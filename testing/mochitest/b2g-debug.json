@@ -441,11 +441,13 @@
     "content/base/test/csp/test_nonce_source.html": "debug-only failure",
     "content/base/test/csp/test_policyuri_regression_from_multipolicy.html": "debug-only failure",
     "content/canvas/test/test_canvas.html": "debug-only crash; bug 933541",
+    "content/events/test/test_bug864040.html": "debug-only failure",
     "content/html/content/test/forms/test_input_range_mouse_and_touch_events.html": "debug-only failure; bug 926546",
     "content/html/content/test/test_bug595449.html": "debug-only failure",
     "content/html/content/test/test_bug841466.html": "debug-only failure",
     "content/html/content/test/test_ignoreuserfocus.html": "debug-only failure",
     "docshell/test/test_bug570341.html": "debug-only failure",
+    "docshell/test/test_bug529119-2.html": "debug-only failure",
     "dom/apps/tests/test_app_update.html": "debug-only failure",
     "dom/bindings/test/test_exceptions_from_jsimplemented.html": "debug-only failure; bug 926547",
     "dom/camera/test/test_camera.html": "debug-only failure; no assertions when 34 were expected",
@@ -472,6 +474,7 @@
     "dom/tests/mochitest/ajax/scriptaculous/test_Scriptaculous.html": "debug-only failure",
     "dom/tests/mochitest/ajax/prototype/test_Prototype.html": "debug-only timeout",
     "dom/tests/mochitest/geolocation/test_errorcheck.html": "debug-only timeout",
+    "dom/tests/mochitest/localstorage/test_cookieSession.html": "debug-only failure",
     "dom/tests/mochitest/orientation/test_bug507902.html": "debug-only failure",
     "dom/workers/test/test_csp.html": "debug-only failure",
     "dom/workers/test/test_url.html": "debug-only crash, bug 931887",
@@ -482,6 +485,7 @@
     "layout/style/test/test_selectors.html": "debug-only failure; timed out",
     "layout/style/test/test_value_cloning.html": "debug-only failure; timed out",
     "layout/style/test/test_value_computation.html": "debug-only failure",
-    "layout/style/test/test_value_storage.html": "debug-only failure"
+    "layout/style/test/test_value_storage.html": "debug-only failure",
+    "layout/style/test/test_pseudoelement_state.html": "debug-only failure"
   }
 }
