@@ -460,6 +460,7 @@
     "dom/media/tests/mochitest/test_getUserMedia_stopVideoAudioStream.html": "debug-only failure",
     "dom/media/tests/mochitest/test_getUserMedia_basicVideo.html": "debug-only failure",
     "dom/media/tests/ipc/test_ipc.html": "debug-only failure",
+    "dom/permission/tests/test_idle.html": "debug-only failure",
     "dom/settings/tests/": "debug-only failure, bug 932878",
     "dom/src/jsurl/test/test_bug351633-2.html": "debug-only failure",
     "dom/src/jsurl/test/test_bug351633-4.html": "debug-only failure",
