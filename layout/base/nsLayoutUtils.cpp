@@ -71,6 +71,7 @@
 #include "nsIFrameInlines.h"
 #include "ImageContainer.h"
 #include "nsComputedDOMStyle.h"
+#include "ActiveLayerTracker.h"
 
 #include "mozilla/Preferences.h"
 
@@ -516,7 +517,7 @@ static void DestroyViewID(void* aObject, nsIAtom* aPropertyName,
  */
 
 bool
-nsLayoutUtils::FindIDFor(nsIContent* aContent, ViewID* aOutViewId)
+nsLayoutUtils::FindIDFor(const nsIContent* aContent, ViewID* aOutViewId)
 {
   void* scrollIdProperty = aContent->GetProperty(nsGkAtoms::RemoteId);
   if (scrollIdProperty) {
@@ -1205,6 +1206,8 @@ nsLayoutUtils::GetActiveScrolledRootFor(nsIFrame* aFrame,
   nsIFrame* stickyFrame = nullptr;
   while (f != aStopAtAncestor) {
     if (IsPopup(f))
+      break;
+    if (ActiveLayerTracker::IsOffsetOrMarginStyleAnimated(f))
       break;
     nsIFrame* parent = GetCrossDocParentFrame(f);
     if (!parent)

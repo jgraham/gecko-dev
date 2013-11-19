@@ -404,7 +404,8 @@ SourcesView.prototype = Heritage.extend(WidgetMethods, {
 
     DebuggerController.SourceScripts.togglePrettyPrint(source)
       .then(resetEditor, printError)
-      .then(DebuggerView.showEditor);
+      .then(DebuggerView.showEditor)
+      .then(this.updateToolbarButtonsState);
   },
 
   /**
@@ -2376,7 +2377,7 @@ LineResults.prototype = {
         firstMatch = firstMatch || lineChunkNode;
       }
       if (lineLength >= GLOBAL_SEARCH_LINE_MAX_LENGTH) {
-        lineContentsNode.appendChild(this._ellipsis.cloneNode());
+        lineContentsNode.appendChild(this._ellipsis.cloneNode(true));
         break;
       }
     }

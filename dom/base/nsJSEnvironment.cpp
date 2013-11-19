@@ -839,7 +839,6 @@ nsJSContext::nsJSContext(bool aGCOnDestruction,
                                   js_options_dot_str, this);
   }
   mIsInitialized = false;
-  mScriptsEnabled = true;
   mProcessingScriptTag = false;
   HoldJSObjects(this);
 }
@@ -950,10 +949,6 @@ nsJSContext::EvaluateString(const nsAString& aScript,
                             void **aOffThreadToken)
 {
   NS_ENSURE_TRUE(mIsInitialized, NS_ERROR_NOT_INITIALIZED);
-  if (!mScriptsEnabled) {
-    return NS_OK;
-  }
-
   AutoCxPusher pusher(mContext);
   nsJSUtils::EvaluateOptions evalOptions;
   evalOptions.setCoerceToString(aCoerceToString);
@@ -1541,16 +1536,16 @@ TraceMallocEnable(JSContext *cx, unsigned argc, JS::Value *vp)
 static bool
 TraceMallocOpenLogFile(JSContext *cx, unsigned argc, JS::Value *vp)
 {
-    int fd;
-    JSString *str;
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 
     if (!CheckUniversalXPConnectForTraceMalloc(cx))
         return false;
 
+    int fd;
     if (argc == 0) {
         fd = -1;
     } else {
-        str = JS_ValueToString(cx, JS_ARGV(cx, vp)[0]);
+        JSString *str = JS::ToString(cx, args[0]);
         if (!str)
             return false;
         JSAutoByteString filename(cx, str);
@@ -1562,7 +1557,7 @@ TraceMallocOpenLogFile(JSContext *cx, unsigned argc, JS::Value *vp)
             return false;
         }
     }
-    JS_SET_RVAL(cx, vp, INT_TO_JSVAL(fd));
+    args.rval().setInt32(fd);
     return true;
 }
 
@@ -1613,27 +1608,29 @@ TraceMallocCloseLogFD(JSContext *cx, unsigned argc, JS::Value *vp)
 static bool
 TraceMallocLogTimestamp(JSContext *cx, unsigned argc, JS::Value *vp)
 {
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
     if (!CheckUniversalXPConnectForTraceMalloc(cx))
         return false;
 
-    JSString *str = JS_ValueToString(cx, argc ? JS_ARGV(cx, vp)[0] : JSVAL_VOID);
+    JSString *str = JS::ToString(cx, args.get(0));
     if (!str)
         return false;
     JSAutoByteString caption(cx, str);
     if (!caption)
         return false;
     NS_TraceMallocLogTimestamp(caption.ptr());
-    JS_SET_RVAL(cx, vp, JSVAL_VOID);
+    args.rval().setUndefined();
     return true;
 }
 
 static bool
 TraceMallocDumpAllocations(JSContext *cx, unsigned argc, JS::Value *vp)
 {
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
     if (!CheckUniversalXPConnectForTraceMalloc(cx))
         return false;
 
-    JSString *str = JS_ValueToString(cx, argc ? JS_ARGV(cx, vp)[0] : JSVAL_VOID);
+    JSString *str = JS::ToString(cx, args.get(0));
     if (!str)
         return false;
     JSAutoByteString pathname(cx, str);
@@ -1643,7 +1640,7 @@ TraceMallocDumpAllocations(JSContext *cx, unsigned argc, JS::Value *vp)
         JS_ReportError(cx, "can't dump to %s: %s", pathname.ptr(), strerror(errno));
         return false;
     }
-    JS_SET_RVAL(cx, vp, JSVAL_VOID);
+    args.rval().setUndefined();
     return true;
 }
 
@@ -1673,7 +1670,8 @@ namespace dmd {
 static bool
 ReportAndDump(JSContext *cx, unsigned argc, JS::Value *vp)
 {
-  JSString *str = JS_ValueToString(cx, argc ? JS_ARGV(cx, vp)[0] : JSVAL_VOID);
+  JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+  JSString *str = JS::ToString(cx, args.get(0));
   if (!str)
     return false;
   JSAutoByteString pathname(cx, str);
@@ -1695,7 +1693,7 @@ ReportAndDump(JSContext *cx, unsigned argc, JS::Value *vp)
 
   fclose(fp);
 
-  JS_SET_RVAL(cx, vp, JSVAL_VOID);
+  args.rval().setUndefined();
   return true;
 }
 
@@ -1862,27 +1860,6 @@ nsJSContext::IsContextInitialized()
 {
   return mIsInitialized;
 }
-
-bool
-nsJSContext::GetScriptsEnabled()
-{
-  return mScriptsEnabled;
-}
-
-void
-nsJSContext::SetScriptsEnabled(bool aEnabled, bool aFireTimeouts)
-{
-  // eeek - this seems the wrong way around - the global should callback
-  // into each context, so every language is disabled.
-  mScriptsEnabled = aEnabled;
-
-  nsIScriptGlobalObject *global = GetGlobalObject();
-
-  if (global) {
-    global->SetScriptsEnabled(aEnabled, aFireTimeouts);
-  }
-}
-
 
 bool
 nsJSContext::GetProcessingScriptTag()
