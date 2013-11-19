@@ -96,7 +96,7 @@ HTTP(..) == ex-unit-1-dynamic.html ex-unit-1-ref.html
 skip-if(B2G) fails-if(Android) == local-1.html local-1-ref.html # bug 773482
 skip-if(B2G) fails-if(Android) == local-styled-1.html local-styled-1-ref.html # bug 773482
 
-skip-if(B2G) HTTP(..) == synthetic-weight-style.html synthetic-weight-style-ref.html # bug 773482
+skip-if(B2G) skip-if(Android&&AndroidVersion>=17) HTTP(..) == synthetic-weight-style.html synthetic-weight-style-ref.html # bug 773482
 skip-if(B2G) HTTP(..) == synthetic-variations.html synthetic-variations-ref.html
 
 # Leak test
