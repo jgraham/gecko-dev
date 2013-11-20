@@ -15,23 +15,23 @@ pref(webgl.disabled,true)  == webgl-disable-test.html       wrapper.html?green.p
 # assert coverage.
 
 # Test: {aa, alpha, preserve, readback} = 16
-                     random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?__&_____&________  wrapper.html?green.png
-                     random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?aa&_____&________  wrapper.html?green.png
-fuzzy-if(B2G,256,91) random-if(Android&&(AndroidVersion<15||AndroidVersion>=17))  == webgl-clear-test.html?__&alpha&________  wrapper.html?green.png
-fuzzy-if(B2G,256,91) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?aa&alpha&________  wrapper.html?green.png
-                     random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?__&_____&preserve  wrapper.html?green.png
-                     random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?aa&_____&preserve  wrapper.html?green.png
-fuzzy-if(B2G,256,91) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?__&alpha&preserve  wrapper.html?green.png
-fuzzy-if(B2G,256,91) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?aa&alpha&preserve  wrapper.html?green.png
+                     skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?__&_____&________  wrapper.html?green.png
+                     skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?aa&_____&________  wrapper.html?green.png
+fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&(AndroidVersion<15||AndroidVersion>=17))  == webgl-clear-test.html?__&alpha&________  wrapper.html?green.png
+fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?aa&alpha&________  wrapper.html?green.png
+                     skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?__&_____&preserve  wrapper.html?green.png
+                     skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?aa&_____&preserve  wrapper.html?green.png
+fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?__&alpha&preserve  wrapper.html?green.png
+fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?aa&alpha&preserve  wrapper.html?green.png
 
-pref(webgl.force-layers-readback,true)                      random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&__&_____&________  wrapper.html?green.png
-pref(webgl.force-layers-readback,true)                      random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&aa&_____&________  wrapper.html?green.png
-pref(webgl.force-layers-readback,true) fuzzy-if(B2G,256,91) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&__&alpha&________  wrapper.html?green.png
-pref(webgl.force-layers-readback,true) fuzzy-if(B2G,256,91) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&aa&alpha&________  wrapper.html?green.png
-pref(webgl.force-layers-readback,true)                      random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&__&_____&preserve  wrapper.html?green.png
-pref(webgl.force-layers-readback,true)                      random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&aa&_____&preserve  wrapper.html?green.png
-pref(webgl.force-layers-readback,true) fuzzy-if(B2G,256,91) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&__&alpha&preserve  wrapper.html?green.png
-pref(webgl.force-layers-readback,true) fuzzy-if(B2G,256,91) random-if(Android&&(AndroidVersion<15||AndroidVersion>=17))  == webgl-clear-test.html?readback&aa&alpha&preserve  wrapper.html?green.png
+pref(webgl.force-layers-readback,true)                      skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&__&_____&________  wrapper.html?green.png
+pref(webgl.force-layers-readback,true)                      skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&aa&_____&________  wrapper.html?green.png
+pref(webgl.force-layers-readback,true) fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&__&alpha&________  wrapper.html?green.png
+pref(webgl.force-layers-readback,true) fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&aa&alpha&________  wrapper.html?green.png
+pref(webgl.force-layers-readback,true)                      skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&__&_____&preserve  wrapper.html?green.png
+pref(webgl.force-layers-readback,true)                      skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&aa&_____&preserve  wrapper.html?green.png
+pref(webgl.force-layers-readback,true) fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&__&alpha&preserve  wrapper.html?green.png
+pref(webgl.force-layers-readback,true) fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&(AndroidVersion<15||AndroidVersion>=17))  == webgl-clear-test.html?readback&aa&alpha&preserve  wrapper.html?green.png
 
 # Check that resize works:
 random-if(Android&&AndroidVersion<15)  == webgl-resize-test.html  wrapper.html?green.png
@@ -157,22 +157,22 @@ fuzzy(1,65536) fails-if(B2G) fuzzy-if(Android,9,65536) random-if(Android&&(Andro
 
 
 # Check for hanging framebuffer bindings:
-                                       random-if(Android&&AndroidVersion<15)  == webgl-hanging-fb-test.html?__&________  wrapper.html?green.png
-                                       random-if(Android&&AndroidVersion<15)  == webgl-hanging-fb-test.html?aa&________  wrapper.html?green.png
-pref(webgl.force-layers-readback,true) random-if(Android&&AndroidVersion<15)  == webgl-hanging-fb-test.html?__&readback  wrapper.html?green.png
-pref(webgl.force-layers-readback,true) random-if(Android&&AndroidVersion<15)  == webgl-hanging-fb-test.html?aa&readback  wrapper.html?green.png
+                                       skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-hanging-fb-test.html?__&________  wrapper.html?green.png
+                                       skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-hanging-fb-test.html?aa&________  wrapper.html?green.png
+pref(webgl.force-layers-readback,true) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-hanging-fb-test.html?__&readback  wrapper.html?green.png
+pref(webgl.force-layers-readback,true) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-hanging-fb-test.html?aa&readback  wrapper.html?green.png
 
-                                       random-if(Android&&AndroidVersion<15)  == webgl-hanging-scissor-test.html?__&________  wrapper.html?green.png
-                                       random-if(Android&&AndroidVersion<15)  == webgl-hanging-scissor-test.html?aa&________  wrapper.html?green.png
-pref(webgl.force-layers-readback,true) random-if(Android&&AndroidVersion<15)  == webgl-hanging-scissor-test.html?__&readback  wrapper.html?green.png
-pref(webgl.force-layers-readback,true) random-if(Android&&AndroidVersion<15)  == webgl-hanging-scissor-test.html?aa&readback  wrapper.html?green.png
+                                       skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-hanging-scissor-test.html?__&________  wrapper.html?green.png
+                                       skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-hanging-scissor-test.html?aa&________  wrapper.html?green.png
+pref(webgl.force-layers-readback,true) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-hanging-scissor-test.html?__&readback  wrapper.html?green.png
+pref(webgl.force-layers-readback,true) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-hanging-scissor-test.html?aa&readback  wrapper.html?green.png
 
 
 # Check that our experimental prefs still work:
 
 # 16bpp:
-skip-if(winWidget) pref(webgl.prefer-16bpp,true)                                        random-if(Android&&AndroidVersion<15)  == webgl-color-test.html?16bpp           wrapper.html?colors.png
-skip-if(winWidget) pref(webgl.prefer-16bpp,true) pref(webgl.force-layers-readback,true) random-if(Android&&AndroidVersion<15)  == webgl-color-test.html?16bpp&readback  wrapper.html?colors.png
+skip-if(winWidget) pref(webgl.prefer-16bpp,true)                                        skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-color-test.html?16bpp           wrapper.html?colors.png
+skip-if(winWidget) pref(webgl.prefer-16bpp,true) pref(webgl.force-layers-readback,true) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-color-test.html?16bpp&readback  wrapper.html?colors.png
 
 # Force native GL (Windows):
 skip-if(!winWidget) pref(webgl.prefer-native-gl,true)                                == webgl-clear-test.html?native-gl        wrapper.html?green.png
