@@ -17,7 +17,7 @@ pref(webgl.disabled,true)  == webgl-disable-test.html       wrapper.html?green.p
 # Test: {aa, alpha, preserve, readback} = 16
                      skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?__&_____&________  wrapper.html?green.png
                      skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?aa&_____&________  wrapper.html?green.png
-fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&(AndroidVersion<15||AndroidVersion>=17))  == webgl-clear-test.html?__&alpha&________  wrapper.html?green.png
+fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?__&alpha&________  wrapper.html?green.png
 fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?aa&alpha&________  wrapper.html?green.png
                      skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?__&_____&preserve  wrapper.html?green.png
                      skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?aa&_____&preserve  wrapper.html?green.png
@@ -31,7 +31,7 @@ pref(webgl.force-layers-readback,true) fuzzy-if(B2G,256,91) skip-if(Android&&And
 pref(webgl.force-layers-readback,true)                      skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&__&_____&preserve  wrapper.html?green.png
 pref(webgl.force-layers-readback,true)                      skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&aa&_____&preserve  wrapper.html?green.png
 pref(webgl.force-layers-readback,true) fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&__&alpha&preserve  wrapper.html?green.png
-pref(webgl.force-layers-readback,true) fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&(AndroidVersion<15||AndroidVersion>=17))  == webgl-clear-test.html?readback&aa&alpha&preserve  wrapper.html?green.png
+pref(webgl.force-layers-readback,true) fuzzy-if(B2G,256,91) skip-if(Android&&AndroidVersion>=17) random-if(Android&&AndroidVersion<15)  == webgl-clear-test.html?readback&aa&alpha&preserve  wrapper.html?green.png
 
 # Check that resize works:
 random-if(Android&&AndroidVersion<15)  == webgl-resize-test.html  wrapper.html?green.png
