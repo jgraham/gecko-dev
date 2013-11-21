@@ -1,4 +1,4 @@
-// |reftest| skip-if(!this.hasOwnProperty("TypedObject")||(Android&&AndroidVersion>=17))
+// |reftest| skip-if(!this.hasOwnProperty("TypedObject")||(Android))
 var BUGNUMBER = 914137;
 var summary = 'Fuzz bug';
 
