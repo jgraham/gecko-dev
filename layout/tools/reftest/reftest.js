@@ -258,31 +258,28 @@ this.OnRefTestLoad = function OnRefTestLoad(win)
     }
 
     if (gBrowserIsIframe) {
-#ifdef REFTEST_B2G
-      gBrowser = gContainingWindow.document.getElementById("systemapp");
-#else
       gBrowser = gContainingWindow.document.createElementNS(XHTML_NS, "iframe");
       gBrowser.setAttribute("mozbrowser", "");
-      gBrowser.setAttribute("id", "browser");
-#endif
     } else {
       gBrowser = gContainingWindow.document.createElementNS(XUL_NS, "xul:browser");
-      gBrowser.setAttribute("id", "browser");
     }
+    gBrowser.setAttribute("id", "browser");
     gBrowser.setAttribute("type", "content-primary");
     gBrowser.setAttribute("remote", gBrowserIsRemote ? "true" : "false");
     // Make sure the browser element is exactly 800x1000, no matter
     // what size our window is
     gBrowser.setAttribute("style", "min-width: 800px; min-height: 1000px; max-width: 800px; max-height: 1000px");
 
-#ifdef BOOTSTRAP
-#ifndef REFTEST_B2G
+#if BOOTSTRAP
+#if REFTEST_B2G
+    var doc = gContainingWindow.document.getElementsByTagName("html")[0];
+#else
     var doc = gContainingWindow.document.getElementById('main-window');
+#endif
     while (doc.hasChildNodes()) {
       doc.removeChild(doc.firstChild);
     }
     doc.appendChild(gBrowser);
-#endif
 #else
     document.getElementById("reftest-window").appendChild(gBrowser);
 #endif

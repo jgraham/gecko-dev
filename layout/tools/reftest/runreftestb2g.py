@@ -6,7 +6,6 @@ import ConfigParser
 import os
 import sys
 import tempfile
-import threading
 import traceback
 
 # We need to know our current directory so that we can serve our test files from it.
@@ -112,15 +111,6 @@ class B2GOptions(ReftestOptions):
                     type = "string", dest = "httpdPath",
                     help = "path to the httpd.js file")
         defaults["httpdPath"] = None
-        self.add_option("--profile", action="store",
-                    type="string", dest="profile",
-                    help="for desktop testing, the path to the "
-                         "gaia profile to use")
-        defaults["profile"] = None
-        self.add_option("--desktop", action="store_true",
-                        dest="desktop",
-                        help="Run the tests on a B2G desktop build")
-        defaults["desktop"] = False
         defaults["remoteTestRoot"] = "/data/local/tests"
         defaults["logFile"] = "reftest.log"
         defaults["autorun"] = True
@@ -131,16 +121,16 @@ class B2GOptions(ReftestOptions):
 
     def verifyRemoteOptions(self, options):
         if not options.remoteTestRoot:
-            options.remoteTestRoot = self.automation._devicemanager.getDeviceRoot() + "/reftest"
+            options.remoteTestRoot = self._automation._devicemanager.getDeviceRoot() + "/reftest"
         options.remoteProfile = options.remoteTestRoot + "/profile"
 
-        productRoot = options.remoteTestRoot + "/" + self.automation._product
-        if options.utilityPath == self.automation.DIST_BIN:
+        productRoot = options.remoteTestRoot + "/" + self._automation._product
+        if options.utilityPath == self._automation.DIST_BIN:
             options.utilityPath = productRoot + "/bin"
 
         if options.remoteWebServer == None:
             if os.name != "nt":
-                options.remoteWebServer = self.automation.getLanIp()
+                options.remoteWebServer = self._automation.getLanIp()
             else:
                 print "ERROR: you must specify a --remote-webserver=<ip address>\n"
                 return None
@@ -215,24 +205,23 @@ class ProfileConfigParser(ConfigParser.RawConfigParser):
                 fp.write("%s\n" % (key))
             fp.write("\n")
 
+
 class B2GReftest(RefTest):
-    def __init__(self, automation=None):
-        RefTest.__init__(self, automation or Automation())
 
-class B2GRemoteReftest(B2GReftest):
-
+    _automation = None
     _devicemanager = None
     localProfile = None
     remoteApp = ''
     profile = None
 
     def __init__(self, automation, devicemanager, options, scriptDir):
-        B2GReftest.__init__(self, automation)
+        self._automation = automation
+        RefTest.__init__(self, self._automation)
         self._devicemanager = devicemanager
         self.runSSLTunnel = False
         self.remoteTestRoot = options.remoteTestRoot
         self.remoteProfile = options.remoteProfile
-        self.automation.setRemoteProfile(self.remoteProfile)
+        self._automation.setRemoteProfile(self.remoteProfile)
         self.localLogName = options.localLogName
         self.remoteLogFile = options.remoteLogFile
         self.bundlesDir = '/system/b2g/distribution/bundles'
@@ -242,7 +231,7 @@ class B2GRemoteReftest(B2GReftest):
         self.originalProfilesIni = None
         self.scriptDir = scriptDir
         self.SERVER_STARTUP_TIMEOUT = 90
-        if self.automation.IS_DEBUG_BUILD:
+        if self._automation.IS_DEBUG_BUILD:
             self.SERVER_STARTUP_TIMEOUT = 180
 
     def cleanup(self, profileDir):
@@ -266,13 +255,13 @@ class B2GRemoteReftest(B2GReftest):
         # Restore the original profiles.ini.
         if self.originalProfilesIni:
             try:
-                if not self.automation._is_emulator:
+                if not self._automation._is_emulator:
                     self.restoreProfilesIni()
                 os.remove(self.originalProfilesIni)
             except:
                 pass
 
-        if not self.automation._is_emulator:
+        if not self._automation._is_emulator:
             self._devicemanager.removeFile(self.remoteLogFile)
             self._devicemanager.removeDir(self.remoteProfile)
             self._devicemanager.removeDir(self.remoteTestRoot)
@@ -283,7 +272,7 @@ class B2GRemoteReftest(B2GReftest):
 
             # We've restored the original profile, so reboot the device so that
             # it gets picked up.
-            self.automation.rebootDevice()
+            self._automation.rebootDevice()
 
         RefTest.cleanup(self, profileDir)
         if getattr(self, 'pidFile', '') != '':
@@ -324,8 +313,8 @@ class B2GRemoteReftest(B2GReftest):
 
         paths = [options.xrePath,
                  localAutomation.DIST_BIN,
-                 self.automation._product,
-                 os.path.join('..', self.automation._product)]
+                 self._automation._product,
+                 os.path.join('..', self._automation._product)]
         options.xrePath = self.findPath(paths)
         if options.xrePath == None:
             print "ERROR: unable to find xulrunner path for %s, please specify with --xre-path" % (os.name)
@@ -345,7 +334,7 @@ class B2GRemoteReftest(B2GReftest):
             sys.exit(1)
 
         xpcshell = os.path.join(options.utilityPath, xpcshell)
-        if self.automation.elf_arm(xpcshell):
+        if self._automation.elf_arm(xpcshell):
             raise Exception('xpcshell at %s is an ARM binary; please use '
                             'the --utility-path argument to specify the path '
                             'to a desktop version.' % xpcshell)
@@ -373,6 +362,7 @@ class B2GRemoteReftest(B2GReftest):
     def stopWebServer(self, options):
         if hasattr(self, 'server'):
             self.server.stop()
+
 
     def restoreProfilesIni(self):
         # restore profiles.ini on the device to its previous state
@@ -414,16 +404,16 @@ class B2GRemoteReftest(B2GReftest):
         prefs = {}
         # Turn off the locale picker screen
         prefs["browser.firstrun.show.localepicker"] = False
-        prefs["browser.homescreenURL"] = "app://test-container.gaiamobile.org/index.html"
-        prefs["browser.manifestURL"] = "app://test-container.gaiamobile.org/manifest.webapp"
+        prefs["browser.homescreenURL"] = "app://system.gaiamobile.org"
+        prefs["browser.manifestURL"] = "app://system.gaiamobile.org/manifest.webapp"
         prefs["browser.tabs.remote"] = True
+        prefs["dom.ipc.browser_frames.oop_by_default"] = True
         prefs["dom.ipc.tabs.disabled"] = False
         prefs["dom.mozBrowserFramesEnabled"] = True
-        prefs["dom.mozBrowserFramesWhitelist"] = "app://test-container.gaiamobile.org,http://127.0.0.1:8888"
+        prefs["dom.mozBrowserFramesWhitelist"] = "app://system.gaiamobile.org"
+        prefs["network.dns.localDomains"] = "app://system.gaiamobile.org"
         prefs["font.size.inflation.emPerLine"] = 0
         prefs["font.size.inflation.minTwips"] = 0
-        prefs["network.dns.localDomains"] = "app://test-container.gaiamobile.org"
-        prefs["marionette.force-local"] = True
         prefs["reftest.browser.iframe.enabled"] = True
         prefs["reftest.remote"] = True
         prefs["reftest.uri"] = "%s" % reftestlist
@@ -477,62 +467,6 @@ class B2GRemoteReftest(B2GReftest):
 
     def getManifestPath(self, path):
         return path
-
-
-
-class B2GDesktopReftest(B2GReftest):
-    def __init__(self, marionette):
-        B2GReftest.__init__(self)
-        self.marionette = marionette
-        self.test_script = os.path.join(SCRIPT_DIRECTORY, 'b2g_start_script.js')
-        self.test_script_args = []
-
-    def runMarionetteScript(self, marionette, test_script, test_script_args):
-        assert(marionette.wait_for_port())
-        marionette.start_session()
-        marionette.set_context(marionette.CONTEXT_CHROME)
-
-        if os.path.isfile(test_script):
-            f = open(test_script, 'r')
-            test_script = f.read()
-            f.close()
-        self.marionette.execute_script(test_script,
-                                       script_args=test_script_args)
-
-    def startTests(self):
-        # This is run in a separate thread because otherwise, the app's
-        # stdout buffer gets filled (which gets drained only after this
-        # function returns, by waitForFinish), which causes the app to hang.
-
-        return
-        thread = threading.Thread(target=self.runMarionetteScript,
-                                  args=(self.marionette,
-                                        self.test_script,
-                                        self.test_script_args))
-        thread.start()
-
-def run_desktop_reftests(parser, options, args):
-    kwargs = {}
-    if options.marionette:
-        host, port = options.marionette.split(':')
-        kwargs['host'] = host
-        kwargs['port'] = int(port)
-    marionette = Marionette.getMarionetteOrExit(**kwargs)
-    reftest = B2GDesktopReftest(marionette)
-
-    # add a -bin suffix if b2g-bin exists, but just b2g was specified
-    if options.app[-4:] != '-bin':
-        if os.path.isfile("%s-bin" % options.app):
-            options.app = "%s-bin" % options.app
-
-    options = ReftestOptions.verifyCommonOptions(parser, options, reftest)
-    if options == None:
-        sys.exit(1)
-
-    if options.desktop and not options.profile:
-        raise Exception("must specify --profile when specifying --desktop")
-
-    sys.exit(reftest.runTests(args[0], options, onLaunch=reftest.startTests))
 
 def run_remote_reftests(parser, options, args):
     auto = B2GRemoteAutomation(None, "fennec", context_chrome=True)
@@ -590,10 +524,10 @@ def run_remote_reftests(parser, options, args):
 
     auto.setProduct("b2g")
     auto.test_script = os.path.join(SCRIPT_DIRECTORY, 'b2g_start_script.js')
-    auto.test_script_args = [True, options.remoteWebServer, options.httpPort]
+    auto.test_script_args = [options.remoteWebServer, options.httpPort]
     auto.logFinish = "REFTEST TEST-START | Shutdown"
 
-    reftest = B2GRemoteReftest(auto, dm, options, SCRIPT_DIRECTORY)
+    reftest = B2GReftest(auto, dm, options, SCRIPT_DIRECTORY)
     options = parser.verifyCommonOptions(options, reftest)
 
     logParent = os.path.dirname(options.remoteLogFile)
@@ -646,10 +580,8 @@ def run_remote_reftests(parser, options, args):
 def main(args=sys.argv[1:]):
     parser = B2GOptions()
     options, args = parser.parse_args(args)
-
-    if options.desktop:
-        return run_desktop_reftests(parser, options, args)
     return run_remote_reftests(parser, options, args)
+
 
 if __name__ == "__main__":
     sys.exit(main())
