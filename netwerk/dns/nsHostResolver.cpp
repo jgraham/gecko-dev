@@ -352,7 +352,7 @@ HostDB_InitEntry(PLDHashTable *table,
     return true;
 }
 
-static PLDHashTableOps gHostDB_ops =
+static const PLDHashTableOps gHostDB_ops =
 {
     PL_DHashAllocTable,
     PL_DHashFreeTable,
@@ -634,27 +634,35 @@ nsHostResolver::ResolveHost(const char            *host,
                         unspecHe->rec->HasUsableResult(flags) &&
                         TimeStamp::NowLoRes() <= (he->rec->expiration +
                             TimeDuration::FromSeconds(mGracePeriod * 60))) {
+
+                        MOZ_ASSERT(unspecHe->rec->addr_info || unspecHe->rec->negative,
+                                   "Entry should be resolved or negative.");
+
                         LOG(("  Trying AF_UNSPEC entry for [%s] af: %s.\n",
                             host, (af == PR_AF_INET) ? "AF_INET" : "AF_INET6"));
 
-                        // Search for any valid address in the AF_UNSPEC entry
-                        // in the cache (not blacklisted and from the right
-                        // family).
-                        NetAddrElement *addrIter =
-                            unspecHe->rec->addr_info->mAddresses.getFirst();
                         he->rec->addr_info = nullptr;
-                        while (addrIter) {
-                            if ((af == addrIter->mAddress.inet.family) &&
-                                 !unspecHe->rec->Blacklisted(&addrIter->mAddress)) {
-                                if (!he->rec->addr_info) {
-                                    he->rec->addr_info = new AddrInfo(
-                                        unspecHe->rec->addr_info->mHostName,
-                                        unspecHe->rec->addr_info->mCanonicalName);
+                        if (unspecHe->rec->negative) {
+                            he->rec->negative = unspecHe->rec->negative;
+                        } else if (he->rec->addr_info) {
+                            // Search for any valid address in the AF_UNSPEC entry
+                            // in the cache (not blacklisted and from the right
+                            // family).
+                            NetAddrElement *addrIter =
+                                unspecHe->rec->addr_info->mAddresses.getFirst();
+                            while (addrIter) {
+                                if ((af == addrIter->mAddress.inet.family) &&
+                                     !unspecHe->rec->Blacklisted(&addrIter->mAddress)) {
+                                    if (!he->rec->addr_info) {
+                                        he->rec->addr_info = new AddrInfo(
+                                            unspecHe->rec->addr_info->mHostName,
+                                            unspecHe->rec->addr_info->mCanonicalName);
+                                    }
+                                    he->rec->addr_info->AddAddress(
+                                        new NetAddrElement(*addrIter));
                                 }
-                                he->rec->addr_info->AddAddress(
-                                    new NetAddrElement(*addrIter));
+                                addrIter = addrIter->getNext();
                             }
-                            addrIter = addrIter->getNext();
                         }
                         if (he->rec->HasUsableResult(flags)) {
                             result = he->rec;
@@ -975,7 +983,7 @@ nsHostResolver::OnLookupComplete(nsHostRecord *rec, nsresult status, AddrInfo *r
             rec->usingAnyThread = false;
         }
 
-        if (rec->addr_info && !mShutdown) {
+        if (!mShutdown) {
             // add to mEvictionQ
             PR_APPEND_LINK(rec, &mEvictionQ);
             NS_ADDREF(rec);
@@ -1169,7 +1177,8 @@ CacheEntryEnumerator(PLDHashTable *table, PLDHashEntryHdr *entry,
     // We don't pay attention to address literals, only resolved domains.
     // Also require a host.
     nsHostRecord *rec = static_cast<nsHostDBEnt*>(entry)->rec;
-    if (!rec->addr_info || !rec->host) {
+    MOZ_ASSERT(rec, "rec should never be null here!");
+    if (!rec || !rec->addr_info || !rec->host) {
         return PL_DHASH_NEXT;
     }
 
