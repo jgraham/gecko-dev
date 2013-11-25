@@ -235,6 +235,7 @@ this.OnRefTestLoad = function OnRefTestLoad(win)
     var env = CC["@mozilla.org/process/environment;1"].
               getService(CI.nsIEnvironment);
     gVerbose = !!env.get("MOZ_REFTEST_VERBOSE");
+    gVerbose = true;
 
     var prefs = Components.classes["@mozilla.org/preferences-service;1"].
                 getService(Components.interfaces.nsIPrefBranch);
@@ -305,6 +306,12 @@ this.OnRefTestLoad = function OnRefTestLoad(win)
 
 function InitAndStartRefTests()
 {
+
+    mainProcess = CC["@mozilla.org/xre/app-info;1"].
+                     getService(CI.nsIXULRuntime).
+                     processType == CI.nsIXULRuntime.PROCESS_TYPE_DEFAULT;
+    gDumpLog("REFTEST | reftest.jsm is in main process: " + mainProcess + "\n");
+
     /* These prefs are optional, so we don't need to spit an error to the log */
     try {
         var prefs = Components.classes["@mozilla.org/preferences-service;1"].

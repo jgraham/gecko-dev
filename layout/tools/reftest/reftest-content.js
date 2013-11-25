@@ -97,6 +97,11 @@ function OnInitialLoad()
     removeEventListener("load", OnInitialLoad, true);
 #endif
 
+    mainProcess = CC["@mozilla.org/xre/app-info;1"].
+                     getService(CI.nsIXULRuntime).
+                     processType == CI.nsIXULRuntime.PROCESS_TYPE_DEFAULT;
+    LogInfo("reftest-content.js is in main process: " + mainProcess + "\n");
+
     gDebug = CC[DEBUG_CONTRACTID].getService(CI.nsIDebug2);
     var env = CC[ENVIRONMENT_CONTRACTID].getService(CI.nsIEnvironment);
     gVerbose = !!env.get("MOZ_REFTEST_VERBOSE");
@@ -865,7 +870,7 @@ function SendUpdateCanvasForEvent(event, contentRootElement)
       }
       return;
     }
-    
+
     var rectList = event.clientRects;
     LogInfo("SendUpdateCanvasForEvent with " + rectList.length + " rects");
     for (var i = 0; i < rectList.length; ++i) {
