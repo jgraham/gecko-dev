@@ -7,3 +7,4 @@ conformance/misc/type-conversion-test.html
 conformance/programs/get-active-test.html
 conformance/textures/texture-npot.html
 conformance/textures/texture-size-cube-maps.html
+non-conf-tests/test_no_arr_points.html
