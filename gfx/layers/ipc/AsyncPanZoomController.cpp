@@ -20,6 +20,7 @@
 #include "base/tracked.h"               // for FROM_HERE
 #include "gfxTypes.h"                   // for gfxFloat
 #include "mozilla/Assertions.h"         // for MOZ_ASSERT, etc
+#include "mozilla/BasicEvents.h"        // for Modifiers, MODIFIER_*
 #include "mozilla/ClearOnShutdown.h"    // for ClearOnShutdown
 #include "mozilla/Constants.h"          // for M_PI
 #include "mozilla/EventForwards.h"      // for nsEventStatus_*
@@ -43,6 +44,7 @@
 #include "nsAutoPtr.h"                  // for nsRefPtr
 #include "nsCOMPtr.h"                   // for already_AddRefed
 #include "nsDebug.h"                    // for NS_WARNING
+#include "nsIDOMWindowUtils.h"          // for nsIDOMWindowUtils
 #include "nsISupportsImpl.h"
 #include "nsMathUtils.h"                // for NS_hypot
 #include "nsPoint.h"                    // for nsIntPoint
@@ -68,6 +70,51 @@
            fm.mScrollOffset.x, fm.mScrollOffset.y, \
            fm.mScrollableRect.x, fm.mScrollableRect.y, fm.mScrollableRect.width, fm.mScrollableRect.height, \
            fm.mDevPixelsPerCSSPixel.scale, fm.mResolution.scale, fm.mCumulativeResolution.scale, fm.mZoom.scale); \
+
+// Static helper functions
+namespace {
+
+int32_t
+WidgetModifiersToDOMModifiers(mozilla::Modifiers aModifiers)
+{
+  int32_t result = 0;
+  if (aModifiers & mozilla::MODIFIER_SHIFT) {
+    result |= nsIDOMWindowUtils::MODIFIER_SHIFT;
+  }
+  if (aModifiers & mozilla::MODIFIER_CONTROL) {
+    result |= nsIDOMWindowUtils::MODIFIER_CONTROL;
+  }
+  if (aModifiers & mozilla::MODIFIER_ALT) {
+    result |= nsIDOMWindowUtils::MODIFIER_ALT;
+  }
+  if (aModifiers & mozilla::MODIFIER_META) {
+    result |= nsIDOMWindowUtils::MODIFIER_META;
+  }
+  if (aModifiers & mozilla::MODIFIER_ALTGRAPH) {
+    result |= nsIDOMWindowUtils::MODIFIER_ALTGRAPH;
+  }
+  if (aModifiers & mozilla::MODIFIER_CAPSLOCK) {
+    result |= nsIDOMWindowUtils::MODIFIER_CAPSLOCK;
+  }
+  if (aModifiers & mozilla::MODIFIER_FN) {
+    result |= nsIDOMWindowUtils::MODIFIER_FN;
+  }
+  if (aModifiers & mozilla::MODIFIER_NUMLOCK) {
+    result |= nsIDOMWindowUtils::MODIFIER_NUMLOCK;
+  }
+  if (aModifiers & mozilla::MODIFIER_SCROLLLOCK) {
+    result |= nsIDOMWindowUtils::MODIFIER_SCROLLLOCK;
+  }
+  if (aModifiers & mozilla::MODIFIER_SYMBOLLOCK) {
+    result |= nsIDOMWindowUtils::MODIFIER_SYMBOLLOCK;
+  }
+  if (aModifiers & mozilla::MODIFIER_OS) {
+    result |= nsIDOMWindowUtils::MODIFIER_OS;
+  }
+  return result;
+}
+
+}
 
 using namespace mozilla::css;
 
@@ -709,7 +756,8 @@ nsEventStatus AsyncPanZoomController::OnLongPress(const TapGestureInput& aEvent)
     ReentrantMonitorAutoEnter lock(mMonitor);
 
     CSSPoint point = WidgetSpaceToCompensatedViewportSpace(aEvent.mPoint, mFrameMetrics.mZoom);
-    controller->HandleLongTap(gfx::RoundedToInt(point));
+    int32_t modifiers = WidgetModifiersToDOMModifiers(aEvent.modifiers);
+    controller->HandleLongTap(gfx::RoundedToInt(point), modifiers);
     return nsEventStatus_eConsumeNoDefault;
   }
   return nsEventStatus_eIgnore;
@@ -722,7 +770,8 @@ nsEventStatus AsyncPanZoomController::OnSingleTapUp(const TapGestureInput& aEven
     ReentrantMonitorAutoEnter lock(mMonitor);
 
     CSSPoint point = WidgetSpaceToCompensatedViewportSpace(aEvent.mPoint, mFrameMetrics.mZoom);
-    controller->HandleSingleTap(gfx::RoundedToInt(point));
+    int32_t modifiers = WidgetModifiersToDOMModifiers(aEvent.modifiers);
+    controller->HandleSingleTap(gfx::RoundedToInt(point), modifiers);
     return nsEventStatus_eConsumeNoDefault;
   }
   return nsEventStatus_eIgnore;
@@ -736,7 +785,8 @@ nsEventStatus AsyncPanZoomController::OnSingleTapConfirmed(const TapGestureInput
     ReentrantMonitorAutoEnter lock(mMonitor);
 
     CSSPoint point = WidgetSpaceToCompensatedViewportSpace(aEvent.mPoint, mFrameMetrics.mZoom);
-    controller->HandleSingleTap(gfx::RoundedToInt(point));
+    int32_t modifiers = WidgetModifiersToDOMModifiers(aEvent.modifiers);
+    controller->HandleSingleTap(gfx::RoundedToInt(point), modifiers);
     return nsEventStatus_eConsumeNoDefault;
   }
   return nsEventStatus_eIgnore;
@@ -750,7 +800,8 @@ nsEventStatus AsyncPanZoomController::OnDoubleTap(const TapGestureInput& aEvent)
 
     if (mAllowZoom) {
       CSSPoint point = WidgetSpaceToCompensatedViewportSpace(aEvent.mPoint, mFrameMetrics.mZoom);
-      controller->HandleDoubleTap(gfx::RoundedToInt(point));
+      int32_t modifiers = WidgetModifiersToDOMModifiers(aEvent.modifiers);
+      controller->HandleDoubleTap(gfx::RoundedToInt(point), modifiers);
     }
 
     return nsEventStatus_eConsumeNoDefault;
@@ -840,7 +891,7 @@ void AsyncPanZoomController::UpdateWithTouchAtDevicePoint(const MultiTouchInput&
 
 void AsyncPanZoomController::AttemptScroll(const ScreenPoint& aStartPoint,
                                            const ScreenPoint& aEndPoint,
-                                           int aOverscrollHandoffChainIndex) {
+                                           uint32_t aOverscrollHandoffChainIndex) {
   // "start - end" rather than "end - start" because e.g. moving your finger
   // down (*positive* direction along y axis) causes the vertical scroll offset
   // to *decrease* as the page follows your finger.
@@ -941,7 +992,7 @@ bool AsyncPanZoomController::DoFling(const TimeDuration& aDelta) {
   if (!shouldContinueFlingX && !shouldContinueFlingY) {
     SendAsyncScrollEvent();
     RequestContentRepaint();
-    mState = NOTHING;
+    SetState(NOTHING);
     return false;
   }
 
@@ -965,8 +1016,7 @@ bool AsyncPanZoomController::DoFling(const TimeDuration& aDelta) {
 }
 
 void AsyncPanZoomController::CancelAnimation() {
-  ReentrantMonitorAutoEnter lock(mMonitor);
-  mState = NOTHING;
+  SetState(NOTHING);
 }
 
 void AsyncPanZoomController::SetCompositorParent(CompositorParent* aCompositorParent) {
@@ -1217,7 +1267,7 @@ bool AsyncPanZoomController::SampleContentTransformForFrame(const TimeStamp& aSa
       requestAnimationFrame = true;
 
       if (aSampleTime - mAnimationStartTime >= ZOOM_TO_DURATION) {
-        mState = NOTHING;
+        SetState(NOTHING);
         SendAsyncScrollEvent();
         RequestContentRepaint();
       }
@@ -1325,7 +1375,7 @@ void AsyncPanZoomController::NotifyLayersUpdated(const FrameMetrics& aLayerMetri
     mY.CancelTouch();
 
     mFrameMetrics = aLayerMetrics;
-    mState = NOTHING;
+    SetState(NOTHING);
   } else {
     // If we're not taking the aLayerMetrics wholesale we still need to pull
     // in some things into our local mFrameMetrics because these things are
@@ -1503,12 +1553,16 @@ void AsyncPanZoomController::SetState(PanZoomState aNewState) {
   }
 
   if (mGeckoContentController) {
-    if (IsPanningState(oldState) && !IsPanningState(aNewState)) {
-      mGeckoContentController->HandlePanEnd();
-    } else if (!IsPanningState(oldState) && IsPanningState(aNewState)) {
-      mGeckoContentController->HandlePanBegin();
+    if (!IsTransformingState(oldState) && IsTransformingState(aNewState)) {
+      mGeckoContentController->NotifyTransformBegin();
+    } else if (IsTransformingState(oldState) && !IsTransformingState(aNewState)) {
+      mGeckoContentController->NotifyTransformEnd();
     }
   }
+}
+
+bool AsyncPanZoomController::IsTransformingState(PanZoomState aState) {
+  return !(aState == NOTHING || aState == TOUCHING || aState == WAITING_LISTENERS);
 }
 
 bool AsyncPanZoomController::IsPanningState(PanZoomState aState) {

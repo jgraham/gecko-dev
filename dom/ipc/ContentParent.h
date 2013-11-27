@@ -368,6 +368,13 @@ private:
     virtual PFMRadioParent* AllocPFMRadioParent();
     virtual bool DeallocPFMRadioParent(PFMRadioParent* aActor);
 
+    virtual PAsmJSCacheEntryParent* AllocPAsmJSCacheEntryParent(
+                                 const asmjscache::OpenMode& aOpenMode,
+                                 const int64_t& aSizeToWrite,
+                                 const IPC::Principal& aPrincipal) MOZ_OVERRIDE;
+    virtual bool DeallocPAsmJSCacheEntryParent(
+                                   PAsmJSCacheEntryParent* aActor) MOZ_OVERRIDE;
+
     virtual PSpeechSynthesisParent* AllocPSpeechSynthesisParent();
     virtual bool DeallocPSpeechSynthesisParent(PSpeechSynthesisParent* aActor);
     virtual bool RecvPSpeechSynthesisConstructor(PSpeechSynthesisParent* aActor);
@@ -473,6 +480,10 @@ private:
       const AudioChannelType& aType, const bool& aHidden);
 
     virtual bool RecvBroadcastVolume(const nsString& aVolumeName);
+
+    virtual bool RecvSpeakerManagerGetSpeakerStatus(bool* aValue);
+
+    virtual bool RecvSpeakerManagerForceSpeaker(const bool& aEnable);
 
     virtual bool RecvSystemMessageHandled() MOZ_OVERRIDE;
 

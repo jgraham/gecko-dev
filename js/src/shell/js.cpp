@@ -4792,7 +4792,13 @@ static const JSJitInfo dom_x_getterinfo = {
     0,        /* depth */
     JSJitInfo::Getter,
     true,     /* isInfallible. False in setters. */
-    true      /* isConstant. Only relevant for getters. */
+    true,     /* isConstant. Only relevant for getters. */
+    true,     /* isPure */
+    false,    /* isInSlot */
+    0,        /* slotIndex */
+    JSVAL_TYPE_UNKNOWN, /* returnType */
+    nullptr,  /* argTypes */
+    nullptr   /* parallelNative */
 };
 
 static const JSJitInfo dom_x_setterinfo = {
@@ -4801,7 +4807,13 @@ static const JSJitInfo dom_x_setterinfo = {
     0,        /* depth */
     JSJitInfo::Setter,
     false,    /* isInfallible. False in setters. */
-    false     /* isConstant. Only relevant for getters. */
+    false,    /* isConstant. Only relevant for getters. */
+    false,    /* isPure */
+    false,    /* isInSlot */
+    0,        /* slotIndex */
+    JSVAL_TYPE_UNKNOWN, /* returnType */
+    nullptr,  /* argTypes */
+    nullptr   /* parallelNative */
 };
 
 static const JSJitInfo doFoo_methodinfo = {
@@ -4810,7 +4822,13 @@ static const JSJitInfo doFoo_methodinfo = {
     0,        /* depth */
     JSJitInfo::Method,
     false,    /* isInfallible. False in setters. */
-    false     /* isConstant. Only relevant for getters. */
+    false,    /* isConstant. Only relevant for getters. */
+    false,    /* isPure */
+    false,    /* isInSlot */
+    0,        /* slotIndex */
+    JSVAL_TYPE_UNKNOWN, /* returnType */
+    nullptr,  /* argTypes */
+    nullptr   /* parallelNative */
 };
 
 static const JSPropertySpec dom_props[] = {
@@ -4997,8 +5015,9 @@ class ScopedFileDesc
 static const uint32_t asmJSCacheCookie = 0xabbadaba;
 
 static bool
-ShellOpenAsmJSCacheEntryForRead(HandleObject global, size_t *serializedSizeOut,
-                                const uint8_t **memoryOut, intptr_t *handleOut)
+ShellOpenAsmJSCacheEntryForRead(HandleObject global, const jschar *begin, const jschar *limit,
+                                size_t *serializedSizeOut, const uint8_t **memoryOut,
+                                intptr_t *handleOut)
 {
     if (!jsCacheAsmJSPath)
         return false;
@@ -5069,8 +5088,8 @@ ShellCloseAsmJSCacheEntryForRead(HandleObject global, size_t serializedSize, con
 }
 
 static bool
-ShellOpenAsmJSCacheEntryForWrite(HandleObject global, size_t serializedSize,
-                                 uint8_t **memoryOut, intptr_t *handleOut)
+ShellOpenAsmJSCacheEntryForWrite(HandleObject global, const jschar *begin, const jschar *end,
+                                 size_t serializedSize, uint8_t **memoryOut, intptr_t *handleOut)
 {
     if (!jsCacheAsmJSPath)
         return false;

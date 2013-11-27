@@ -181,12 +181,11 @@ namespace jit {
     _(InterruptCheck)                                                       \
     _(FunctionBoundary)                                                     \
     _(GetDOMProperty)                                                       \
+    _(GetDOMMember)                                                         \
     _(SetDOMProperty)                                                       \
     _(IsCallable)                                                           \
     _(HaveSameClass)                                                        \
     _(AsmJSNeg)                                                             \
-    _(AsmJSUDiv)                                                            \
-    _(AsmJSUMod)                                                            \
     _(AsmJSUnsignedToDouble)                                                \
     _(AsmJSUnsignedToFloat32)                                               \
     _(AsmJSLoadHeap)                                                        \

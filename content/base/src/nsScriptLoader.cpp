@@ -11,7 +11,6 @@
 #include "jsapi.h"
 #include "jsfriendapi.h"
 #include "nsScriptLoader.h"
-#include "nsICharsetConverterManager.h"
 #include "nsIUnicodeDecoder.h"
 #include "nsIContent.h"
 #include "mozilla/dom/Element.h"
@@ -48,6 +47,7 @@
 #include "nsSandboxFlags.h"
 #include "nsContentTypeParser.h"
 #include "nsINetworkSeer.h"
+#include "mozilla/dom/EncodingUtils.h"
 
 #include "mozilla/CORSMode.h"
 #include "mozilla/Attributes.h"
@@ -1181,37 +1181,30 @@ nsScriptLoader::ConvertToUTF16(nsIChannel* aChannel, const uint8_t* aData,
 
   nsAutoCString charset;
 
-  nsCOMPtr<nsICharsetConverterManager> charsetConv =
-    do_GetService(NS_CHARSETCONVERTERMANAGER_CONTRACTID);
-
   nsCOMPtr<nsIUnicodeDecoder> unicodeDecoder;
 
   if (DetectByteOrderMark(aData, aLength, charset)) {
     // charset is now "UTF-8" or "UTF-16". The UTF-16 decoder will re-sniff
     // the BOM for endianness. Both the UTF-16 and the UTF-8 decoder will
     // take care of swallowing the BOM.
-    charsetConv->GetUnicodeDecoderRaw(charset.get(),
-                                      getter_AddRefs(unicodeDecoder));
+    unicodeDecoder = EncodingUtils::DecoderForEncoding(charset);
   }
 
   if (!unicodeDecoder &&
       aChannel &&
       NS_SUCCEEDED(aChannel->GetContentCharset(charset)) &&
-      !charset.IsEmpty()) {
-    charsetConv->GetUnicodeDecoder(charset.get(),
-                                   getter_AddRefs(unicodeDecoder));
+      EncodingUtils::FindEncodingForLabel(charset, charset)) {
+    unicodeDecoder = EncodingUtils::DecoderForEncoding(charset);
   }
 
-  if (!unicodeDecoder && !aHintCharset.IsEmpty()) {
-    CopyUTF16toUTF8(aHintCharset, charset);
-    charsetConv->GetUnicodeDecoder(charset.get(),
-                                   getter_AddRefs(unicodeDecoder));
+  if (!unicodeDecoder &&
+      EncodingUtils::FindEncodingForLabel(aHintCharset, charset)) {
+    unicodeDecoder = EncodingUtils::DecoderForEncoding(charset);
   }
 
   if (!unicodeDecoder && aDocument) {
     charset = aDocument->GetDocumentCharacterSet();
-    charsetConv->GetUnicodeDecoderRaw(charset.get(),
-                                      getter_AddRefs(unicodeDecoder));
+    unicodeDecoder = EncodingUtils::DecoderForEncoding(charset);
   }
 
   if (!unicodeDecoder) {
@@ -1219,8 +1212,7 @@ nsScriptLoader::ConvertToUTF16(nsIChannel* aChannel, const uint8_t* aData,
     // fallback in the old code was ISO-8859-1, which behaved like
     // windows-1252. Saying windows-1252 for clarity and for compliance
     // with the Encoding Standard.
-    charsetConv->GetUnicodeDecoderRaw("windows-1252",
-                                      getter_AddRefs(unicodeDecoder));
+    unicodeDecoder = EncodingUtils::DecoderForEncoding("windows-1252");
   }
 
   int32_t unicodeLength = 0;

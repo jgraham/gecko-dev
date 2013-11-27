@@ -26,6 +26,7 @@
 #include "IndexedDatabaseManager.h"
 #include "mozIApplication.h"
 #include "mozilla/ClearOnShutdown.h"
+#include "mozilla/dom/asmjscache/AsmJSCache.h"
 #include "mozilla/dom/Element.h"
 #include "mozilla/dom/ExternalHelperAppParent.h"
 #include "mozilla/dom/PMemoryReportRequestParent.h"
@@ -113,6 +114,7 @@
 #ifdef MOZ_WIDGET_GONK
 #include "nsIVolume.h"
 #include "nsIVolumeService.h"
+#include "SpeakerManagerService.h"
 using namespace mozilla::system;
 #endif
 
@@ -2447,6 +2449,22 @@ ContentParent::DeallocPFMRadioParent(PFMRadioParent* aActor)
 #endif
 }
 
+asmjscache::PAsmJSCacheEntryParent*
+ContentParent::AllocPAsmJSCacheEntryParent(
+                                          const asmjscache::OpenMode& aOpenMode,
+                                          const int64_t& aSizeToWrite,
+                                          const IPC::Principal& aPrincipal)
+{
+  return asmjscache::AllocEntryParent(aOpenMode, aSizeToWrite, aPrincipal);
+}
+
+bool
+ContentParent::DeallocPAsmJSCacheEntryParent(PAsmJSCacheEntryParent* aActor)
+{
+  asmjscache::DeallocEntryParent(aActor);
+  return true;
+}
+
 PSpeechSynthesisParent*
 ContentParent::AllocPSpeechSynthesisParent()
 {
@@ -2476,6 +2494,35 @@ ContentParent::RecvPSpeechSynthesisConstructor(PSpeechSynthesisParent* aActor)
 #else
     return false;
 #endif
+}
+
+bool
+ContentParent::RecvSpeakerManagerGetSpeakerStatus(bool* aValue)
+{
+#ifdef MOZ_WIDGET_GONK
+  *aValue = false;
+  nsRefPtr<SpeakerManagerService> service =
+    SpeakerManagerService::GetSpeakerManagerService();
+  if (service) {
+    *aValue = service->GetSpeakerStatus();
+  }
+  return true;
+#endif
+  return false;
+}
+
+bool
+ContentParent::RecvSpeakerManagerForceSpeaker(const bool& aEnable)
+{
+#ifdef MOZ_WIDGET_GONK
+  nsRefPtr<SpeakerManagerService> service =
+    SpeakerManagerService::GetSpeakerManagerService();
+  if (service) {
+    service->ForceSpeaker(aEnable, mChildID);
+  }
+  return true;
+#endif
+  return false;
 }
 
 bool
@@ -2711,7 +2758,8 @@ ContentParent::RecvSyncMessage(const nsString& aMsg,
                                InfallibleTArray<nsString>* aRetvals)
 {
   nsIPrincipal* principal = aPrincipal;
-  if (principal && !AssertAppPrincipal(this, principal)) {
+  if (!Preferences::GetBool("geo.testing.ignore_ipc_principal", false) &&
+      principal && !AssertAppPrincipal(this, principal)) {
     return false;
   }
 
@@ -2734,7 +2782,8 @@ ContentParent::AnswerRpcMessage(const nsString& aMsg,
                                 InfallibleTArray<nsString>* aRetvals)
 {
   nsIPrincipal* principal = aPrincipal;
-  if (principal && !AssertAppPrincipal(this, principal)) {
+  if (!Preferences::GetBool("geo.testing.ignore_ipc_principal", false) &&
+      principal && !AssertAppPrincipal(this, principal)) {
     return false;
   }
 
@@ -2755,7 +2804,8 @@ ContentParent::RecvAsyncMessage(const nsString& aMsg,
                                 const IPC::Principal& aPrincipal)
 {
   nsIPrincipal* principal = aPrincipal;
-  if (principal && !AssertAppPrincipal(this, principal)) {
+  if (!Preferences::GetBool("geo.testing.ignore_ipc_principal", false) &&
+      principal && !AssertAppPrincipal(this, principal)) {
     return false;
   }
 
@@ -2797,6 +2847,8 @@ AddGeolocationListener(nsIDOMGeoPositionCallback* watcher, bool highAccuracy)
   }
 
   PositionOptions* options = new PositionOptions();
+  options->mTimeout = 0;
+  options->mMaximumAge = 0;
   options->mEnableHighAccuracy = highAccuracy;
   int32_t retval = 1;
   geo->WatchPosition(watcher, nullptr, options, &retval);

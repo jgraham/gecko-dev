@@ -3075,6 +3075,14 @@ JSTerm.prototype = {
   _autocompleteQuery: null,
 
   /**
+   * The frameActorId used in the last autocomplete query. Whenever this changes
+   * the autocomplete cache must be invalidated.
+   * @private
+   * @type string
+   */
+  _lastFrameActorId: null,
+
+  /**
    * The Web Console sidebar.
    * @see this._createSidebar()
    * @see Sidebar.jsm
@@ -3980,30 +3988,6 @@ JSTerm.prototype = {
 
     if (aEvent.ctrlKey) {
       switch (aEvent.charCode) {
-        case 97:
-          // control-a
-          this.clearCompletion();
-
-          if (Services.appinfo.OS == "WINNT") {
-            // Allow Select All on Windows.
-            break;
-          }
-
-          let lineBeginPos = 0;
-          if (this.hasMultilineInput()) {
-            // find index of closest newline <= to cursor
-            for (let i = inputNode.selectionStart-1; i >= 0; i--) {
-              if (inputNode.value.charAt(i) == "\r" ||
-                  inputNode.value.charAt(i) == "\n") {
-                lineBeginPos = i+1;
-                break;
-              }
-            }
-          }
-          inputNode.setSelectionRange(lineBeginPos, lineBeginPos);
-          aEvent.preventDefault();
-          break;
-
         case 101:
           // control-e
           if (Services.appinfo.OS == "WINNT") {
@@ -4310,6 +4294,8 @@ JSTerm.prototype = {
   {
     let inputNode = this.inputNode;
     let inputValue = inputNode.value;
+    let frameActor = this.getFrameActor(this.SELECTED_FRAME);
+
     // If the inputNode has no value, then don't try to complete on it.
     if (!inputValue) {
       this.clearCompletion();
@@ -4323,7 +4309,7 @@ JSTerm.prototype = {
     }
 
     // Update the completion results.
-    if (this.lastCompletion.value != inputValue) {
+    if (this.lastCompletion.value != inputValue || frameActor != this._lastFrameActorId) {
       this._updateCompletionResult(aType, aCallback);
       return false;
     }
@@ -4359,7 +4345,8 @@ JSTerm.prototype = {
   _updateCompletionResult:
   function JST__updateCompletionResult(aType, aCallback)
   {
-    if (this.lastCompletion.value == this.inputNode.value) {
+    let frameActor = this.getFrameActor(this.SELECTED_FRAME);
+    if (this.lastCompletion.value == this.inputNode.value && frameActor == this._lastFrameActorId) {
       return;
     }
 
@@ -4374,7 +4361,7 @@ JSTerm.prototype = {
     // character we ask the server again for suggestions.
 
     // Check if last character is non-alphanumeric
-    if (!/[a-zA-Z0-9]$/.test(input)) {
+    if (!/[a-zA-Z0-9]$/.test(input) || frameActor != this._lastFrameActorId) {
       this._autocompleteQuery = null;
       this._autocompleteCache = null;
     }
@@ -4404,6 +4391,8 @@ JSTerm.prototype = {
       return;
     }
 
+    this._lastFrameActorId = frameActor;
+
     this.lastCompletion = {
       requestId: requestId,
       completionType: aType,
@@ -4412,7 +4401,8 @@ JSTerm.prototype = {
 
     let callback = this._receiveAutocompleteProperties.bind(this, requestId,
                                                             aCallback);
-    this.webConsoleClient.autocomplete(input, cursor, callback);
+
+    this.webConsoleClient.autocomplete(input, cursor, callback, frameActor);
   },
 
   /**

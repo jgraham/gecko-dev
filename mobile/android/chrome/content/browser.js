@@ -20,6 +20,7 @@ Cu.import("resource://gre/modules/PermissionPromptHelper.jsm");
 Cu.import("resource://gre/modules/ContactService.jsm");
 Cu.import("resource://gre/modules/NotificationDB.jsm");
 Cu.import("resource://gre/modules/SpatialNavigation.jsm");
+Cu.import("resource://gre/modules/UITelemetry.jsm");
 
 #ifdef ACCESSIBILITY
 Cu.import("resource://gre/modules/accessibility/AccessFu.jsm");
@@ -336,6 +337,7 @@ var BrowserApp = {
     DesktopUserAgent.init();
     Distribution.init();
     Tabs.init();
+    UITelemetry.init();
 #ifdef ACCESSIBILITY
     AccessFu.attach(window);
 #endif
@@ -4386,11 +4388,16 @@ var BrowserEventHandler = {
               element = ElementTouchHelper.anyElementFromPoint(x, y);
             }
 
+            // Was the element already focused before it was clicked?
+            let isFocused = (element == BrowserApp.getFocusedInput(BrowserApp.selectedBrowser, true));
+
             this._sendMouseEvent("mousemove", element, x, y);
             this._sendMouseEvent("mousedown", element, x, y);
             this._sendMouseEvent("mouseup",   element, x, y);
 
-            SelectionHandler.attachCaret(element);
+            // If the element was previously focused, show the caret attached to it.
+            if (isFocused)
+              SelectionHandler.attachCaret(element);
 
             // scrollToFocusedInput does its own checks to find out if an element should be zoomed into
             BrowserApp.scrollToFocusedInput(BrowserApp.selectedBrowser);

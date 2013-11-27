@@ -50,6 +50,7 @@ PARALLEL_DIRS += [
     'encoding',
     'file',
     'fmradio',
+    'asmjscache',
     'media',
     'messages',
     'power',
@@ -81,7 +82,10 @@ if CONFIG['OS_ARCH'] == 'WINNT':
     PARALLEL_DIRS += ['plugins/ipc/hangui']
 
 if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'gonk':
-    PARALLEL_DIRS += ['wifi']
+    PARALLEL_DIRS += [
+        'speakermanager',
+        'wifi',
+    ]
 
 if CONFIG['MOZ_B2G_RIL']:
     PARALLEL_DIRS += [

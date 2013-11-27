@@ -595,11 +595,6 @@ documenttab[selected] .documenttab-selection {
   padding: 0 !important;
 }
 
-#urlbar-edit > hbox > .textbox-input-box > .textbox-input::-moz-selection {
-  color: white;
-  background-color: @metro_orange@;
-}
-
 #urlbar-edit > hbox > .textbox-input-box > .textbox-input:invalid {
   /* Hide error glow around the address bar that shows by default
    * when URLs are made invalid by trmming. */
@@ -746,13 +741,16 @@ documenttab[selected] .documenttab-selection {
 }
 
 #download-progress {
-  -moz-image-region: rect(0px, 40px, 40px, 0px) !important;
+  width: 40px;
+  height: 40px;
+  list-style-image: url(chrome://browser/skin/images/navbar-download.png);
+  -moz-image-region: rect(0px, 40px, 40px, 0px);
 }
 #download-progress:hover {
-  -moz-image-region: rect(40px, 40px, 80px, 0px) !important;
+  -moz-image-region: rect(0px, 80px, 40px, 40px);
 }
 #download-progress:active {
-  -moz-image-region: rect(80px, 40px, 120px, 0px) !important;
+  -moz-image-region: rect(0px, 120px, 40px, 80px);
 }
 
 #pin-button {
@@ -768,6 +766,10 @@ documenttab[selected] .documenttab-selection {
 }
 
 @media (min-resolution: @min_res_140pc@) {
+  #download-progress {
+    list-style-image: url(chrome://browser/skin/images/navbar-download@1.4x.png);
+  }
+
   #pin-button {
     list-style-image: url(chrome://browser/skin/images/navbar-pin@1.4x.png);
   }
@@ -782,6 +784,10 @@ documenttab[selected] .documenttab-selection {
 }
 
 @media (min-resolution: @min_res_180pc@) {
+  #download-progress {
+    list-style-image: url(chrome://browser/skin/images/navbar-download@1.8x.png);
+  }
+
   #pin-button {
     list-style-image: url(chrome://browser/skin/images/navbar-pin@1.8x.png);
   }

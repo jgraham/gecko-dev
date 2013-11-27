@@ -131,6 +131,8 @@ private:
         nsRefPtr<TabParent> tabParent;
         mTabParent.swap(tabParent);
 
+        using mozilla::ipc::FileDescriptor;
+
         FileDescriptor::PlatformHandleType handle =
             FileDescriptor::PlatformHandleType(PR_FileDesc2NativeHandle(mFD));
 
@@ -494,21 +496,22 @@ TabParent::UpdateFrame(const FrameMetrics& aFrameMetrics)
   }
 }
 
-void TabParent::HandleDoubleTap(const CSSIntPoint& aPoint)
+void TabParent::HandleDoubleTap(const CSSIntPoint& aPoint, int32_t aModifiers)
 {
   if (!mIsDestroyed) {
     unused << SendHandleDoubleTap(aPoint);
   }
 }
 
-void TabParent::HandleSingleTap(const CSSIntPoint& aPoint)
+void TabParent::HandleSingleTap(const CSSIntPoint& aPoint, int32_t aModifiers)
 {
+  // TODO Send the modifier data to TabChild for use in mouse events.
   if (!mIsDestroyed) {
     unused << SendHandleSingleTap(aPoint);
   }
 }
 
-void TabParent::HandleLongTap(const CSSIntPoint& aPoint)
+void TabParent::HandleLongTap(const CSSIntPoint& aPoint, int32_t aModifiers)
 {
   if (!mIsDestroyed) {
     unused << SendHandleLongTap(aPoint);
@@ -774,7 +777,8 @@ TabParent::RecvSyncMessage(const nsString& aMessage,
 {
   nsIPrincipal* principal = aPrincipal;
   ContentParent* parent = static_cast<ContentParent*>(Manager());
-  if (principal && !AssertAppPrincipal(parent, principal)) {
+  if (!Preferences::GetBool("geo.testing.ignore_ipc_principal", false) &&
+      principal && !AssertAppPrincipal(parent, principal)) {
     return false;
   }
 
@@ -792,7 +796,8 @@ TabParent::AnswerRpcMessage(const nsString& aMessage,
 {
   nsIPrincipal* principal = aPrincipal;
   ContentParent* parent = static_cast<ContentParent*>(Manager());
-  if (principal && !AssertAppPrincipal(parent, principal)) {
+  if (!Preferences::GetBool("geo.testing.ignore_ipc_principal", false) &&
+      principal && !AssertAppPrincipal(parent, principal)) {
     return false;
   }
 
@@ -809,7 +814,8 @@ TabParent::RecvAsyncMessage(const nsString& aMessage,
 {
   nsIPrincipal* principal = aPrincipal;
   ContentParent* parent = static_cast<ContentParent*>(Manager());
-  if (principal && !AssertAppPrincipal(parent, principal)) {
+  if (!Preferences::GetBool("geo.testing.ignore_ipc_principal", false) &&
+      principal && !AssertAppPrincipal(parent, principal)) {
     return false;
   }
 
