@@ -117,7 +117,8 @@ void main(void) {
 
     var elemTestFunc = todo; // We fail on most implementations.
     if (DriverInfo.getDriver() == DriverInfo.DRIVER.ANGLE ||
-        DriverInfo.getOS() == DriverInfo.OS.ANDROID)
+        (DriverInfo.getOS() == DriverInfo.OS.ANDROID &&
+         DriverInfo.getDriver() != DriverInfo.DRIVER.ANDROID_X86_EMULATOR))
     {
       // ANGLE and Android slaves seem to work fine.
       elemTestFunc = ok;
