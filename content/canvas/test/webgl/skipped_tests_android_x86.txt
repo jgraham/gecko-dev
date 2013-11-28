@@ -26,10 +26,6 @@ conformance/glsl/functions/glsl-function-smoothstep-float.html
 conformance/glsl/functions/glsl-function-smoothstep-gentype.html
 conformance/glsl/functions/glsl-function-step-float.html
 conformance/glsl/functions/glsl-function-step-gentype.html
-conformance/glsl/misc/shader-with-limited-indexing.frag.html
-conformance/glsl/misc/shader-with-quoted-error.frag.html
-conformance/glsl/misc/shader-with-undefined-preprocessor-symbol.frag.html
-conformance/glsl/misc/shader-with-version-100.vert.html
 conformance/more/conformance/quickCheckAPI-B2.html
 conformance/programs/gl-getshadersource.html
 conformance/reading/read-pixels-test.html
