@@ -590,10 +590,11 @@ class GlobalObject : public JSObject
     // in which |obj| was created, if no prior warning was given.
     static bool warnOnceAboutWatch(JSContext *cx, HandleObject obj);
 
-    Value getOriginalEval() const {
-        JS_ASSERT(getSlotRefForCompilation(EVAL).isObject());
-        return getSlotRefForCompilation(EVAL);
-    }
+    static bool getOrCreateEval(JSContext *cx, Handle<GlobalObject*> global,
+                                MutableHandleObject eval);
+
+    // Infallibly test whether the given value is the eval function for this global.
+    bool valueIsEval(Value val);
 
     // Implemented in jsiter.cpp.
     static bool initIteratorClasses(JSContext *cx, Handle<GlobalObject*> global);

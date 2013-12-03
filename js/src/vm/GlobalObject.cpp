@@ -454,6 +454,23 @@ GlobalObject::create(JSContext *cx, const Class *clasp)
 }
 
 /* static */ bool
+GlobalObject::getOrCreateEval(JSContext *cx, Handle<GlobalObject*> global,
+                              MutableHandleObject eval)
+{
+    if (!global->getOrCreateObjectPrototype(cx))
+        return false;
+    eval.set(&global->getSlotRefForCompilation(EVAL).toObject());
+    return true;
+}
+
+bool
+GlobalObject::valueIsEval(Value val)
+{
+    HeapSlot &eval = getSlotRef(EVAL);
+    return eval.isObject() && eval.get() == val;
+}
+
+/* static */ bool
 GlobalObject::initStandardClasses(JSContext *cx, Handle<GlobalObject*> global)
 {
     /* Define a top-level property 'undefined' with the undefined value. */

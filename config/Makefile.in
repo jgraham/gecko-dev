@@ -55,15 +55,11 @@ include $(topsrcdir)/config/rules.mk
 
 HOST_CFLAGS += -DUNICODE -D_UNICODE
 
-ifeq ($(OS_CONFIG),SunOS4.1)
-NSPR_CFLAGS	+= -I$(srcdir)/../nsprpub/pr/include/md
-endif
-
 # Generate a new buildid every time we "export" in config... that's only
 # supposed to be once per-build!
 export::
 ifdef MOZ_BUILD_DATE
-	printf "%s" $(MOZ_BUILD_DATE) > buildid
+	printf '%s' $(MOZ_BUILD_DATE) > buildid
 else
 	$(PYTHON) $(topsrcdir)/toolkit/xre/make-platformini.py --print-buildid > buildid
 endif

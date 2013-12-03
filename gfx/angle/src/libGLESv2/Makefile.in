@@ -25,12 +25,6 @@ VPATH += $(srcdir)/../compiler/preprocessor
 
 # Target: 'translator_common'
 #   Requires: 'preprocessor'
-LOCAL_INCLUDES += \
-  -I$(srcdir)/../../include \
-  -I$(srcdir)/../../include/KHR \
-  -I$(srcdir)/.. \
-  -I"$(MOZ_DIRECTX_SDK_PATH)/include"
-
 VPATH += $(srcdir)/renderer
 VPATH += $(srcdir)/..
 VPATH += $(srcdir)/../compiler
@@ -50,6 +44,8 @@ RCFILE  = $(srcdir)/libGLESv2.rc
 
 include $(topsrcdir)/config/rules.mk
 
+CXXFLAGS += -I'$(MOZ_DIRECTX_SDK_PATH)/include'
+
 ifdef GNU_CC
 
 TextureSSE2.$(OBJ_SUFFIX): CXXFLAGS+=-msse2
@@ -59,8 +55,8 @@ OS_LIBS += -ld3d9 -ldxguid
 
 else
 
-EXTRA_DSO_LDOPTS = "$(MOZ_DIRECTX_SDK_PATH)/lib/$(MOZ_DIRECTX_SDK_CPU_SUFFIX)/d3d9.lib" \
-                   "$(MOZ_DIRECTX_SDK_PATH)/lib/$(MOZ_DIRECTX_SDK_CPU_SUFFIX)/dxguid.lib" \
+EXTRA_DSO_LDOPTS = '$(MOZ_DIRECTX_SDK_PATH)/lib/$(MOZ_DIRECTX_SDK_CPU_SUFFIX)/d3d9.lib' \
+                   '$(MOZ_DIRECTX_SDK_PATH)/lib/$(MOZ_DIRECTX_SDK_CPU_SUFFIX)/dxguid.lib' \
                    delayimp.lib
 
 endif

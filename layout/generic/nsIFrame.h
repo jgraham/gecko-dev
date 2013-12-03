@@ -862,6 +862,12 @@ public:
    * Accessor functions for geometric parent
    */
   nsIFrame* GetParent() const { return mParent; }
+  /**
+   * Set this frame's parent to aParent.
+   * If the frame may have moved into or out of a scrollframe's
+   * frame subtree, StickyScrollContainer::NotifyReparentedFrameAcrossScrollFrameBoundary
+   * must also be called.
+   */
   virtual void SetParent(nsIFrame* aParent) = 0;
 
   /**
@@ -3014,6 +3020,13 @@ NS_PTR_TO_INT32(frame->Properties().Get(nsIFrame::ParagraphDepthProperty()))
   bool IsContainerForFontSizeInflation() const {
     return GetStateBits() & NS_FRAME_FONT_INFLATION_CONTAINER;
   }
+
+  /**
+   * Returns the content node within the anonymous content that this frame
+   * generated and which corresponds to the specified pseudo-element type,
+   * or nullptr if there is no such anonymous content.
+   */
+  virtual nsIContent* GetPseudoElementContent(nsCSSPseudoElements::Type aType);
 
 protected:
   // Members
