@@ -10,6 +10,7 @@
 #include "FPSCounter.h"                 // for FPSState, FPSCounter
 #include "GLContextProvider.h"          // for GLContextProvider
 #include "GLContext.h"                  // for GLContext
+#include "GLUploadHelpers.h"
 #include "Layers.h"                     // for WriteSnapshotToDumpFile
 #include "LayerScope.h"                 // for LayerScope
 #include "gfx2DGlue.h"                  // for ThebesFilter
@@ -305,7 +306,9 @@ CompositorOGL::GetTemporaryTexture(GLenum aTextureUnit)
   }
   // lazily initialize the temporary textures
   if (!mTextures[index]) {
-    gl()->MakeCurrent();
+    if (!gl()->MakeCurrent()) {
+      return 0;
+    }
     gl()->fGenTextures(1, &mTextures[index]);
   }
   return mTextures[index];
@@ -314,8 +317,7 @@ CompositorOGL::GetTemporaryTexture(GLenum aTextureUnit)
 void
 CompositorOGL::Destroy()
 {
-  if (gl()) {
-    gl()->MakeCurrent();
+  if (gl() && gl()->MakeCurrent()) {
     if (mTextures.Length() > 0) {
       gl()->fDeleteTextures(mTextures.Length(), &mTextures[0]);
     }
@@ -346,7 +348,11 @@ CompositorOGL::CleanupResources()
 
   mPrograms.Clear();
 
-  ctx->MakeCurrent();
+  if (!ctx->MakeCurrent()) {
+    mQuadVBO = 0;
+    mGLContext = nullptr;
+    return;
+  }
 
   ctx->fBindFramebuffer(LOCAL_GL_FRAMEBUFFER, 0);
 
@@ -576,7 +582,7 @@ CompositorOGL::BindAndDrawQuadWithTextureRect(ShaderProgramOGL *aProg,
   GLenum wrapMode = aTexture->AsSourceOGL()->GetWrapMode();
 
   IntSize realTexSize = aTexture->GetSize();
-  if (!mGLContext->CanUploadNonPowerOfTwo()) {
+  if (!CanUploadNonPowerOfTwo(mGLContext)) {
     realTexSize = IntSize(NextPowerOfTwo(realTexSize.width),
                           NextPowerOfTwo(realTexSize.height));
   }
@@ -751,7 +757,7 @@ bool CompositorOGL::sDrawFPS = false;
 static IntSize
 CalculatePOTSize(const IntSize& aSize, GLContext* gl)
 {
-  if (gl->CanUploadNonPowerOfTwo())
+  if (CanUploadNonPowerOfTwo(gl))
     return aSize;
 
   return IntSize(NextPowerOfTwo(aSize.width), NextPowerOfTwo(aSize.height));
@@ -1496,7 +1502,7 @@ CompositorOGL::CreateDataTextureSource(TextureFlags aFlags)
 bool
 CompositorOGL::SupportsPartialTextureUpdate()
 {
-  return mGLContext->CanUploadSubTextures();
+  return CanUploadSubTextures(mGLContext);
 }
 
 int32_t

@@ -715,6 +715,9 @@ IonBuilder::build()
     if (!traverseBytecode())
         return false;
 
+    if (!maybeAddOsrTypeBarriers())
+        return false;
+
     if (!processIterators())
         return false;
 
@@ -1204,7 +1207,7 @@ IonBuilder::traverseBytecode()
                 if (status == ControlStatus_Abort)
                     return abort("Aborted while processing control flow");
                 if (!current)
-                    return maybeAddOsrTypeBarriers();
+                    return true;
                 continue;
             }
 
@@ -1232,7 +1235,7 @@ IonBuilder::traverseBytecode()
             if (status == ControlStatus_Abort)
                 return abort("Aborted while processing control flow");
             if (!current)
-                return maybeAddOsrTypeBarriers();
+                return true;
         }
 
 #ifdef DEBUG
@@ -1247,7 +1250,7 @@ IonBuilder::traverseBytecode()
         // adding any SSA uses and doesn't call setFoldedUnchecked on it.
         Vector<MDefinition *, 4, IonAllocPolicy> popped(alloc());
         Vector<size_t, 4, IonAllocPolicy> poppedUses(alloc());
-        unsigned nuses = GetUseCount(script_, pc - script_->code);
+        unsigned nuses = GetUseCount(script_, script_->pcToOffset(pc));
 
         for (unsigned i = 0; i < nuses; i++) {
             MDefinition *def = current->peek(-int32_t(i + 1));
@@ -1311,7 +1314,7 @@ IonBuilder::traverseBytecode()
         current->updateTrackedPc(pc);
     }
 
-    return maybeAddOsrTypeBarriers();
+    return true;
 }
 
 IonBuilder::ControlStatus
@@ -3983,7 +3986,7 @@ IonBuilder::patchInlinedReturns(CallInfo &callInfo, MIRGraphReturns &returns, MB
 static bool
 IsSmallFunction(JSScript *script)
 {
-    return script->length <= js_IonOptions.smallFunctionMaxBytecodeLength;
+    return script->length() <= js_IonOptions.smallFunctionMaxBytecodeLength;
 }
 
 bool
@@ -4031,7 +4034,7 @@ IonBuilder::makeInliningDecision(JSFunction *target, CallInfo &callInfo)
             }
 
             // Caller must not be excessively large.
-            if (script()->length >= js_IonOptions.inliningMaxCallerBytecodeLength) {
+            if (script()->length() >= js_IonOptions.inliningMaxCallerBytecodeLength) {
                 IonSpew(IonSpew_Inlining, "%s:%d - Vetoed: caller excessively large.",
                         targetScript->filename(), targetScript->lineno);
                 return false;
@@ -4040,7 +4043,7 @@ IonBuilder::makeInliningDecision(JSFunction *target, CallInfo &callInfo)
 
         // Callee must not be excessively large.
         // This heuristic also applies to the callsite as a whole.
-        if (targetScript->length > js_IonOptions.inlineMaxTotalBytecodeLength) {
+        if (targetScript->length() > js_IonOptions.inlineMaxTotalBytecodeLength) {
             IonSpew(IonSpew_Inlining, "%s:%d - Vetoed: callee excessively large.",
                     targetScript->filename(), targetScript->lineno);
             return false;
@@ -4080,7 +4083,7 @@ IonBuilder::selectInliningTargets(ObjectVector &targets, CallInfo &callInfo, Boo
 
         // Enforce a maximum inlined bytecode limit at the callsite.
         if (inlineable && target->isInterpreted()) {
-            totalSize += target->nonLazyScript()->length;
+            totalSize += target->nonLazyScript()->length();
             if (totalSize > js_IonOptions.inlineMaxTotalBytecodeLength)
                 inlineable = false;
         }
@@ -5983,6 +5986,12 @@ ClassHasEffectlessLookup(const Class *clasp, PropertyName *name)
 static bool
 ClassHasResolveHook(CompileCompartment *comp, const Class *clasp, PropertyName *name)
 {
+    // While arrays do not have resolve hooks, the types of their |length|
+    // properties are not reflected in type information, so pretend there is a
+    // resolve hook for this property.
+    if (clasp == &ArrayObject::class_)
+        return name = comp->runtime()->names().length;
+
     if (clasp->resolve == JS_ResolveStub)
         return false;
 
@@ -6099,6 +6108,9 @@ IonBuilder::testSingletonPropertyTypes(MDefinition *obj, JSObject *singleton, Pr
             if (analysisContext)
                 object->ensureTrackedProperty(analysisContext, NameToId(name));
 
+            const Class *clasp = object->clasp();
+            if (!ClassHasEffectlessLookup(clasp, name) || ClassHasResolveHook(compartment, clasp, name))
+                return false;
             if (object->unknownProperties())
                 return false;
             types::HeapTypeSetKey property = object->property(NameToId(name));
@@ -7998,12 +8010,16 @@ IonBuilder::annotateGetPropertyCache(MDefinition *obj, MGetPropertyCache *getPro
         if (typeObj->unknownProperties() || !typeObj->proto().isObject())
             continue;
 
+        const Class *clasp = typeObj->clasp();
+        if (!ClassHasEffectlessLookup(clasp, name) || ClassHasResolveHook(compartment, clasp, name))
+            continue;
+
         types::HeapTypeSetKey ownTypes = typeObj->property(NameToId(name));
         if (ownTypes.isOwnProperty(constraints()))
             continue;
 
         JSObject *singleton = testSingletonProperty(typeObj->proto().toObject(), name);
-        if (!singleton)
+        if (!singleton || !singleton->is<JSFunction>())
             continue;
 
         // Don't add cases corresponding to non-observed pushes

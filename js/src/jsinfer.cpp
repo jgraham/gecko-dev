@@ -551,8 +551,6 @@ static LifoAlloc *IonAlloc() {
 #endif
 }
 
-namespace {
-
 // Superclass of all constraints generated during Ion compilation. These may
 // be allocated off the main thread, using the current Ion context's allocator.
 class CompilerConstraint
@@ -575,8 +573,6 @@ class CompilerConstraint
     // compilation. Returns true if the assumption originally made still holds.
     virtual bool generateTypeConstraint(JSContext *cx, RecompileInfo recompileInfo) = 0;
 };
-
-} // anonymous namespace
 
 class types::CompilerConstraintList
 {
@@ -1719,7 +1715,7 @@ PreviousOpcode(HandleScript script, jsbytecode *pc)
     ScriptAnalysis *analysis = script->analysis();
     JS_ASSERT(analysis->maybeCode(pc));
 
-    if (pc == script->code)
+    if (pc == script->code())
         return nullptr;
 
     for (pc--;; pc--) {
@@ -1811,18 +1807,18 @@ TypeCompartment::addAllocationSiteTypeObject(JSContext *cx, AllocationSiteKey ke
      * try to reuse the type objects from earlier elements to avoid
      * distinguishing elements of the outer array unnecessarily.
      */
-    jsbytecode *pc = key.script->code + key.offset;
+    jsbytecode *pc = key.script->offsetToPC(key.offset);
     RootedScript keyScript(cx, key.script);
     jsbytecode *prev = FindPreviousInnerInitializer(keyScript, pc);
     if (prev) {
         AllocationSiteKey nkey;
         nkey.script = key.script;
-        nkey.offset = prev - key.script->code;
+        nkey.offset = key.script->pcToOffset(prev);
         nkey.kind = JSProto_Array;
 
         AllocationSiteTable::Ptr p = cx->compartment()->types.allocationSiteTable->lookup(nkey);
         if (p)
-            res = p->value;
+            res = p->value();
     }
 
     if (!res) {
@@ -1927,7 +1923,7 @@ types::UseNewTypeForInitializer(JSScript *script, jsbytecode *pc, JSProtoKey key
     if (!script->hasTrynotes())
         return SingletonObject;
 
-    unsigned offset = pc - script->code;
+    unsigned offset = script->pcToOffset(pc);
 
     JSTryNote *tn = script->trynotes()->vector;
     JSTryNote *tnlimit = tn + script->trynotes()->length;
@@ -2303,7 +2299,7 @@ TypeCompartment::setTypeToHomogenousArray(ExclusiveContext *cx,
     ArrayTableKey key(elementType, obj->getProto());
     DependentAddPtr<ArrayTypeTable> p(cx, *arrayTypeTable, key);
     if (p) {
-        obj->setType(p->value);
+        obj->setType(p->value());
     } else {
         /* Make a new type to use for future arrays with the same elements. */
         RootedObject objProto(cx, obj->getProto());
@@ -2492,11 +2488,11 @@ TypeCompartment::fixObjectType(ExclusiveContext *cx, JSObject *obj)
     ObjectTypeTable::AddPtr p = objectTypeTable->lookupForAdd(lookup);
 
     if (p) {
-        JS_ASSERT(obj->getProto() == p->value.object->proto);
-        JS_ASSERT(obj->lastProperty() == p->value.shape);
+        JS_ASSERT(obj->getProto() == p->value().object->proto);
+        JS_ASSERT(obj->lastProperty() == p->value().shape);
 
-        UpdateObjectTableEntryTypes(cx, p->value, properties.begin(), properties.length());
-        obj->setType(p->value.object);
+        UpdateObjectTableEntryTypes(cx, p->value(), properties.begin(), properties.length());
+        obj->setType(p->value().object);
         return;
     }
 
@@ -2595,20 +2591,20 @@ TypeCompartment::newTypedObject(JSContext *cx, IdValuePair *properties, size_t n
         cx->clearPendingException();
         return nullptr;
     }
-    JS_ASSERT(obj->getProto() == p->value.object->proto);
+    JS_ASSERT(obj->getProto() == p->value().object->proto);
 
-    RootedShape shape(cx, p->value.shape);
+    RootedShape shape(cx, p->value().shape);
     if (!JSObject::setLastProperty(cx, obj, shape)) {
         cx->clearPendingException();
         return nullptr;
     }
 
-    UpdateObjectTableEntryTypes(cx, p->value, properties, nproperties);
+    UpdateObjectTableEntryTypes(cx, p->value(), properties, nproperties);
 
     for (size_t i = 0; i < nproperties; i++)
         obj->setSlot(i, properties[i].value);
 
-    obj->setType(p->value.object);
+    obj->setType(p->value().object);
     return obj;
 }
 
@@ -2974,7 +2970,7 @@ TypeObject::clearNewScriptAddendum(ExclusiveContext *cx)
     if (cx->isJSContext()) {
         Vector<uint32_t, 32> pcOffsets(cx);
         for (ScriptFrameIter iter(cx->asJSContext()); !iter.done(); ++iter) {
-            pcOffsets.append(uint32_t(iter.pc() - iter.script()->code));
+            pcOffsets.append(iter.script()->pcToOffset(iter.pc()));
             if (!iter.isConstructing() ||
                 iter.callee() != newScript()->fun ||
                 !iter.thisv().isObject() ||
@@ -3373,7 +3369,7 @@ types::TypeMonitorResult(JSContext *cx, JSScript *script, jsbytecode *pc, const 
         return;
 
     InferSpew(ISpewOps, "bytecodeType: #%u:%05u: %s",
-              script->id(), pc - script->code, TypeString(type));
+              script->id(), script->pcToOffset(pc), TypeString(type));
     types->addType(cx, type);
 }
 
@@ -4026,7 +4022,7 @@ TypeCompartment::sweep(FreeOp *fop)
 
     if (arrayTypeTable) {
         for (ArrayTypeTable::Enum e(*arrayTypeTable); !e.empty(); e.popFront()) {
-            const ArrayTableKey &key = e.front().key;
+            const ArrayTableKey &key = e.front().key();
             JS_ASSERT(key.type.isUnknown() || !key.type.isSingleObject());
 
             bool remove = false;
@@ -4036,7 +4032,7 @@ TypeCompartment::sweep(FreeOp *fop)
                 if (IsTypeObjectAboutToBeFinalized(&typeObject))
                     remove = true;
             }
-            if (IsTypeObjectAboutToBeFinalized(e.front().value.unsafeGet()))
+            if (IsTypeObjectAboutToBeFinalized(e.front().value().unsafeGet()))
                 remove = true;
 
             if (remove) {
@@ -4052,8 +4048,8 @@ TypeCompartment::sweep(FreeOp *fop)
 
     if (objectTypeTable) {
         for (ObjectTypeTable::Enum e(*objectTypeTable); !e.empty(); e.popFront()) {
-            const ObjectTableKey &key = e.front().key;
-            ObjectTableEntry &entry = e.front().value;
+            const ObjectTableKey &key = e.front().key();
+            ObjectTableEntry &entry = e.front().value();
 
             bool remove = false;
             if (IsTypeObjectAboutToBeFinalized(entry.object.unsafeGet()))
@@ -4088,12 +4084,12 @@ TypeCompartment::sweep(FreeOp *fop)
 
     if (allocationSiteTable) {
         for (AllocationSiteTable::Enum e(*allocationSiteTable); !e.empty(); e.popFront()) {
-            AllocationSiteKey key = e.front().key;
+            AllocationSiteKey key = e.front().key();
             bool keyDying = IsScriptAboutToBeFinalized(&key.script);
-            bool valDying = IsTypeObjectAboutToBeFinalized(e.front().value.unsafeGet());
+            bool valDying = IsTypeObjectAboutToBeFinalized(e.front().value().unsafeGet());
             if (keyDying || valDying)
                 e.removeFront();
-            else if (key.script != e.front().key.script)
+            else if (key.script != e.front().key().script)
                 e.rekeyFront(key);
         }
     }
@@ -4118,8 +4114,8 @@ TypeCompartment::sweepShapes(FreeOp *fop)
      */
     if (objectTypeTable) {
         for (ObjectTypeTable::Enum e(*objectTypeTable); !e.empty(); e.popFront()) {
-            const ObjectTableKey &key = e.front().key;
-            ObjectTableEntry &entry = e.front().value;
+            const ObjectTableKey &key = e.front().key();
+            ObjectTableEntry &entry = e.front().value();
 
             if (IsShapeAboutToBeFinalized(entry.shape.unsafeGet())) {
                 fop->free_(key.properties);
@@ -4233,8 +4229,8 @@ TypeCompartment::addSizeOfExcludingThis(mozilla::MallocSizeOf mallocSizeOf,
              !e.empty();
              e.popFront())
         {
-            const ObjectTableKey &key = e.front().key;
-            const ObjectTableEntry &value = e.front().value;
+            const ObjectTableKey &key = e.front().key();
+            const ObjectTableEntry &value = e.front().value();
 
             /* key.ids and values.types have the same length. */
             *objectTypeTables += mallocSizeOf(key.properties) + mallocSizeOf(value.types);
@@ -4368,10 +4364,7 @@ TypeScript::printTypes(JSContext *cx, HandleScript script) const
     }
     fprintf(stderr, "\n");
 
-    for (jsbytecode *pc = script->code;
-         pc < script->code + script->length;
-         pc += GetBytecodeLength(pc))
-    {
+    for (jsbytecode *pc = script->code(); pc < script->codeEnd(); pc += GetBytecodeLength(pc)) {
         PrintBytecode(cx, script, pc);
 
         if (js_CodeSpec[*pc].format & JOF_TYPESET) {

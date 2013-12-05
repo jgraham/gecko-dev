@@ -196,9 +196,7 @@ MemoryReportRequestParent::~MemoryReportRequestParent()
 class ContentParentsMemoryReporter MOZ_FINAL : public MemoryMultiReporter
 {
 public:
-    ContentParentsMemoryReporter()
-      : MemoryMultiReporter("content-parents")
-    {}
+    ContentParentsMemoryReporter() {}
 
     NS_IMETHOD CollectReports(nsIMemoryReporterCallback* cb,
                               nsISupports* aClosure);
@@ -627,6 +625,7 @@ ContentParent::Init()
         obs->AddObserver(this, "memory-pressure", false);
         obs->AddObserver(this, "child-gc-request", false);
         obs->AddObserver(this, "child-cc-request", false);
+        obs->AddObserver(this, "child-mmu-request", false);
         obs->AddObserver(this, "last-pb-context-exited", false);
         obs->AddObserver(this, "file-watcher-update", false);
 #ifdef MOZ_WIDGET_GONK
@@ -1008,6 +1007,7 @@ ContentParent::ActorDestroy(ActorDestroyReason why)
         obs->RemoveObserver(static_cast<nsIObserver*>(this), NS_IPC_IOSERVICE_SET_OFFLINE_TOPIC);
         obs->RemoveObserver(static_cast<nsIObserver*>(this), "child-gc-request");
         obs->RemoveObserver(static_cast<nsIObserver*>(this), "child-cc-request");
+        obs->RemoveObserver(static_cast<nsIObserver*>(this), "child-mmu-request");
         obs->RemoveObserver(static_cast<nsIObserver*>(this), "last-pb-context-exited");
         obs->RemoveObserver(static_cast<nsIObserver*>(this), "file-watcher-update");
 #ifdef MOZ_WIDGET_GONK
@@ -1837,6 +1837,9 @@ ContentParent::Observe(nsISupports* aSubject,
     else if (!strcmp(aTopic, "child-cc-request")){
         unused << SendCycleCollect();
     }
+    else if (!strcmp(aTopic, "child-mmu-request")){
+        unused << SendMinimizeMemoryUsage();
+    }
     else if (!strcmp(aTopic, "last-pb-context-exited")) {
         unused << SendLastPrivateDocShellDestroyed();
     }
@@ -1860,6 +1863,7 @@ ContentParent::Observe(nsISupports* aSubject,
         int32_t  mountGeneration;
         bool     isMediaPresent;
         bool     isSharing;
+        bool     isFormatting;
 
         vol->GetName(volName);
         vol->GetMountPoint(mountPoint);
@@ -1867,10 +1871,11 @@ ContentParent::Observe(nsISupports* aSubject,
         vol->GetMountGeneration(&mountGeneration);
         vol->GetIsMediaPresent(&isMediaPresent);
         vol->GetIsSharing(&isSharing);
+        vol->GetIsFormatting(&isFormatting);
 
         unused << SendFileSystemUpdate(volName, mountPoint, state,
                                        mountGeneration, isMediaPresent,
-                                       isSharing);
+                                       isSharing, isFormatting);
     } else if (!strcmp(aTopic, "phone-state-changed")) {
         nsString state(aData);
         unused << SendNotifyPhoneStateChange(state);
@@ -3102,6 +3107,33 @@ ContentParent::ShouldSandboxContentProcesses()
 #else
   return true;
 #endif
+}
+
+bool
+ContentParent::RecvRecordingDeviceEvents(const nsString& aRecordingStatus,
+                                         const nsString& aPageURL,
+                                         const bool& aIsAudio,
+                                         const bool& aIsVideo)
+{
+    nsCOMPtr<nsIObserverService> obs = mozilla::services::GetObserverService();
+    if (obs) {
+        // recording-device-ipc-events needs to gather more information from content process
+        nsRefPtr<nsHashPropertyBag> props = new nsHashPropertyBag();
+        props->SetPropertyAsUint64(NS_LITERAL_STRING("childID"), ChildID());
+        props->SetPropertyAsBool(NS_LITERAL_STRING("isApp"), IsForApp());
+        props->SetPropertyAsBool(NS_LITERAL_STRING("isAudio"), aIsAudio);
+        props->SetPropertyAsBool(NS_LITERAL_STRING("isVideo"), aIsVideo);
+
+        nsString requestURL = IsForApp() ? AppManifestURL() : aPageURL;
+        props->SetPropertyAsAString(NS_LITERAL_STRING("requestURL"), requestURL);
+
+        obs->NotifyObservers((nsIPropertyBag2*) props,
+                             "recording-device-ipc-events",
+                             aRecordingStatus.get());
+    } else {
+        NS_WARNING("Could not get the Observer service for ContentParent::RecvRecordingDeviceEvents.");
+    }
+    return true;
 }
 
 } // namespace dom

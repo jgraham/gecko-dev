@@ -881,6 +881,9 @@ public:
   nsRect GetRect() const { return mRect; }
   nsPoint GetPosition() const { return mRect.TopLeft(); }
   nsSize GetSize() const { return mRect.Size(); }
+  nsRect GetRectRelativeToSelf() const {
+    return nsRect(nsPoint(0, 0), mRect.Size());
+  }
 
   /**
    * When we change the size of the frame's border-box rect, we may need to
@@ -1068,6 +1071,7 @@ public:
   nsRect GetPaddingRectRelativeToSelf() const;
   nsRect GetContentRect() const;
   nsRect GetContentRectRelativeToSelf() const;
+  nsRect GetMarginRectRelativeToSelf() const;
 
   /**
    * The area to paint box-shadows around.  The default is the border rect.
@@ -3026,7 +3030,7 @@ NS_PTR_TO_INT32(frame->Properties().Get(nsIFrame::ParagraphDepthProperty()))
    * generated and which corresponds to the specified pseudo-element type,
    * or nullptr if there is no such anonymous content.
    */
-  virtual nsIContent* GetPseudoElementContent(nsCSSPseudoElements::Type aType);
+  virtual mozilla::dom::Element* GetPseudoElement(nsCSSPseudoElements::Type aType);
 
 protected:
   // Members
