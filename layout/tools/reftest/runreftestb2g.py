@@ -528,7 +528,7 @@ def run_remote_reftests(parser, options, args):
 
     auto.setProduct("b2g")
     auto.test_script = os.path.join(here, 'b2g_start_script.js')
-    auto.test_script_args = [True, options.remoteWebServer, options.httpPort]
+    auto.test_script_args = [options.remoteWebServer, options.httpPort]
     auto.logFinish = "REFTEST TEST-START | Shutdown"
 
     reftest = B2GRemoteReftest(auto, dm, options, here)
