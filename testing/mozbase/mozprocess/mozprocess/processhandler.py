@@ -108,7 +108,7 @@ class ProcessHandlerMixin(object):
             else:
                 subprocess.Popen.__del__(self)
 
-        def kill(self, sig=signal.SIGKILL):
+        def kill(self, sig=None):
             self.returncode = 0
             if mozinfo.isWin:
                 if not self._ignore_children and self._handle and self._job:
@@ -124,9 +124,8 @@ class ProcessHandlerMixin(object):
                     self._cleanup()
                     if err is not None:
                         raise OSError(err)
-                else:
-                    pass
             else:
+                sig = sig or signal.SIGKILL
                 if not self._ignore_children:
                     try:
                         os.killpg(self.pid, sig)
