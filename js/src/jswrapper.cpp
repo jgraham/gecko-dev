@@ -149,12 +149,10 @@ ErrorCopier::~ErrorCopier()
     JSContext *cx = ac.ref().context()->asJSContext();
     if (ac.ref().origin() != cx->compartment() && cx->isExceptionPending()) {
         RootedValue exc(cx, cx->getPendingException());
-        if (exc.isObject() && exc.toObject().is<ErrorObject>() &&
-            exc.toObject().as<ErrorObject>().getExnPrivate())
-        {
+        if (exc.isObject() && exc.toObject().is<ErrorObject>()) {
             cx->clearPendingException();
             ac.destroy();
-            Rooted<JSObject*> errObj(cx, &exc.toObject());
+            Rooted<ErrorObject*> errObj(cx, &exc.toObject().as<ErrorObject>());
             JSObject *copyobj = js_CopyErrorObject(cx, errObj, scope);
             if (copyobj)
                 cx->setPendingException(ObjectValue(*copyobj));
@@ -688,6 +686,25 @@ SecurityWrapper<Base>::defineProperty(JSContext *cx, HandleObject wrapper,
 
     return Base::defineProperty(cx, wrapper, id, desc);
 }
+
+template <class Base>
+bool
+SecurityWrapper<Base>::watch(JSContext *cx, HandleObject proxy,
+                             HandleId id, HandleObject callable)
+{
+    JS_ReportErrorNumber(cx, js_GetErrorMessage, nullptr, JSMSG_UNWRAP_DENIED);
+    return false;
+}
+
+template <class Base>
+bool
+SecurityWrapper<Base>::unwatch(JSContext *cx, HandleObject proxy,
+                               HandleId id)
+{
+    JS_ReportErrorNumber(cx, js_GetErrorMessage, nullptr, JSMSG_UNWRAP_DENIED);
+    return false;
+}
+
 
 template class js::SecurityWrapper<Wrapper>;
 template class js::SecurityWrapper<CrossCompartmentWrapper>;

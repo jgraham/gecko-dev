@@ -406,7 +406,7 @@ CodeGeneratorX86Shared::bailout(const T &binder, LSnapshot *snapshot)
     // We could not use a jump table, either because all bailout IDs were
     // reserved, or a jump table is not optimal for this frame size or
     // platform. Whatever, we will generate a lazy bailout.
-    OutOfLineBailout *ool = new OutOfLineBailout(snapshot);
+    OutOfLineBailout *ool = new(alloc()) OutOfLineBailout(snapshot);
     if (!addOutOfLineCode(ool))
         return false;
 
@@ -607,7 +607,7 @@ CodeGeneratorX86Shared::visitAddI(LAddI *ins)
 
     if (ins->snapshot()) {
         if (ins->recoversInput()) {
-            OutOfLineUndoALUOperation *ool = new OutOfLineUndoALUOperation(ins);
+            OutOfLineUndoALUOperation *ool = new(alloc()) OutOfLineUndoALUOperation(ins);
             if (!addOutOfLineCode(ool))
                 return false;
             masm.j(Assembler::Overflow, ool->entry());
@@ -629,7 +629,7 @@ CodeGeneratorX86Shared::visitSubI(LSubI *ins)
 
     if (ins->snapshot()) {
         if (ins->recoversInput()) {
-            OutOfLineUndoALUOperation *ool = new OutOfLineUndoALUOperation(ins);
+            OutOfLineUndoALUOperation *ool = new(alloc()) OutOfLineUndoALUOperation(ins);
             if (!addOutOfLineCode(ool))
                 return false;
             masm.j(Assembler::Overflow, ool->entry());
@@ -747,7 +747,7 @@ CodeGeneratorX86Shared::visitMulI(LMulI *ins)
 
         if (mul->canBeNegativeZero()) {
             // Jump to an OOL path if the result is 0.
-            MulNegativeZeroCheck *ool = new MulNegativeZeroCheck(ins);
+            MulNegativeZeroCheck *ool = new(alloc()) MulNegativeZeroCheck(ins);
             if (!addOutOfLineCode(ool))
                 return false;
 
@@ -801,7 +801,7 @@ CodeGeneratorX86Shared::visitUDivOrMod(LUDivOrMod *ins)
         masm.testl(rhs, rhs);
         if (ins->mir()->isTruncated()) {
             if (!ool)
-                ool = new ReturnZero(output);
+                ool = new(alloc()) ReturnZero(output);
             masm.j(Assembler::Zero, ool->entry());
         } else {
             if (!bailoutIf(Assembler::Zero, ins->snapshot()))
@@ -937,7 +937,7 @@ CodeGeneratorX86Shared::visitDivI(LDivI *ins)
         if (mir->isTruncated()) {
             // Truncated division by zero is zero (Infinity|0 == 0)
             if (!ool)
-                ool = new ReturnZero(output);
+                ool = new(alloc()) ReturnZero(output);
             masm.j(Assembler::Zero, ool->entry());
         } else {
             JS_ASSERT(mir->fallible());
@@ -1036,16 +1036,21 @@ CodeGeneratorX86Shared::visitModPowTwoI(LModPowTwoI *ins)
     Register lhs = ToRegister(ins->getOperand(0));
     int32_t shift = ins->shift();
 
-    Label negative, done;
-    // Switch based on sign of the lhs.
-    // Positive numbers are just a bitmask
-    masm.branchTest32(Assembler::Signed, lhs, lhs, &negative);
-    {
-        masm.andl(Imm32((1 << shift) - 1), lhs);
-        masm.jump(&done);
+    Label negative;
+
+    if (ins->mir()->canBeNegativeDividend()) {
+        // Switch based on sign of the lhs.
+        // Positive numbers are just a bitmask
+        masm.branchTest32(Assembler::Signed, lhs, lhs, &negative);
     }
-    // Negative numbers need a negate, bitmask, negate
-    {
+
+    masm.andl(Imm32((1 << shift) - 1), lhs);
+
+    if (ins->mir()->canBeNegativeDividend()) {
+        Label done;
+        masm.jump(&done);
+
+        // Negative numbers need a negate, bitmask, negate
         masm.bind(&negative);
         // visitModI has an overflow check here to catch INT_MIN % -1, but
         // here the rhs is a power of 2, and cannot be -1, so the check is not generated.
@@ -1054,8 +1059,8 @@ CodeGeneratorX86Shared::visitModPowTwoI(LModPowTwoI *ins)
         masm.negl(lhs);
         if (!ins->mir()->isTruncated() && !bailoutIf(Assembler::Zero, ins->snapshot()))
             return false;
+        masm.bind(&done);
     }
-    masm.bind(&done);
     return true;
 
 }
@@ -1122,7 +1127,7 @@ CodeGeneratorX86Shared::visitModI(LModI *ins)
         masm.testl(rhs, rhs);
         if (ins->mir()->isTruncated()) {
             if (!ool)
-                ool = new ReturnZero(edx);
+                ool = new(alloc()) ReturnZero(edx);
             masm.j(Assembler::Zero, ool->entry());
         } else {
             if (!bailoutIf(Assembler::Zero, ins->snapshot()))
@@ -1173,7 +1178,7 @@ CodeGeneratorX86Shared::visitModI(LModI *ins)
         // Prevent an integer overflow exception from -2147483648 % -1
         Label notmin;
         masm.cmpl(lhs, Imm32(INT32_MIN));
-        overflow = new ModOverflowCheck(ins, rhs);
+        overflow = new(alloc()) ModOverflowCheck(ins, rhs);
         masm.j(Assembler::Equal, overflow->entry());
         masm.bind(overflow->rejoin());
         masm.cdq();
@@ -1404,7 +1409,7 @@ CodeGeneratorX86Shared::emitTableSwitchDispatch(MTableSwitch *mir, const Registe
     // To fill in the CodeLabels for the case entries, we need to first
     // generate the case entries (we don't yet know their offsets in the
     // instruction stream).
-    OutOfLineTableSwitch *ool = new OutOfLineTableSwitch(mir);
+    OutOfLineTableSwitch *ool = new(alloc()) OutOfLineTableSwitch(mir);
     if (!addOutOfLineCode(ool))
         return false;
 
@@ -1766,7 +1771,7 @@ CodeGeneratorX86Shared::generateInvalidateEpilogue()
 
     // We should never reach this point in JIT code -- the invalidation thunk should
     // pop the invalidated JS frame and return directly to its caller.
-    masm.breakpoint();
+    masm.assume_unreachable("Should have returned directly to its caller instead of here.");
     return true;
 }
 

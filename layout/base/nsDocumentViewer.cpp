@@ -33,6 +33,9 @@
 #include "nsIDOMHTMLElement.h"
 #include "nsContentUtils.h"
 #include "nsLayoutStylesheetCache.h"
+#ifdef ACCESSIBILITY
+#include "mozilla/a11y/DocAccessible.h"
+#endif
 #include "mozilla/BasicEvents.h"
 #include "mozilla/Preferences.h"
 #include "mozilla/dom/EncodingUtils.h"
@@ -996,6 +999,16 @@ nsDocumentViewer::LoadComplete(nsresult aStatus)
       if (timing) {
         timing->NotifyLoadEventStart();
       }
+
+      // Dispatch observer notification to notify observers document load is complete.
+      nsCOMPtr<nsIObserverService> os = mozilla::services::GetObserverService();
+      nsIPrincipal *principal = d->NodePrincipal();
+      os->NotifyObservers(d,
+                          nsContentUtils::IsSystemPrincipal(principal) ?
+                          "chrome-document-loaded" :
+                          "content-document-loaded",
+                          nullptr);
+
       nsEventDispatcher::Dispatch(window, mPresContext, &event, nullptr,
                                   &status);
       if (timing) {
@@ -1554,6 +1567,16 @@ nsDocumentViewer::Destroy()
     // and shEntry has no window state at this point we'll be ok; we just won't
     // cache ourselves.
     shEntry->SyncPresentationState();
+
+    // Shut down accessibility for the document before we start to tear it down.
+#ifdef ACCESSIBILITY
+    if (mPresShell) {
+      a11y::DocAccessible* docAcc = mPresShell->GetDocAccessible();
+      if (docAcc) {
+        docAcc->Shutdown();
+      }
+    }
+#endif
 
     // Break the link from the document/presentation to the docshell, so that
     // link traversals cannot affect the currently-loaded document.
