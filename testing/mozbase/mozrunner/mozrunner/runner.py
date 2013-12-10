@@ -105,7 +105,7 @@ class Runner(object):
         return self.process_handler is not None
 
 
-    def stop(self, sig=signal.SIGKILL):
+    def stop(self, sig=None):
         """
         Kill the process
 
