@@ -8,7 +8,6 @@ Runs the reftest test harness.
 
 from optparse import OptionParser
 import json
-import mozprofile
 import os
 import re
 import shutil
@@ -24,6 +23,8 @@ from automationutils import (
         isURL,
         processLeakLog
 )
+
+import mozprofile
 
 class RefTest(object):
 
