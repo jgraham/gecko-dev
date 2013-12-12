@@ -2504,11 +2504,11 @@ void
 nsEventStateManager::DoScrollZoom(nsIFrame *aTargetFrame,
                                   int32_t adjustment)
 {
-  // Exclude form controls and XUL content.
+  // Exclude form controls and content in chrome docshells.
   nsIContent *content = aTargetFrame->GetContent();
   if (content &&
       !content->IsNodeOfType(nsINode::eHTML_FORM_CONTROL) &&
-      !content->OwnerDoc()->IsXUL())
+      !nsContentUtils::IsInChromeDocshell(content->OwnerDoc()))
     {
       // positive adjustment to decrease zoom, negative to increase
       int32_t change = (adjustment > 0) ? -1 : 1;
@@ -5511,14 +5511,13 @@ nsEventStateManager::WheelPrefs::Shutdown()
 }
 
 // static
-int
+void
 nsEventStateManager::WheelPrefs::OnPrefChanged(const char* aPrefName,
                                                void* aClosure)
 {
   // forget all prefs, it's not problem for performance.
   sInstance->Reset();
   DeltaAccumulator::GetInstance()->Reset();
-  return 0;
 }
 
 nsEventStateManager::WheelPrefs::WheelPrefs()
@@ -5800,14 +5799,13 @@ nsEventStateManager::Prefs::Init()
 }
 
 // static
-int
+void
 nsEventStateManager::Prefs::OnChange(const char* aPrefName, void*)
 {
   nsDependentCString prefName(aPrefName);
   if (prefName.EqualsLiteral("dom.popup_allowed_events")) {
     nsDOMEvent::PopupAllowedEventsChanged();
   }
-  return 0;
 }
 
 // static

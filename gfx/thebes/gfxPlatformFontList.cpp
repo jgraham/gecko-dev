@@ -31,6 +31,11 @@ using namespace mozilla;
 #define LOG_FONTLIST_ENABLED() PR_LOG_TEST( \
                                    gfxPlatform::GetLog(eGfxLog_fontlist), \
                                    PR_LOG_DEBUG)
+#define LOG_FONTINIT(args) PR_LOG(gfxPlatform::GetLog(eGfxLog_fontinit), \
+                               PR_LOG_DEBUG, args)
+#define LOG_FONTINIT_ENABLED() PR_LOG_TEST( \
+                                   gfxPlatform::GetLog(eGfxLog_fontinit), \
+                                   PR_LOG_DEBUG)
 
 #endif // PR_LOGGING
 
@@ -179,10 +184,21 @@ void
 gfxPlatformFontList::InitOtherFamilyNames()
 {
     mOtherFamilyNamesInitialized = true;
+    TimeStamp start = TimeStamp::Now();
 
-    Telemetry::AutoTimer<Telemetry::FONTLIST_INITOTHERFAMILYNAMES> timer;
     // iterate over all font families and read in other family names
     mFontFamilies.Enumerate(gfxPlatformFontList::InitOtherFamilyNamesProc, this);
+
+    TimeStamp end = TimeStamp::Now();
+    Telemetry::AccumulateTimeDelta(Telemetry::FONTLIST_INITOTHERFAMILYNAMES,
+                                   start, end);
+#ifdef PR_LOGGING
+    if (LOG_FONTINIT_ENABLED()) {
+        TimeDuration elapsed = end - start;
+        LOG_FONTINIT(("(fontinit) InitOtherFamilyNames took %8.2f ms",
+                      elapsed.ToMilliseconds()));
+    }
+#endif
 }
                                                          
 PLDHashOperator
@@ -200,9 +216,21 @@ gfxPlatformFontList::InitFaceNameLists()
 {
     mFaceNamesInitialized = true;
 
+    TimeStamp start = TimeStamp::Now();
+
     // iterate over all font families and read in other family names
-    Telemetry::AutoTimer<Telemetry::FONTLIST_INITFACENAMELISTS> timer;
     mFontFamilies.Enumerate(gfxPlatformFontList::InitFaceNameListsProc, this);
+
+    TimeStamp end = TimeStamp::Now();
+    Telemetry::AccumulateTimeDelta(Telemetry::FONTLIST_INITFACENAMELISTS,
+                                   start, end);
+#ifdef PR_LOGGING
+    if (LOG_FONTINIT_ENABLED()) {
+        TimeDuration elapsed = end - start;
+        LOG_FONTINIT(("(fontinit) InitFaceNameLists took %8.2f ms",
+                      elapsed.ToMilliseconds()));
+    }
+#endif
 }
 
 PLDHashOperator

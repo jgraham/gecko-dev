@@ -100,7 +100,7 @@ pref("dom.workers.enabled", true);
 pref("dom.workers.maxPerDomain", 20);
 
 // Whether or not Shared Web Workers are enabled.
-pref("dom.workers.sharedWorkers.enabled", false);
+pref("dom.workers.sharedWorkers.enabled", true);
 
 // Whether nonzero values can be returned from performance.timing.*
 pref("dom.enable_performance", true);
@@ -1983,6 +1983,13 @@ pref("layout.css.unset-value.enabled", true);
 
 // Is support for the "all" shorthand enabled?
 pref("layout.css.all-shorthand.enabled", true);
+
+// Is support for CSS variables enabled?
+#ifdef RELEASE_BUILD
+pref("layout.css.variables.enabled", false);
+#else
+pref("layout.css.variables.enabled", true);
+#endif
 
 // pref for which side vertical scrollbars should be on
 // 0 = end-side in UI direction

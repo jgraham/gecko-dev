@@ -567,6 +567,24 @@ public:
     }
   }
 
+  virtual void HandleLongTapUp(const CSSIntPoint& aPoint,
+                             int32_t aModifiers) MOZ_OVERRIDE
+  {
+    if (MessageLoop::current() != mUILoop) {
+      // We have to send this message from the "UI thread" (main
+      // thread).
+      mUILoop->PostTask(
+        FROM_HERE,
+        NewRunnableMethod(this, &RemoteContentController::HandleLongTapUp,
+                          aPoint, aModifiers));
+      return;
+    }
+    if (mRenderFrame) {
+      TabParent* browser = static_cast<TabParent*>(mRenderFrame->Manager());
+      browser->HandleLongTapUp(aPoint, aModifiers);
+    }
+  }
+
   void ClearRenderFrame() { mRenderFrame = nullptr; }
 
   virtual void SendAsyncScrollDOMEvent(bool aIsRoot,
@@ -613,6 +631,36 @@ public:
       *aOutMaxZoom = mMaxZoom;
     }
     return mHaveZoomConstraints;
+  }
+
+  virtual void NotifyTransformBegin(const ScrollableLayerGuid& aGuid)
+  {
+    if (MessageLoop::current() != mUILoop) {
+      mUILoop->PostTask(
+        FROM_HERE,
+        NewRunnableMethod(this, &RemoteContentController::NotifyTransformBegin,
+                          aGuid));
+      return;
+    }
+    if (mRenderFrame) {
+      TabParent* browser = static_cast<TabParent*>(mRenderFrame->Manager());
+      browser->NotifyTransformBegin(aGuid.mScrollId);
+    }
+  }
+
+  virtual void NotifyTransformEnd(const ScrollableLayerGuid& aGuid)
+  {
+    if (MessageLoop::current() != mUILoop) {
+      mUILoop->PostTask(
+        FROM_HERE,
+        NewRunnableMethod(this, &RemoteContentController::NotifyTransformEnd,
+                          aGuid));
+      return;
+    }
+    if (mRenderFrame) {
+      TabParent* browser = static_cast<TabParent*>(mRenderFrame->Manager());
+      browser->NotifyTransformEnd(aGuid.mScrollId);
+    }
   }
 
 private:

@@ -175,6 +175,7 @@ Layer::Layer(LayerManager* aManager, void* aImplData) :
   mIsFixedPosition(false),
   mMargins(0, 0, 0, 0),
   mStickyPositionData(nullptr),
+  mIsScrollbar(false),
   mDebugColorIndex(0),
   mAnimationGeneration(0)
 {}
@@ -213,7 +214,7 @@ Layer::ClearAnimations()
   Mutated();
 }
 
-static nsCSSValueList*
+static nsCSSValueSharedList*
 CreateCSSValueList(const InfallibleTArray<TransformFunction>& aFunctions)
 {
   nsAutoPtr<nsCSSValueList> result;
@@ -336,7 +337,7 @@ CreateCSSValueList(const InfallibleTArray<TransformFunction>& aFunctions)
     result = new nsCSSValueList();
     result->mValue.SetNoneValue();
   }
-  return result.forget();
+  return new nsCSSValueSharedList(result.forget());
 }
 
 void
@@ -384,13 +385,11 @@ Layer::SetAnimations(const AnimationArray& aAnimations)
       if (segment.endState().type() == Animatable::TArrayOfTransformFunction) {
         const InfallibleTArray<TransformFunction>& startFunctions =
           segment.startState().get_ArrayOfTransformFunction();
-        startValue->SetAndAdoptCSSValueListValue(CreateCSSValueList(startFunctions),
-                                                 nsStyleAnimation::eUnit_Transform);
+        startValue->SetTransformValue(CreateCSSValueList(startFunctions));
 
         const InfallibleTArray<TransformFunction>& endFunctions =
           segment.endState().get_ArrayOfTransformFunction();
-        endValue->SetAndAdoptCSSValueListValue(CreateCSSValueList(endFunctions),
-                                               nsStyleAnimation::eUnit_Transform);
+        endValue->SetTransformValue(CreateCSSValueList(endFunctions));
       } else {
         NS_ASSERTION(segment.endState().type() == Animatable::Tfloat,
                      "Unknown Animatable type");
@@ -1268,6 +1267,13 @@ Layer::PrintInfo(nsACString& aTo, const char* aPrefix)
   }
   if (GetContentFlags() & CONTENT_COMPONENT_ALPHA) {
     aTo += " [componentAlpha]";
+  }
+  if (GetIsScrollbar()) {
+    if (GetScrollbarDirection() == VERTICAL) {
+      aTo.AppendPrintf(" [vscrollbar=%lld]", GetScrollbarTargetContainerId());
+    } else {
+      aTo.AppendPrintf(" [hscrollbar=%lld]", GetScrollbarTargetContainerId());
+    }
   }
   if (GetIsFixedPosition()) {
     aTo.AppendPrintf(" [isFixedPosition anchor=%f,%f]", mAnchor.x, mAnchor.y);

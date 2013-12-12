@@ -3966,7 +3966,7 @@ JS_CloneFunctionObject(JSContext *cx, JSObject *funobjArg, JSObject *parentArg)
             return nullptr;
     }
     if (fun->isInterpreted() && (fun->nonLazyScript()->enclosingStaticScope() ||
-        (fun->nonLazyScript()->compileAndGo && !parent->is<GlobalObject>())))
+        (fun->nonLazyScript()->compileAndGo() && !parent->is<GlobalObject>())))
     {
         JS_ReportErrorNumber(cx, js_GetErrorMessage, nullptr, JSMSG_BAD_CLONE_FUNOBJ_SCOPE);
         return nullptr;
@@ -4570,7 +4570,7 @@ JS_BufferIsCompilableUnit(JSContext *cx, JSObject *objArg, const char *utf8, siz
 JS_PUBLIC_API(JSObject *)
 JS_GetGlobalFromScript(JSScript *script)
 {
-    JS_ASSERT(!script->isCachedEval);
+    JS_ASSERT(!script->isCachedEval());
     return &script->global();
 }
 
@@ -6079,11 +6079,43 @@ JS_DescribeScriptedCaller(JSContext *cx, MutableHandleScript script, unsigned *l
     if (i.done())
         return false;
 
+    // If the caller is hidden, the embedding wants us to return null here so
+    // that it can check its own stack.
+    if (i.activation()->scriptedCallerIsHidden())
+        return false;
+
     script.set(i.script());
     if (lineno)
         *lineno = js::PCToLineNumber(i.script(), i.pc());
     return true;
 }
+
+namespace JS {
+
+JS_PUBLIC_API(void)
+HideScriptedCaller(JSContext *cx)
+{
+    MOZ_ASSERT(cx);
+
+    // If there's no accessible activation on the stack, we'll return null from
+    // JS_DescribeScriptedCaller anyway, so there's no need to annotate
+    // anything.
+    Activation *act = cx->runtime()->mainThread.activation();
+    if (!act)
+        return;
+    act->hideScriptedCaller();
+}
+
+JS_PUBLIC_API(void)
+UnhideScriptedCaller(JSContext *cx)
+{
+    Activation *act = cx->runtime()->mainThread.activation();
+    if (!act)
+        return;
+    act->unhideScriptedCaller();
+}
+
+} /* namespace JS */
 
 #ifdef JS_THREADSAFE
 static PRStatus

@@ -35,7 +35,7 @@ endif
 # responsibility between Makefile.in and mozbuild files.
 _MOZBUILD_EXTERNAL_VARIABLES := \
   ANDROID_GENERATED_RESFILES \
-  ANDROID_RESFILES \
+  ANDROID_RES_DIRS \
   CMSRCS \
   CMMSRCS \
   CPP_UNIT_TESTS \
@@ -70,6 +70,7 @@ _MOZBUILD_EXTERNAL_VARIABLES := \
   $(NULL)
 
 _DEPRECATED_VARIABLES := \
+  ANDROID_RESFILES \
   MOCHITEST_FILES_PARTS \
   MOCHITEST_BROWSER_FILES_PARTS \
   SHORT_LIBNAME \
@@ -440,10 +441,6 @@ ifdef USE_EXTENSION_MANIFEST
 MAKE_JARS_FLAGS += -e
 endif
 
-ifdef BOTH_MANIFESTS
-MAKE_JARS_FLAGS += --both-manifests
-endif
-
 TAR_CREATE_FLAGS = -chf
 
 ifeq ($(OS_ARCH),OS2)
@@ -466,7 +463,7 @@ JAVA_GEN_DIR  = _javagen
 JAVA_DIST_DIR = $(DEPTH)/$(JAVA_GEN_DIR)
 JAVA_IFACES_PKG_NAME = org/mozilla/interfaces
 
-OS_INCLUDES += $(MOZ_JPEG_CFLAGS) $(MOZ_PNG_CFLAGS) $(MOZ_ZLIB_CFLAGS)
+OS_INCLUDES += $(MOZ_JPEG_CFLAGS) $(MOZ_PNG_CFLAGS) $(MOZ_ZLIB_CFLAGS) $(MOZ_PIXMAN_CFLAGS)
 
 # NSPR_CFLAGS and NSS_CFLAGS must appear ahead of OS_INCLUDES to avoid Linux
 # builds wrongly picking up system NSPR/NSS header files.

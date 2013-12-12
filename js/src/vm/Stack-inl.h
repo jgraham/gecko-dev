@@ -137,7 +137,7 @@ template <class Op>
 inline void
 StackFrame::forEachUnaliasedActual(Op op)
 {
-    JS_ASSERT(!script()->funHasAnyAliasedFormal);
+    JS_ASSERT(!script()->funHasAnyAliasedFormal());
     JS_ASSERT(!script()->needsArgsObj());
 
     const Value *argsEnd = argv() + numActualArgs();
@@ -833,6 +833,7 @@ Activation::Activation(JSContext *cx, Kind kind)
     compartment_(cx->compartment()),
     prev_(cx->mainThread().activation_),
     savedFrameChain_(0),
+    hideScriptedCallerCount_(0),
     kind_(kind)
 {
     cx->mainThread().activation_ = this;
@@ -841,6 +842,7 @@ Activation::Activation(JSContext *cx, Kind kind)
 Activation::~Activation()
 {
     JS_ASSERT(cx_->mainThread().activation_ == this);
+    JS_ASSERT(hideScriptedCallerCount_ == 0);
     cx_->mainThread().activation_ = prev_;
 }
 
@@ -860,7 +862,7 @@ InterpreterActivation::InterpreterActivation(RunState &state, JSContext *cx, Sta
         regs_ = state.asGenerator()->gen()->regs;
     }
 
-    JS_ASSERT_IF(entryFrame_->isEvalFrame(), state_.script()->isActiveEval);
+    JS_ASSERT_IF(entryFrame_->isEvalFrame(), state_.script()->isActiveEval());
 }
 
 InterpreterActivation::~InterpreterActivation()

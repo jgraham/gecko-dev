@@ -9,6 +9,7 @@ import logging
 import os
 import traceback
 import sys
+import time
 
 from mach.mixin.logging import LoggingMixin
 
@@ -63,7 +64,7 @@ class TreeMetadataEmitter(LoggingMixin):
         self.config = config
 
         # TODO add mozinfo into config or somewhere else.
-        mozinfo_path = os.path.join(config.topobjdir, 'mozinfo.json')
+        mozinfo_path = mozpath.join(config.topobjdir, 'mozinfo.json')
         if os.path.exists(mozinfo_path):
             self.mozinfo = json.load(open(mozinfo_path, 'rt'))
         else:
@@ -79,26 +80,44 @@ class TreeMetadataEmitter(LoggingMixin):
         typically fed into this function.
         """
         file_count = 0
-        execution_time = 0.0
+        sandbox_execution_time = 0.0
+        emitter_time = 0.0
         sandboxes = {}
+
+        def emit_objs(objs):
+            for o in objs:
+                yield o
+                if not o._ack:
+                    raise Exception('Unhandled object of type %s' % type(o))
 
         for out in output:
             if isinstance(out, MozbuildSandbox):
                 # Keep all sandboxes around, we will need them later.
                 sandboxes[out['OBJDIR']] = out
 
-                for o in self.emit_from_sandbox(out):
-                    yield o
-                    if not o._ack:
-                        raise Exception('Unhandled object of type %s' % type(o))
+                start = time.time()
+                # We need to expand the generator for the timings to work.
+                objs = list(self.emit_from_sandbox(out))
+                emitter_time += time.time() - start
+
+                for o in emit_objs(objs): yield o
 
                 # Update the stats.
                 file_count += len(out.all_paths)
-                execution_time += out.execution_time
+                sandbox_execution_time += out.execution_time
 
             else:
                 raise Exception('Unhandled output type: %s' % out)
 
+        start = time.time()
+        objs = list(self._emit_libs_derived(sandboxes))
+        emitter_time += time.time() - start
+
+        for o in emit_objs(objs): yield o
+
+        yield ReaderSummary(file_count, sandbox_execution_time, emitter_time)
+
+    def _emit_libs_derived(self, sandboxes):
         for objdir, libname, final_lib in self._final_libs:
             if final_lib not in self._libs:
                 raise Exception('FINAL_LIBRARY in %s (%s) does not match any '
@@ -133,8 +152,6 @@ class TreeMetadataEmitter(LoggingMixin):
                         passthru.variables['FINAL_LIBRARY'] = basename
                         yield passthru
                 yield libdef
-
-        yield ReaderSummary(file_count, execution_time)
 
     def emit_from_sandbox(self, sandbox):
         """Convert a MozbuildSandbox to tree metadata objects.
@@ -174,7 +191,7 @@ class TreeMetadataEmitter(LoggingMixin):
 
         for symbol in ('SOURCES', 'HOST_SOURCES', 'UNIFIED_SOURCES'):
             for src in (sandbox[symbol] or []):
-                if not os.path.exists(os.path.join(sandbox['SRCDIR'], src)):
+                if not os.path.exists(mozpath.join(sandbox['SRCDIR'], src)):
                     raise SandboxValidationError('Reference to a file that '
                         'doesn\'t exist in %s (%s) in %s'
                         % (symbol, src, sandbox['RELATIVEDIR']))
@@ -189,7 +206,7 @@ class TreeMetadataEmitter(LoggingMixin):
         varmap = dict(
             # Makefile.in : moz.build
             ANDROID_GENERATED_RESFILES='ANDROID_GENERATED_RESFILES',
-            ANDROID_RESFILES='ANDROID_RESFILES',
+            ANDROID_RES_DIRS='ANDROID_RES_DIRS',
             CPP_UNIT_TESTS='CPP_UNIT_TESTS',
             EXPORT_LIBRARY='EXPORT_LIBRARY',
             EXTRA_COMPONENTS='EXTRA_COMPONENTS',
@@ -247,7 +264,7 @@ class TreeMetadataEmitter(LoggingMixin):
                            if k in ('SOURCES', 'UNIFIED_SOURCES')))
         for variable, mapping in varmap.items():
             for f in sandbox[variable]:
-                ext = os.path.splitext(f)[1]
+                ext = mozpath.splitext(f)[1]
                 if ext not in mapping:
                     raise SandboxValidationError('%s has an unknown file type in %s' % (f, sandbox['RELATIVEDIR']))
                 l = passthru.variables.setdefault(mapping[ext], [])
@@ -369,8 +386,8 @@ class TreeMetadataEmitter(LoggingMixin):
             path = path[1:]
 
         sub = cls(sandbox)
-        sub.input_path = os.path.join(sandbox['SRCDIR'], '%s.in' % path)
-        sub.output_path = os.path.join(sandbox['OBJDIR'], path)
+        sub.input_path = mozpath.join(sandbox['SRCDIR'], '%s.in' % path)
+        sub.output_path = mozpath.join(sandbox['OBJDIR'], path)
         sub.relpath = path
 
         return sub
@@ -378,7 +395,7 @@ class TreeMetadataEmitter(LoggingMixin):
     def _process_test_manifest(self, sandbox, info, manifest_path):
         flavor, install_prefix, filter_inactive = info
 
-        manifest_path = os.path.normpath(manifest_path)
+        manifest_path = mozpath.normpath(manifest_path)
         path = mozpath.normpath(mozpath.join(sandbox['SRCDIR'], manifest_path))
         manifest_dir = mozpath.dirname(path)
         manifest_reldir = mozpath.dirname(mozpath.relpath(path,
@@ -441,7 +458,7 @@ class TreeMetadataEmitter(LoggingMixin):
                             obj.installs[full] = mozpath.join(out_dir, pattern)
 
             # We also copy the manifest into the output directory.
-            out_path = mozpath.join(out_dir, os.path.basename(manifest_path))
+            out_path = mozpath.join(out_dir, mozpath.basename(manifest_path))
             obj.installs[path] = out_path
 
             # Some manifests reference files that are auto generated as

@@ -79,6 +79,9 @@ XPCOMUtils.defineLazyModuleGetter(this, "OS",
 XPCOMUtils.defineLazyModuleGetter(this, "SessionStore",
                                   "resource:///modules/sessionstore/SessionStore.jsm");
 
+XPCOMUtils.defineLazyModuleGetter(this, "BrowserUITelemetry",
+                                  "resource:///modules/BrowserUITelemetry.jsm");
+
 const PREF_PLUGINS_NOTIFYUSER = "plugins.update.notifyUser";
 const PREF_PLUGINS_UPDATEURL  = "plugins.update.url";
 
@@ -476,6 +479,7 @@ BrowserGlue.prototype = {
     webrtcUI.init();
     AboutHome.init();
     SessionStore.init();
+    BrowserUITelemetry.init();
 
     if (Services.prefs.getBoolPref("browser.tabs.remote"))
       ContentClick.init();
@@ -1591,7 +1595,7 @@ BrowserGlue.prototype = {
     // be set to the version it has been added in, we will compare its value
     // to users' smartBookmarksVersion and add new smart bookmarks without
     // recreating old deleted ones.
-    const SMART_BOOKMARKS_VERSION = 5;
+    const SMART_BOOKMARKS_VERSION = 6;
     const SMART_BOOKMARKS_ANNO = "Places/SmartBookmark";
     const SMART_BOOKMARKS_PREF = "browser.places.smartBookmarksVersion";
 
@@ -1653,7 +1657,10 @@ BrowserGlue.prototype = {
             position: menuIndex++,
             newInVersion: 1
           },
-          Windows8Touch: {
+        };
+
+        if (Services.sysinfo.getProperty("hasWindowsTouchInterface")) {
+          smartBookmarks.Windows8Touch = {
             title: bundle.GetStringFromName("windows8TouchTitle"),
             uri: NetUtil.newURI("place:folder=" +
                                 PlacesUtils.annotations.getItemsWithAnnotation('metro/bookmarksRoot', {})[0] +
@@ -1665,9 +1672,9 @@ BrowserGlue.prototype = {
                                 "&excludeQueries=1"),
             parent: PlacesUtils.bookmarksMenuFolderId,
             position: menuIndex++,
-            newInVersion: 5
-          },
-        };
+            newInVersion: 6
+          };
+        }
 
         // Set current itemId, parent and position if Smart Bookmark exists,
         // we will use these informations to create the new version at the same

@@ -248,11 +248,6 @@ inline JSObject* GetWNExpandoChain(JSObject *obj)
     return JS_GetReservedSlot(obj, WN_XRAYEXPANDOCHAIN_SLOT).toObjectOrNull();
 }
 
-// We PROMISE to never screw this up.
-#ifdef _MSC_VER
-#pragma warning(disable : 4355) // OK to pass "this" in member initializer
-#endif
-
 /***************************************************************************
 ****************************************************************************
 *
@@ -1142,11 +1137,23 @@ public:
     void
     DebugDump(int16_t depth);
 
-    static size_t
-    SizeOfAllScopesIncludingThis(mozilla::MallocSizeOf mallocSizeOf);
+    struct ScopeSizeInfo {
+        ScopeSizeInfo(mozilla::MallocSizeOf mallocSizeOf)
+            : mMallocSizeOf(mallocSizeOf),
+              mScopeAndMapSize(0),
+              mProtoAndIfaceCacheSize(0)
+        {}
 
-    size_t
-    SizeOfIncludingThis(mozilla::MallocSizeOf mallocSizeOf);
+        mozilla::MallocSizeOf mMallocSizeOf;
+        size_t mScopeAndMapSize;
+        size_t mProtoAndIfaceCacheSize;
+    };
+
+    static void
+    AddSizeOfAllScopesIncludingThis(ScopeSizeInfo* scopeSizeInfo);
+
+    void
+    AddSizeOfIncludingThis(ScopeSizeInfo* scopeSizeInfo);
 
     bool
     IsValid() const {return mRuntime != nullptr;}
@@ -2502,6 +2509,7 @@ public:
     nsXPCWrappedJS* Find(REFNSIID aIID);
     nsXPCWrappedJS* FindInherited(REFNSIID aIID);
 
+    bool IsRootWrapper() const {return mRoot == this;}
     bool IsValid() const {return mJSObj != nullptr;}
     void SystemIsBeingShutDown();
 

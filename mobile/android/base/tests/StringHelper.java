@@ -52,13 +52,6 @@ public class StringHelper {
         "Add to Home Screen"
     };
 
-    public static final String[] CONTEXT_MENU_ITEMS_IN_URL_BAR = new String[] {
-        "Share",
-        "Copy Address",
-        "Edit Site Settings",
-        "Add to Home Screen"
-    };
-
     public static final String TITLE_PLACE_HOLDER = "Enter Search or Address";
 
     // Robocop page urls
@@ -115,7 +108,7 @@ public class StringHelper {
     // Privacy
     public static final String TRACKING_LABEL = "Tracking";
     public static final String COOKIES_LABEL = "Cookies";
-    public static final String REMEMBER_PASSWORDS_LABEL = "Remeber passwords";
+    public static final String REMEMBER_PASSWORDS_LABEL = "Remember passwords";
     public static final String MASTER_PASWSWORD_LABEL = "Use master password";
     public static final String CLEAR_PRIVATE_DATA_LABEL = "Clear private data";
 

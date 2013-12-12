@@ -521,6 +521,27 @@ void TabParent::HandleLongTap(const CSSIntPoint& aPoint, int32_t aModifiers)
   }
 }
 
+void TabParent::HandleLongTapUp(const CSSIntPoint& aPoint, int32_t aModifiers)
+{
+  if (!mIsDestroyed) {
+    unused << SendHandleLongTapUp(aPoint);
+  }
+}
+
+void TabParent::NotifyTransformBegin(ViewID aViewId)
+{
+  if (!mIsDestroyed) {
+    unused << SendNotifyTransformBegin(aViewId);
+  }
+}
+
+void TabParent::NotifyTransformEnd(ViewID aViewId)
+{
+  if (!mIsDestroyed) {
+    unused << SendNotifyTransformEnd(aViewId);
+  }
+}
+
 void
 TabParent::Activate()
 {
@@ -697,6 +718,15 @@ bool TabParent::SendHandleLongTap(const CSSIntPoint& aPoint)
   }
 
   return PBrowserParent::SendHandleLongTap(AdjustTapToChildWidget(aPoint));
+}
+
+bool TabParent::SendHandleLongTapUp(const CSSIntPoint& aPoint)
+{
+  if (mIsDestroyed) {
+    return false;
+  }
+
+  return PBrowserParent::SendHandleLongTapUp(AdjustTapToChildWidget(aPoint));
 }
 
 bool TabParent::SendHandleDoubleTap(const CSSIntPoint& aPoint)
