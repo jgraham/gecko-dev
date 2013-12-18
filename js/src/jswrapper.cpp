@@ -48,7 +48,7 @@ Wrapper::New(JSContext *cx, JSObject *obj, JSObject *parent, Wrapper *handler)
     RootedValue priv(cx, ObjectValue(*obj));
     ProxyOptions options;
     options.setCallable(obj->isCallable());
-    return NewProxyObject(cx, handler, priv, Proxy::LazyProto, parent, options);
+    return NewProxyObject(cx, handler, priv, TaggedProto::LazyProto, parent, options);
 }
 
 JSObject *
@@ -141,7 +141,7 @@ js::TransparentObjectWrapper(JSContext *cx, HandleObject existing, HandleObject 
 {
     // Allow wrapping outer window proxies.
     JS_ASSERT(!obj->is<WrapperObject>() || obj->getClass()->ext.innerObject);
-    JS_ASSERT(wrappedProto == Proxy::LazyProto);
+    JS_ASSERT(wrappedProto == TaggedProto::LazyProto);
     return Wrapper::New(cx, obj, parent, &CrossCompartmentWrapper::singleton);
 }
 
@@ -149,8 +149,8 @@ ErrorCopier::~ErrorCopier()
 {
     JSContext *cx = ac.ref().context()->asJSContext();
     if (ac.ref().origin() != cx->compartment() && cx->isExceptionPending()) {
-        RootedValue exc(cx, cx->getPendingException());
-        if (exc.isObject() && exc.toObject().is<ErrorObject>()) {
+        RootedValue exc(cx);
+        if (cx->getPendingException(&exc) && exc.isObject() && exc.toObject().is<ErrorObject>()) {
             cx->clearPendingException();
             ac.destroy();
             Rooted<ErrorObject*> errObj(cx, &exc.toObject().as<ErrorObject>());

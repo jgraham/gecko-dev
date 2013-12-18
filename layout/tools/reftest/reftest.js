@@ -1880,7 +1880,7 @@ function RegisterMessageListenersAndLoadContentScript()
         function (m) { SetAsyncScroll(true); }
     );
 
-    gBrowserMessageManager.loadFrameScript("chrome://reftest/content/reftest-content.js", true);
+    gBrowserMessageManager.loadFrameScript("chrome://reftest/content/reftest-content.js", true, true);
 }
 
 function SetAsyncScroll(enabled)

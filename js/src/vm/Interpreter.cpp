@@ -993,6 +993,7 @@ HandleError(JSContext *cx, FrameRegs &regs)
             }
         }
 
+        RootedValue exception(cx);
         for (TryNoteIter tni(cx, regs); !tni.done(); ++tni) {
             JSTryNote *tn = *tni;
 
@@ -1009,14 +1010,10 @@ HandleError(JSContext *cx, FrameRegs &regs)
             switch (tn->kind) {
               case JSTRY_CATCH:
                 /* Catch cannot intercept the closing of a generator. */
-                if (JS_UNLIKELY(cx->getPendingException().isMagic(JS_GENERATOR_CLOSING)))
+                if (!cx->getPendingException(&exception))
+                    return ErrorReturnContinuation;
+                if (exception.isMagic(JS_GENERATOR_CLOSING))
                     break;
-
-                /*
-                 * Don't clear exceptions to save cx->exception from GC
-                 * until it is pushed to the stack via [exception] in the
-                 * catch block.
-                 */
                 return CatchContinuation;
 
               case JSTRY_FINALLY:
@@ -1042,11 +1039,16 @@ HandleError(JSContext *cx, FrameRegs &regs)
          * Propagate the exception or error to the caller unless the exception
          * is an asynchronous return from a generator.
          */
-        if (JS_UNLIKELY(cx->isExceptionPending() &&
-                        cx->getPendingException().isMagic(JS_GENERATOR_CLOSING))) {
-            cx->clearPendingException();
-            ok = true;
-            regs.fp()->clearReturnValue();
+        if (cx->isExceptionPending()) {
+            RootedValue exception(cx);
+            if (!cx->getPendingException(&exception))
+                return ErrorReturnContinuation;
+
+            if (exception.isMagic(JS_GENERATOR_CLOSING)) {
+                cx->clearPendingException();
+                ok = true;
+                regs.fp()->clearReturnValue();
+            }
         }
     } else {
         UnwindForUncatchableException(cx, regs);
@@ -1294,7 +1296,7 @@ SetObjectElementOperation(JSContext *cx, Handle<JSObject*> obj, HandleId id, con
         if ((uint32_t)i >= length) {
             // Annotate script if provided with information (e.g. baseline)
             if (script && script->hasBaselineScript() && *pc == JSOP_SETELEM)
-                script->baselineScript()->noteArrayWriteHole(script->pcToOffset(pc));
+                script->baselineScript()->noteArrayWriteHole(cx, script->pcToOffset(pc));
         }
     }
 #endif
@@ -1603,6 +1605,7 @@ CASE(JSOP_UNUSED103)
 CASE(JSOP_UNUSED104)
 CASE(JSOP_UNUSED105)
 CASE(JSOP_UNUSED107)
+CASE(JSOP_UNUSED124)
 CASE(JSOP_UNUSED125)
 CASE(JSOP_UNUSED126)
 CASE(JSOP_UNUSED132)
@@ -1651,7 +1654,8 @@ CASE(JSOP_UNUSED192)
 CASE(JSOP_UNUSED194)
 CASE(JSOP_UNUSED196)
 CASE(JSOP_UNUSED201)
-CASE(JSOP_GETFUNNS)
+CASE(JSOP_UNUSED205)
+CASE(JSOP_UNUSED206)
 CASE(JSOP_UNUSED207)
 CASE(JSOP_UNUSED208)
 CASE(JSOP_UNUSED209)
@@ -2011,26 +2015,6 @@ CASE(JSOP_SETCONST)
         goto error;
 }
 END_CASE(JSOP_SETCONST);
-
-#if JS_HAS_DESTRUCTURING
-CASE(JSOP_ENUMCONSTELEM)
-{
-    RootedValue &rval = rootValue0;
-    rval = REGS.sp[-3];
-
-    RootedObject &obj = rootObject0;
-    FETCH_OBJECT(cx, -2, obj);
-    RootedId &id = rootId0;
-    FETCH_ELEMENT_ID(-1, id);
-    if (!JSObject::defineGeneric(cx, obj, id, rval,
-                                 JS_PropertyStub, JS_StrictPropertyStub,
-                                 JSPROP_ENUMERATE | JSPROP_PERMANENT | JSPROP_READONLY)) {
-        goto error;
-    }
-    REGS.sp -= 3;
-}
-END_CASE(JSOP_ENUMCONSTELEM)
-#endif
 
 CASE(JSOP_BINDGNAME)
     PUSH_OBJECT(REGS.fp()->global());
@@ -2495,22 +2479,6 @@ CASE(JSOP_SETELEM)
     REGS.sp -= 2;
 }
 END_CASE(JSOP_SETELEM)
-
-CASE(JSOP_ENUMELEM)
-{
-    RootedObject &obj = rootObject0;
-    RootedValue &rval = rootValue0;
-
-    /* Funky: the value to set is under the [obj, id] pair. */
-    FETCH_OBJECT(cx, -2, obj);
-    RootedId &id = rootId0;
-    FETCH_ELEMENT_ID(-1, id);
-    rval = REGS.sp[-3];
-    if (!JSObject::setGeneric(cx, obj, obj, id, &rval, script->strict()))
-        goto error;
-    REGS.sp -= 3;
-}
-END_CASE(JSOP_ENUMELEM)
 
 CASE(JSOP_EVAL)
 {
@@ -3467,8 +3435,13 @@ DEFAULT()
          * Push (true, exception) pair for finally to indicate that [retsub]
          * should rethrow the exception.
          */
+        RootedValue &exception = rootValue0;
+        if (!cx->getPendingException(&exception)) {
+            interpReturnOK = false;
+            goto return_continuation;
+        }
         PUSH_BOOLEAN(true);
-        PUSH_COPY(cx->getPendingException());
+        PUSH_COPY(exception);
         cx->clearPendingException();
         ADVANCE_AND_DISPATCH(0);
     }
@@ -3712,13 +3685,15 @@ js::SetCallOperation(JSContext *cx)
 bool
 js::GetAndClearException(JSContext *cx, MutableHandleValue res)
 {
-    // Check the interrupt flag to allow interrupting deeply nested exception
-    // handling.
-    if (cx->runtime()->interrupt && !js_HandleExecutionInterrupt(cx))
+    bool status = cx->getPendingException(res);
+    cx->clearPendingException();
+    if (!status)
         return false;
 
-    res.set(cx->getPendingException());
-    cx->clearPendingException();
+    // Check the interrupt flag to allow interrupting deeply nested exception
+    // handling.
+    if (cx->runtime()->interrupt)
+        return js_HandleExecutionInterrupt(cx);
     return true;
 }
 
