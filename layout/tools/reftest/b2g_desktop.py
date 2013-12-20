@@ -48,13 +48,13 @@ class B2GDesktopReftest(RefTest):
             reftestlist = 'file://%s' % reftestlist
 
         self.profile = self.create_profile(options, reftestlist,
-                                      profile_to_clone=options.profile)
+                                           profile_to_clone=options.profile)
         env = self.buildBrowserEnv(options, self.profile.profile)
         kp_kwargs = { 'processOutputLine': [self._on_output],
                       'onTimeout': [self._on_timeout],
                       'kill_on_timeout': False }
 
-        if not options.debugger and options.autorun:
+        if not options.debugger:
             if not options.timeout:
                 if mozinfo.info['debug']:
                     options.timeout = 420
@@ -66,16 +66,16 @@ class B2GDesktopReftest(RefTest):
         cmd, args = self.build_command_line(options.app,
                             ignore_window_size=options.ignoreWindowSize)
         self.runner = FirefoxRunner(profile=self.profile,
-                               binary=cmd,
-                               cmdargs=args,
-                               env=env,
-                               process_class=ProcessHandler,
-                               symbols_path=options.symbolsPath,
-                               kp_kwargs=kp_kwargs)
+                                    binary=cmd,
+                                    cmdargs=args,
+                                    env=env,
+                                    process_class=ProcessHandler,
+                                    symbols_path=options.symbolsPath,
+                                    kp_kwargs=kp_kwargs)
 
         status = 0
         try:
-            self.runner.start(timeout=10,outputTimeout=self.timeout)
+            self.runner.start(outputTimeout=self.timeout)
             log.info("%s | Application pid: %d",
                      os.path.basename(__file__),
                      self.runner.process_handler.pid)
@@ -85,6 +85,7 @@ class B2GDesktopReftest(RefTest):
             status = self.runner.wait()
         finally:
             self.runner.check_for_crashes(test_name=self.last_test)
+            self.runner.cleanup()
 
         if status > 0:
             log.testFail("%s | application terminated with exit code %s",
@@ -140,9 +141,9 @@ class B2GDesktopReftest(RefTest):
         msg = "%s | application timed out after %s seconds with no output"
         log.testFail(msg % (self.last_test, self.timeout))
 
-        # kill process and get stack
+        # kill process to get a stack
+        log.info("killing process to get stack")
         self.runner.stop(sig=signal.SIGABRT)
-        self.runner.check_for_crashes(test_name=self.last_test)
 
 
 def run_desktop_reftests(parser, options, args):
