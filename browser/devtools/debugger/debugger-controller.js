@@ -1928,7 +1928,10 @@ Breakpoints.prototype = {
       let disabledPromise = this._disabled.get(identifier);
       if (disabledPromise) {
         disabledPromise.then(({ conditionalExpression: previousValue }) => {
-          aBreakpointClient.conditionalExpression = previousValue;
+          // Setting a falsy conditional expression is redundant.
+          if (previousValue) {
+            aBreakpointClient.conditionalExpression = previousValue;
+          }
         });
         this._disabled.delete(identifier);
       }
@@ -2182,6 +2185,7 @@ let Prefs = new ViewHelpers.Prefs("devtools", {
   ignoreCaughtExceptions: ["Bool", "debugger.ignore-caught-exceptions"],
   sourceMapsEnabled: ["Bool", "debugger.source-maps-enabled"],
   prettyPrintEnabled: ["Bool", "debugger.pretty-print-enabled"],
+  autoPrettyPrint: ["Bool", "debugger.auto-pretty-print"],
   tracerEnabled: ["Bool", "debugger.tracer"],
   editorTabSize: ["Int", "editor.tabsize"]
 });
