@@ -400,7 +400,7 @@ load 570160.html
 load 570289-1.html
 load 571618-1.svg
 asserts(1) load 571975-1.html # bug 574889
-asserts(1) load 571995.xhtml # 761848
+load 571995.xhtml
 load 574958.xhtml
 asserts(0-4) load 578977.html # bug 757305
 load 580504-1.xhtml
@@ -514,8 +514,10 @@ needs-focus pref(accessibility.browsewithcaret,true) load 868906.html
 load 866547-1.html
 asserts(1-4) load 876074-1.html # bug 876749
 load 885009-1.html
+load 893496-1.html
 load 893523.html
 test-pref(layout.css.sticky.enabled,true) load 914891.html
 test-pref(layout.css.sticky.enabled,true) load 915475.xhtml
 load 943509-1.html
+asserts(4-8) load 944909-1.html
 test-pref(layout.css.sticky.enabled,true) load 949932.html

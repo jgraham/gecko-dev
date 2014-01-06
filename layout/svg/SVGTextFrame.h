@@ -295,7 +295,7 @@ public:
    */
   virtual nsIAtom* GetType() const MOZ_OVERRIDE;
 
-#ifdef DEBUG
+#ifdef DEBUG_FRAME_DUMP
   NS_IMETHOD GetFrameName(nsAString& aResult) const MOZ_OVERRIDE
   {
     return MakeFrameName(NS_LITERAL_STRING("SVGText"), aResult);
@@ -613,17 +613,6 @@ private:
                       nsIFrame* aFrame,
                       gfxTextContextPaint* aOuterContextPaint,
                       SVGTextContextPaint* aThisContextPaint);
-
-  /**
-   * Sets the current pattern for |aFrame| to the fill or stroke style of the
-   * outer text context. Will also set the paint opacity to transparent if the
-   * paint is set to "none".
-   */
-  bool SetupContextPaint(gfxContext* aContext,
-                        nsIFrame* aFrame,
-                        nsStyleSVGPaint nsStyleSVG::*aFillOrStroke,
-                        float& aOpacity,
-                        gfxTextContextPaint* aContextPaint);
 
   /**
    * Stores in |aTargetPaint| information on how to reconstruct the current

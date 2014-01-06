@@ -136,16 +136,23 @@ static int64_t gCanvasAzureMemoryUsed = 0;
 // This is KIND_OTHER because it's not always clear where in memory the pixels
 // of a canvas are stored.  Furthermore, this memory will be tracked by the
 // underlying surface implementations.  See bug 655638 for details.
-class Canvas2dPixelsReporter MOZ_FINAL : public MemoryUniReporter
+class Canvas2dPixelsReporter MOZ_FINAL : public nsIMemoryReporter
 {
-  public:
-    Canvas2dPixelsReporter()
-      : MemoryUniReporter("canvas-2d-pixels", KIND_OTHER, UNITS_BYTES,
-"Memory used by 2D canvases. Each canvas requires (width * height * 4) bytes.")
-    {}
-private:
-    int64_t Amount() MOZ_OVERRIDE { return gCanvasAzureMemoryUsed; }
+public:
+  NS_DECL_ISUPPORTS
+
+  NS_IMETHOD CollectReports(nsIHandleReportCallback* aHandleReport,
+                            nsISupports* aData)
+  {
+    return MOZ_COLLECT_REPORT(
+      "canvas-2d-pixels", KIND_OTHER, UNITS_BYTES,
+      gCanvasAzureMemoryUsed,
+      "Memory used by 2D canvases. Each canvas requires "
+      "(width * height * 4) bytes.");
+  }
 };
+
+NS_IMPL_ISUPPORTS1(Canvas2dPixelsReporter, nsIMemoryReporter)
 
 class CanvasRadialGradient : public CanvasGradient
 {
@@ -583,7 +590,7 @@ CanvasRenderingContext2D::ParseColor(const nsAString& aString,
     return false;
   }
 
-  if (value.GetUnit() == eCSSUnit_Color) {
+  if (value.IsNumericColorUnit()) {
     // if we already have a color we can just use it directly
     *aColor = value.GetColorValue();
   } else {
@@ -1099,7 +1106,7 @@ CanvasRenderingContext2D::GetImageBuffer(uint8_t** aImageBuffer,
 
 NS_IMETHODIMP
 CanvasRenderingContext2D::GetInputStream(const char *aMimeType,
-                                         const PRUnichar *aEncoderOptions,
+                                         const char16_t *aEncoderOptions,
                                          nsIInputStream **aStream)
 {
   nsCString enccid("@mozilla.org/image/encoder;2?type=");
@@ -2326,7 +2333,7 @@ CanvasRenderingContext2D::GetTextBaseline(nsAString& tb)
 static inline void
 TextReplaceWhitespaceCharacters(nsAutoString& str)
 {
-  str.ReplaceChar("\x09\x0A\x0B\x0C\x0D", PRUnichar(' '));
+  str.ReplaceChar("\x09\x0A\x0B\x0C\x0D", char16_t(' '));
 }
 
 void
@@ -2368,7 +2375,7 @@ struct MOZ_STACK_CLASS CanvasBidiProcessor : public nsBidiPresUtils::BidiProcess
 {
   typedef CanvasRenderingContext2D::ContextState ContextState;
 
-  virtual void SetText(const PRUnichar* text, int32_t length, nsBidiDirection direction)
+  virtual void SetText(const char16_t* text, int32_t length, nsBidiDirection direction)
   {
     mFontgrp->UpdateFontList(); // ensure user font generation is current
     mTextRun = mFontgrp->MakeTextRun(text,
@@ -4080,7 +4087,7 @@ CanvasRenderingContext2D::MarkContextClean()
 bool
 CanvasRenderingContext2D::ShouldForceInactiveLayer(LayerManager *aManager)
 {
-  return !aManager->CanUseCanvasLayerForSize(gfxIntSize(mWidth, mHeight));
+  return !aManager->CanUseCanvasLayerForSize(IntSize(mWidth, mHeight));
 }
 
 }

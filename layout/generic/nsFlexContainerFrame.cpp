@@ -335,9 +335,19 @@ public:
       return 0.0f;
     }
 
-    return aIsUsingFlexGrow ?
-      mFlexGrow :
-      mFlexShrink * mFlexBaseSize;
+    if (aIsUsingFlexGrow) {
+      return mFlexGrow;
+    }
+
+    // We're using flex-shrink --> return mFlexShrink * mFlexBaseSize
+    if (mFlexBaseSize == 0) {
+      // Special-case for mFlexBaseSize == 0 -- we have no room to shrink, so
+      // regardless of mFlexShrink, we should just return 0.
+      // (This is really a special-case for when mFlexShrink is infinity, to
+      // avoid performing mFlexShrink * mFlexBaseSize = inf * 0 = undefined.)
+      return 0.0f;
+    }
+    return mFlexShrink * mFlexBaseSize;
   }
 
   // Getters for margin:
@@ -1268,13 +1278,13 @@ nsFlexContainerFrame::GetType() const
   return nsGkAtoms::flexContainerFrame;
 }
 
-#ifdef DEBUG
+#ifdef DEBUG_FRAME_DUMP
 NS_IMETHODIMP
 nsFlexContainerFrame::GetFrameName(nsAString& aResult) const
 {
   return MakeFrameName(NS_LITERAL_STRING("FlexContainer"), aResult);
 }
-#endif // DEBUG
+#endif
 
 // Helper for BuildDisplayList, to implement this special-case for flex items
 // from the spec:
@@ -1366,7 +1376,8 @@ nsFlexContainerFrame::SanityCheckAnonymousFlexItems() const
 static void
 FreezeOrRestoreEachFlexibleSize(
   const nscoord aTotalViolation,
-  nsTArray<FlexItem>& aItems)
+  nsTArray<FlexItem>& aItems,
+  bool aFinalIteration)
 {
   enum FreezeType {
     eFreezeEverything,
@@ -1398,6 +1409,12 @@ FreezeOrRestoreEachFlexibleSize(
         MOZ_ASSERT(item.GetMainSize() <= item.GetMainMaxSize(),
                    "Freezing item at a size above its maximum");
 
+        item.Freeze();
+      } else if (MOZ_UNLIKELY(aFinalIteration)) {
+        // XXXdholbert If & when bug 765861 is fixed, we should upgrade this
+        // assertion to be fatal except in documents with enormous lengths.
+        NS_ERROR("Final iteration still has unfrozen items, this shouldn't"
+                 " happen unless there was nscoord under/overflow.");
         item.Freeze();
       } // else, we'll reset this item's main size to its flex base size on the
         // next iteration of this algorithm.
@@ -1578,7 +1595,8 @@ FlexLine::ResolveFlexibleLengths(nscoord aFlexContainerMainSize)
       }
     }
 
-    FreezeOrRestoreEachFlexibleSize(totalViolation, mItems);
+    FreezeOrRestoreEachFlexibleSize(totalViolation, mItems,
+                                    iterationCounter + 1 == mItems.Length());
 
     PR_LOG(GetFlexContainerLog(), PR_LOG_DEBUG,
            (" Total violation: %d\n", totalViolation));

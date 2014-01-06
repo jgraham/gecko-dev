@@ -193,26 +193,6 @@ nsFrame::GetLogModuleInfo()
   return gLogModule;
 }
 
-void
-nsIFrame::DumpFrameTree()
-{
-  RootFrameList(PresContext(), stdout, 0);
-}
-
-void
-nsIFrame::RootFrameList(nsPresContext* aPresContext, FILE* out, int32_t aIndent)
-{
-  if (!aPresContext || !out)
-    return;
-
-  nsIPresShell *shell = aPresContext->GetPresShell();
-  if (shell) {
-    nsIFrame* frame = shell->FrameManager()->GetRootFrame();
-    if(frame) {
-      frame->List(out, aIndent);
-    }
-  }
-}
 #endif
 
 static void
@@ -5253,7 +5233,7 @@ nsIFrame::GetContainingBlock() const
   return GetNearestBlockContainer(GetParent());
 }
 
-#ifdef DEBUG
+#ifdef DEBUG_FRAME_DUMP
 
 int32_t nsFrame::ContentIndexInContainer(const nsIFrame* aFrame)
 {
@@ -5368,23 +5348,6 @@ nsFrame::GetFrameName(nsAString& aResult) const
   return MakeFrameName(NS_LITERAL_STRING("Frame"), aResult);
 }
 
-NS_IMETHODIMP_(nsFrameState)
-nsFrame::GetDebugStateBits() const
-{
-  // We'll ignore these flags for the purposes of comparing frame state:
-  //
-  //   NS_FRAME_EXTERNAL_REFERENCE
-  //     because this is set by the event state manager or the
-  //     caret code when a frame is focused. Depending on whether
-  //     or not the regression tests are run as the focused window
-  //     will make this value vary randomly.
-#define IRRELEVANT_FRAME_STATE_FLAGS NS_FRAME_EXTERNAL_REFERENCE
-
-#define FRAME_STATE_MASK (~(IRRELEVANT_FRAME_STATE_FLAGS))
-
-  return GetStateBits() & FRAME_STATE_MASK;
-}
-
 nsresult
 nsFrame::MakeFrameName(const nsAString& aType, nsAString& aResult) const
 {
@@ -5406,11 +5369,51 @@ nsFrame::MakeFrameName(const nsAString& aType, nsAString& aResult) const
 }
 
 void
+nsIFrame::DumpFrameTree()
+{
+  RootFrameList(PresContext(), stdout, 0);
+}
+
+void
+nsIFrame::RootFrameList(nsPresContext* aPresContext, FILE* out, int32_t aIndent)
+{
+  if (!aPresContext || !out)
+    return;
+
+  nsIPresShell *shell = aPresContext->GetPresShell();
+  if (shell) {
+    nsIFrame* frame = shell->FrameManager()->GetRootFrame();
+    if(frame) {
+      frame->List(out, aIndent);
+    }
+  }
+}
+#endif
+
+#ifdef DEBUG
+NS_IMETHODIMP_(nsFrameState)
+nsFrame::GetDebugStateBits() const
+{
+  // We'll ignore these flags for the purposes of comparing frame state:
+  //
+  //   NS_FRAME_EXTERNAL_REFERENCE
+  //     because this is set by the event state manager or the
+  //     caret code when a frame is focused. Depending on whether
+  //     or not the regression tests are run as the focused window
+  //     will make this value vary randomly.
+#define IRRELEVANT_FRAME_STATE_FLAGS NS_FRAME_EXTERNAL_REFERENCE
+
+#define FRAME_STATE_MASK (~(IRRELEVANT_FRAME_STATE_FLAGS))
+
+  return GetStateBits() & FRAME_STATE_MASK;
+}
+
+void
 nsFrame::XMLQuote(nsString& aString)
 {
   int32_t i, len = aString.Length();
   for (i = 0; i < len; i++) {
-    PRUnichar ch = aString.CharAt(i);
+    char16_t ch = aString.CharAt(i);
     if (ch == '<') {
       nsAutoString tmp(NS_LITERAL_STRING("&lt;"));
       aString.Cut(i, 1);
@@ -5984,8 +5987,7 @@ FindBlockFrameOrBR(nsIFrame* aFrame, nsDirection aDirection)
   }
 
   // If this is a preformatted text frame, see if it ends with a newline
-  if (aFrame->HasTerminalNewline() &&
-      aFrame->StyleText()->NewlineIsSignificant()) {
+  if (aFrame->HasSignificantTerminalNewline()) {
     int32_t startOffset, endOffset;
     aFrame->GetOffsets(startOffset, endOffset);
     result.mContent = aFrame->GetContent();
@@ -6145,8 +6147,7 @@ nsIFrame::PeekOffset(nsPeekOffsetStruct* aPos)
       // we're placed before the linefeed character on the previous line.
       if (offset < 0 && jumpedLine &&
           aPos->mDirection == eDirPrevious &&
-          current->StyleText()->NewlineIsSignificant() &&
-          current->HasTerminalNewline()) {
+          current->HasSignificantTerminalNewline()) {
         --aPos->mContentOffset;
       }
       
@@ -6218,8 +6219,7 @@ nsIFrame::PeekOffset(nsPeekOffsetStruct* aPos)
             // If we've crossed the line boundary, check to make sure that we
             // have not consumed a trailing newline as whitesapce if it's significant.
             if (jumpedLine && wordSelectEatSpace &&
-                current->HasTerminalNewline() &&
-                current->StyleText()->NewlineIsSignificant()) {
+                current->HasSignificantTerminalNewline()) {
               offsetAdjustment = -1;
             }
           } else {
@@ -6395,7 +6395,7 @@ nsIFrame::PeekOffset(nsPeekOffsetStruct* aPos)
       FrameContentRange range = GetRangeForFrame(targetFrame.frame);
       aPos->mResultContent = range.content;
       aPos->mContentOffset = endOfLine ? range.end : range.start;
-      if (endOfLine && targetFrame.frame->HasTerminalNewline()) {
+      if (endOfLine && targetFrame.frame->HasSignificantTerminalNewline()) {
         // Do not position the caret after the terminating newline if we're
         // trying to move to the end of line (see bug 596506)
         --aPos->mContentOffset;
@@ -7365,11 +7365,11 @@ nsIFrame::IsFocusable(int32_t *aTabIndex, bool aWithMouse)
 }
 
 /**
- * @return true if this text frame ends with a newline character.  It
- * should return false if this is not a text frame.
+ * @return true if this text frame ends with a newline character which is
+ * treated as preformatted. It should return false if this is not a text frame.
  */
 bool
-nsIFrame::HasTerminalNewline() const
+nsIFrame::HasSignificantTerminalNewline() const
 {
   return false;
 }
@@ -7743,11 +7743,13 @@ nsFrame::DoLayout(nsBoxLayoutState& aState)
                                   nsSize(size.width, NS_UNCONSTRAINEDSIZE),
                                   nsHTMLReflowState::DUMMY_PARENT_REFLOW_STATE);
 
+    AddStateBits(NS_FRAME_IN_REFLOW);
     // Set up a |reflowStatus| to pass into ReflowAbsoluteFrames
     // (just a dummy value; hopefully that's OK)
     nsReflowStatus reflowStatus = NS_FRAME_COMPLETE;
     ReflowAbsoluteFrames(aState.PresContext(), desiredSize,
                          reflowState, reflowStatus);
+    RemoveStateBits(NS_FRAME_IN_REFLOW);
   }
 
   nsSize oldSize(ourRect.Size());

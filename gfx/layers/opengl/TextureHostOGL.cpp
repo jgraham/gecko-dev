@@ -7,7 +7,7 @@
 #include "GLContext.h"                  // for GLContext, etc
 #include "GLSharedHandleHelpers.h"
 #include "GLUploadHelpers.h"
-#include "GLContextUtils.h"             // for GLContextUtils
+#include "GLReadTexImageHelper.h"
 #include "SharedSurface.h"              // for SharedSurface
 #include "SharedSurfaceEGL.h"           // for SharedSurface_EGLImage
 #include "SharedSurfaceGL.h"            // for SharedSurface_GLTexture, etc
@@ -236,7 +236,7 @@ TextureImageTextureSourceOGL::Update(gfx::DataSourceSurface* aSurface,
   }
   MOZ_ASSERT(aSurface);
 
-  nsIntSize size = ThebesIntSize(aSurface->GetSize());
+  IntSize size = aSurface->GetSize();
   if (!mTexImage ||
       mTexImage->GetSize() != size ||
       mTexImage->GetContentType() != gfx::ContentForFormat(aSurface->GetFormat())) {
@@ -501,15 +501,15 @@ TextureImageDeprecatedTextureHostOGL::EnsureBuffer(const nsIntSize& aSize,
                                          gfxContentType aContentType)
 {
   if (!mTexture ||
-      mTexture->GetSize() != aSize ||
+      mTexture->GetSize() != aSize.ToIntSize() ||
       mTexture->GetContentType() != aContentType) {
     mTexture = CreateTextureImage(mGL,
-                                  aSize,
+                                  aSize.ToIntSize(),
                                   aContentType,
                                   WrapMode(mGL, mFlags & TEXTURE_ALLOW_REPEAT),
                                   FlagsToGLFlags(mFlags));
   }
-  mTexture->Resize(aSize);
+  mTexture->Resize(aSize.ToIntSize());
 }
 
 void
@@ -771,7 +771,7 @@ SurfaceStreamHostOGL::Lock()
 
   mSize = IntSize(sharedSurf->Size().width, sharedSurf->Size().height);
 
-  gfxImageSurface* toUpload = nullptr;
+  DataSourceSurface* toUpload = nullptr;
   switch (sharedSurf->Type()) {
     case SharedSurfaceType::GLTextureShare: {
       SharedSurface_GLTexture* glTexSurf = SharedSurface_GLTexture::Cast(sharedSurf);
@@ -820,7 +820,7 @@ SurfaceStreamHostOGL::Lock()
 
   if (toUpload) {
     // mBounds seems to end up as (0,0,0,0) a lot, so don't use it?
-    nsIntSize size(toUpload->GetSize());
+    nsIntSize size(ThebesIntSize(toUpload->GetSize()));
     nsIntRect rect(nsIntPoint(0,0), size);
     nsIntRegion bounds(rect);
     mFormat = UploadSurfaceToTexture(mGL,

@@ -406,7 +406,7 @@ class XPCReadableJSStringWrapper : public nsDependentString
 public:
     typedef nsDependentString::char_traits char_traits;
 
-    XPCReadableJSStringWrapper(const PRUnichar *chars, size_t length) :
+    XPCReadableJSStringWrapper(const char16_t *chars, size_t length) :
         nsDependentString(chars, length)
     { }
 
@@ -584,7 +584,7 @@ public:
 
     ~XPCJSRuntime();
 
-    XPCReadableJSStringWrapper *NewStringWrapper(const PRUnichar *str, uint32_t len);
+    XPCReadableJSStringWrapper *NewStringWrapper(const char16_t *str, uint32_t len);
     void DeleteString(nsAString *string);
 
     void AddGCCallback(xpcGCCallback cb);
@@ -801,7 +801,7 @@ public:
     static JSContext* GetDefaultJSContext();
 
     XPCCallContext(XPCContext::LangType callerLanguage,
-                   JSContext* cx           = GetDefaultJSContext(),
+                   JSContext* cx,
                    JS::HandleObject obj    = JS::NullPtr(),
                    JS::HandleObject funobj = JS::NullPtr(),
                    JS::HandleId id         = JSID_VOIDHANDLE,
@@ -893,7 +893,7 @@ inline void CHECK_STATE(int s) const {MOZ_ASSERT(mState >= s, "bad state");}
 #endif
 
 private:
-    mozilla::AutoPushJSContext      mPusher;
+    JSAutoRequest                   mAr;
     State                           mState;
 
     nsRefPtr<nsXPConnect>           mXPC;
@@ -2495,6 +2495,12 @@ public:
 
     nsXPCWrappedJS* Find(REFNSIID aIID);
     nsXPCWrappedJS* FindInherited(REFNSIID aIID);
+    nsXPCWrappedJS* FindOrFindInherited(REFNSIID aIID) {
+        nsXPCWrappedJS* wrapper = Find(aIID);
+        if (wrapper)
+            return wrapper;
+        return FindInherited(aIID);
+    }
 
     bool IsRootWrapper() const {return mRoot == this;}
     bool IsValid() const {return mJSObj != nullptr;}
@@ -2515,7 +2521,7 @@ public:
                        "Only one aggregated native can be set");
             return;
         }
-        NS_ADDREF(mRoot->mOuter = aNative);
+        mRoot->mOuter = aNative;
     }
 
     void TraceJS(JSTracer* trc);
@@ -2535,10 +2541,10 @@ protected:
 
 private:
     JS::Heap<JSObject*> mJSObj;
-    nsXPCWrappedJSClass* mClass;
-    nsXPCWrappedJS* mRoot;
+    nsRefPtr<nsXPCWrappedJSClass> mClass;
+    nsXPCWrappedJS* mRoot;    // If mRoot != this, it is an owning pointer.
     nsXPCWrappedJS* mNext;
-    nsISupports* mOuter;    // only set in root
+    nsCOMPtr<nsISupports> mOuter;    // only set in root
 };
 
 /***************************************************************************/
@@ -2582,7 +2588,7 @@ public:
   NS_DECL_ISUPPORTS
   NS_DECL_NSIPROPERTY
 
-  xpcProperty(const PRUnichar* aName, uint32_t aNameLen, nsIVariant* aValue);
+  xpcProperty(const char16_t* aName, uint32_t aNameLen, nsIVariant* aValue);
   virtual ~xpcProperty() {}
 
 private:
@@ -3228,7 +3234,7 @@ CloneAllAccess();
 
 // Returns access if wideName is in list
 char *
-CheckAccessList(const PRUnichar *wideName, const char *const list[]);
+CheckAccessList(const char16_t *wideName, const char *const list[]);
 } /* namespace xpc */
 
 /***************************************************************************/
