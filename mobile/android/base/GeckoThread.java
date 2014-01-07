@@ -182,6 +182,7 @@ public class GeckoThread extends Thread implements GeckoEventListener {
     @Override
     public void handleMessage(String event, JSONObject message) {
         if ("Gecko:Ready".equals(event)) {
+Log.i(LOGTAG, "==== GeckoThread received Gecko:Ready");
             GeckoAppShell.getEventDispatcher().unregisterEventListener(event, this);
             setLaunchState(LaunchState.GeckoRunning);
             GeckoAppShell.sendPendingEventsToGecko();
@@ -191,6 +192,7 @@ public class GeckoThread extends Thread implements GeckoEventListener {
     @RobocopTarget
     public static boolean checkLaunchState(LaunchState checkState) {
         synchronized (sLock) {
+Log.i(LOGTAG, "==== GeckoThread.checkLaunchState: "+sLaunchState);
             return sLaunchState == checkState;
         }
     }
