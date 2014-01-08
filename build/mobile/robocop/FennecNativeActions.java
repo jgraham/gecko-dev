@@ -73,7 +73,7 @@ public class FennecNativeActions implements Actions {
             mListener = new GeckoEventListener() {
                 @Override
                 public void handleMessage(final String event, final JSONObject message) {
-                    FennecNativeDriver.log(FennecNativeDriver.LogLevel.WARN,
+                    FennecNativeDriver.log(FennecNativeDriver.LogLevel.DEBUG,
                             "handleMessage called for: " + event + "; expecting: " + mGeckoEvent);
                     mAsserter.is(event, mGeckoEvent, "Given message occurred for registered event: " + message);
 
@@ -82,7 +82,6 @@ public class FennecNativeActions implements Actions {
             };
 
             GeckoAppShell.registerEventListener(mGeckoEvent, mListener);
-FennecNativeDriver.log(FennecNativeDriver.LogLevel.WARN, "=== registered event listener for "+mGeckoEvent);
             mIsRegistered = true;
         }
 
