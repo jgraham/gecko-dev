@@ -10,8 +10,6 @@ import org.mozilla.gecko.gfx.GeckoLayerClient.DrawListener;
 import org.mozilla.gecko.mozglue.GeckoLoader;
 import org.mozilla.gecko.sqlite.SQLiteBridge;
 import org.mozilla.gecko.util.GeckoEventListener;
-import org.mozilla.gecko.GeckoThread;
-import org.mozilla.gecko.GeckoThread.LaunchState;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -102,13 +100,6 @@ public class FennecNativeActions implements Actions {
             if (mEventData == null) {
                 if (failOnTimeout) {
                     FennecNativeDriver.logAllStackTraces(FennecNativeDriver.LogLevel.ERROR);
-if (GeckoThread.checkLaunchState(LaunchState.GeckoRunning)) {
-    FennecNativeDriver.log(FennecNativeDriver.LogLevel.ERROR,
-        "---- checkLaunchState returned TRUE!");
-} else {
-    FennecNativeDriver.log(FennecNativeDriver.LogLevel.ERROR,
-        "---- checkLaunchState returned FALSE!");
-}
                     mAsserter.ok(false, "GeckoEventExpecter",
                         "blockForEvent timeout: "+mGeckoEvent);
                 } else {

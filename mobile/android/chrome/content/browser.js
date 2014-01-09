@@ -407,7 +407,6 @@ var BrowserApp = {
 
     // notify java that gecko has loaded
     sendMessageToJava({ type: "Gecko:Ready" });
-    dump("======= Gecko:Ready sent!!!");
 
 #ifdef MOZ_SAFE_BROWSING
     // Bug 778855 - Perf regression if we do this here. To be addressed in bug 779008.
