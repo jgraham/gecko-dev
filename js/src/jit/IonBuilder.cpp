@@ -5410,10 +5410,12 @@ IonBuilder::jsop_newarray(uint32_t count)
 
     types::TemporaryTypeSet::DoubleConversion conversion =
         ins->resultTypeSet()->convertDoubleElements(constraints());
-    if (conversion == types::TemporaryTypeSet::AlwaysConvertToDoubles) {
-        AutoThreadSafeAccess ts(templateObject);
+
+    AutoThreadSafeAccess ts(templateObject);
+    if (conversion == types::TemporaryTypeSet::AlwaysConvertToDoubles)
         templateObject->setShouldConvertDoubleElements();
-    }
+    else
+        templateObject->clearShouldConvertDoubleElements();
     return true;
 }
 
@@ -6684,7 +6686,7 @@ IonBuilder::getElemTryScalarElemOfTypedObject(bool *emitted,
                                               TypeRepresentationSet elemTypeReprs,
                                               size_t elemSize)
 {
-    JS_ASSERT(objTypeReprs.kind() == TypeRepresentation::SizedArray);
+    JS_ASSERT(objTypeReprs.allOfArrayKind());
 
     // Must always be loading the same scalar type
     if (!elemTypeReprs.singleton())
