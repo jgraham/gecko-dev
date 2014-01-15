@@ -166,6 +166,8 @@
     "content/events/test/test_bug508479.html":"drag event, also fails on Android",
     "content/events/test/test_dragstart.html":"drag event, also fails on Android",
 
+    "content/events/test/test_bug864040.html":"failing when the test gets moved around, and on debug",
+
     "content/html/content/test/forms/test_input_file_picker.html":"5 failures out of 139 and timing out, bug 901581",
     "content/html/content/test/forms/test_validation.html":"374 total, bug 901848, no keygen support",
 
@@ -190,11 +192,13 @@
     "content/html/content/test/test_iframe_sandbox_popups.html":"multiple concurrent window.open()s fail on B2G",
     "content/html/content/test/test_iframe_sandbox_popups_inheritance.html":"multiple concurrent window.open()s fail on B2G",
     "content/html/content/test/test_iframe_sandbox_modal.html":"modal tests fail on B2G",
+    "content/html/content/test/test_mozaudiochannel.html":"Perma-orange on debug emulator",
 
     "content/html/content/test/test_iframe_sandbox_plugins.html":"plugins not supported",
     "content/html/content/test/test_object_plugin_nav.html":"plugins not supported",
     "content/html/document/test/test_bug741266.html":"needs control of popup window size",
     "docshell/test/navigation/test_popup-navigates-children.html":"Needs multiple window.open support, also uses docshelltreenode",
+    "docshell/test/navigation/test_sessionhistory.html":"Perma-orange on debug emulator builds",
     "docshell/test/test_bug590573.html":"queryinterfaces into webnavigation, might suffer from something similar as bug 823022",
     "dom/devicestorage/ipc/test_ipc.html":"nested ipc not working",
 
@@ -451,6 +455,7 @@
     "docshell/test/test_bug570341.html": "debug-only failure",
     "docshell/test/test_bug529119-2.html": "debug-only failure",
     "dom/apps/tests/test_app_update.html": "debug-only failure",
+    "dom/apps/tests/test_packaged_app_install.html": "debug-only failure",
     "dom/apps/tests/test_packaged_app_update.html": "debug-only timeout",
     "dom/bindings/test/test_exceptions_from_jsimplemented.html": "debug-only failure; bug 926547",
     "dom/camera/test/test_camera.html": "debug-only failure; no assertions when 34 were expected",
@@ -479,6 +484,7 @@
     "dom/tests/mochitest/geolocation/test_errorcheck.html": "debug-only timeout",
     "dom/tests/mochitest/localstorage/test_cookieSession.html": "debug-only failure",
     "dom/tests/mochitest/orientation/test_bug507902.html": "debug-only failure",
+    "dom/workers/test/test_onLine.html": "debug-only failure",
     "dom/workers/test/test_csp.html": "debug-only failure",
     "dom/workers/test/test_url.html": "debug-only crash, bug 931887",
     "dom/workers/test/test_jsversion.html": "debug-only failure",

@@ -1067,8 +1067,8 @@ public:
   : WorkerControlRunnable(aWorkerPrivate, WorkerThreadUnchangedBusyCount),
     mStatus(aStatus)
   {
-    MOZ_ASSERT(aStatus == Terminating || aStatus == Canceling ||
-               aStatus == Killing);
+    MOZ_ASSERT(aStatus == Closing || aStatus == Terminating ||
+               aStatus == Canceling || aStatus == Killing);
   }
 
 private:
@@ -4857,27 +4857,46 @@ WorkerPrivate::RunCurrentSyncLoop()
 
         ProcessAllControlRunnablesLocked();
 
-        if (normalRunnablesPending) {
+        // NB: If we processed a NotifyRunnable, we might have run non-control
+        // runnables, one of which may have shut down the sync loop.
+        if (normalRunnablesPending || loopInfo->mCompleted) {
           break;
         }
       }
     }
 
-    // Make sure the periodic timer is running before we continue.
-    SetGCTimerMode(PeriodicTimer);
+    if (normalRunnablesPending) {
+      // Make sure the periodic timer is running before we continue.
+      SetGCTimerMode(PeriodicTimer);
 
-    MOZ_ALWAYS_TRUE(NS_ProcessNextEvent(thread, false));
+      MOZ_ALWAYS_TRUE(NS_ProcessNextEvent(thread, false));
 
-    // Now *might* be a good time to GC. Let the JS engine make the decision.
-    JS_MaybeGC(cx);
+      // Now *might* be a good time to GC. Let the JS engine make the decision.
+      JS_MaybeGC(cx);
+    }
   }
 
   // Make sure that the stack didn't change underneath us.
-  MOZ_ASSERT(!mSyncLoopStack.IsEmpty());
-  MOZ_ASSERT(mSyncLoopStack.Length() - 1 == currentLoopIndex);
   MOZ_ASSERT(mSyncLoopStack[currentLoopIndex] == loopInfo);
 
-  // We're about to delete |loop|, stash its event target and result.
+  return DestroySyncLoop(currentLoopIndex);
+}
+
+bool
+WorkerPrivate::DestroySyncLoop(uint32_t aLoopIndex, nsIThreadInternal* aThread)
+{
+  MOZ_ASSERT(!mSyncLoopStack.IsEmpty());
+  MOZ_ASSERT(mSyncLoopStack.Length() - 1 == aLoopIndex);
+
+  if (!aThread) {
+    nsCOMPtr<nsIThreadInternal> thread = do_QueryInterface(mThread);
+    MOZ_ASSERT(thread);
+
+    aThread = thread.get();
+  }
+
+  // We're about to delete the loop, stash its event target and result.
+  SyncLoopInfo* loopInfo = mSyncLoopStack[aLoopIndex];
   nsIEventTarget* nestedEventTarget =
     loopInfo->mEventTarget->GetWeakNestedEventTarget();
   MOZ_ASSERT(nestedEventTarget);
@@ -4891,11 +4910,11 @@ WorkerPrivate::RunCurrentSyncLoop()
     MutexAutoLock lock(mMutex);
 #endif
 
-    // This will delete |loop|!
-    mSyncLoopStack.RemoveElementAt(currentLoopIndex);
+    // This will delete |loopInfo|!
+    mSyncLoopStack.RemoveElementAt(aLoopIndex);
   }
 
-  MOZ_ALWAYS_TRUE(NS_SUCCEEDED(thread->PopEventQueue(nestedEventTarget)));
+  MOZ_ALWAYS_TRUE(NS_SUCCEEDED(aThread->PopEventQueue(nestedEventTarget)));
 
   return result;
 }

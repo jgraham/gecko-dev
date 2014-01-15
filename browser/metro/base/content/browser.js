@@ -172,7 +172,10 @@ var Browser = {
       let self = this;
       function loadStartupURI() {
         if (activationURI) {
-          self.addTab(activationURI, true, null, { flags: Ci.nsIWebNavigation.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP });
+          let webNav = Ci.nsIWebNavigation;
+          let flags = webNav.LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP |
+                      webNav.LOAD_FLAGS_FIXUP_SCHEME_TYPOS;
+          self.addTab(activationURI, true, null, { flags: flags });
         } else {
           let uri = commandURL || Browser.getHomePage();
           self.addTab(uri, true);
@@ -1495,12 +1498,14 @@ Tab.prototype = {
     let browser = this._browser;
 
     if (aActive) {
+      notification.classList.add("active-tab-notificationbox");
       browser.setAttribute("type", "content-primary");
       Elements.browsers.selectedPanel = notification;
       browser.active = true;
       Elements.tabList.selectedTab = this._chromeTab;
       browser.focus();
     } else {
+      notification.classList.remove("active-tab-notificationbox");
       browser.messageManager.sendAsyncMessage("Browser:Blur", { });
       browser.setAttribute("type", "content");
       browser.active = false;
