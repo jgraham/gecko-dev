@@ -10,6 +10,7 @@
 
 #include "jsscriptinlines.h"
 
+#include "mozilla/MathAlgorithms.h"
 #include "mozilla/MemoryReporting.h"
 #include "mozilla/PodOperations.h"
 
@@ -33,6 +34,7 @@
 #include "jit/IonCode.h"
 #include "js/OldDebugAPI.h"
 #include "vm/ArgumentsObject.h"
+#include "vm/Compression.h"
 #include "vm/Debugger.h"
 #include "vm/Shape.h"
 #include "vm/Xdr.h"
@@ -50,6 +52,7 @@ using namespace js::frontend;
 
 using mozilla::PodCopy;
 using mozilla::PodZero;
+using mozilla::RotateLeft;
 
 typedef Rooted<GlobalObject *> RootedGlobalObject;
 
@@ -1239,7 +1242,7 @@ ScriptSource::setSource(const jschar *src, size_t length)
 }
 
 bool
-SourceCompressionTask::compress()
+SourceCompressionTask::work()
 {
     // A given compression token can be compressed on any thread, and the ss
     // not being ready indicates to other threads that its fields might change
@@ -3225,13 +3228,13 @@ LazyScriptHash(uint32_t lineno, uint32_t column, uint32_t begin, uint32_t end,
                HashNumber hashes[3])
 {
     HashNumber hash = lineno;
-    hash = JS_ROTATE_LEFT32(hash, 4) ^ column;
-    hash = JS_ROTATE_LEFT32(hash, 4) ^ begin;
-    hash = JS_ROTATE_LEFT32(hash, 4) ^ end;
+    hash = RotateLeft(hash, 4) ^ column;
+    hash = RotateLeft(hash, 4) ^ begin;
+    hash = RotateLeft(hash, 4) ^ end;
 
     hashes[0] = hash;
-    hashes[1] = JS_ROTATE_LEFT32(hashes[0], 4) ^ begin;
-    hashes[2] = JS_ROTATE_LEFT32(hashes[1], 4) ^ end;
+    hashes[1] = RotateLeft(hashes[0], 4) ^ begin;
+    hashes[2] = RotateLeft(hashes[1], 4) ^ end;
 }
 
 void
