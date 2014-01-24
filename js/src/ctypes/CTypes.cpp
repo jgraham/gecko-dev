@@ -577,7 +577,7 @@ static const JSPropertySpec sCTypeProps[] = {
   JS_PSG("prototype",
          (Property<CType::IsCTypeOrProto, CType::PrototypeGetter>::Fun),
          CTYPESACC_FLAGS),
-  { 0, 0, 0, JSOP_NULLWRAPPER, JSOP_NULLWRAPPER }
+  JS_PS_END
 };
 
 static const JSFunctionSpec sCTypeFunctions[] = {
@@ -608,10 +608,6 @@ static const JSFunctionSpec sCDataFunctions[] = {
   JS_FN("toSource", CData::ToSource, 0, CDATAFN_FLAGS),
   JS_FN("toString", CData::ToSource, 0, CDATAFN_FLAGS),
   JS_FS_END
-};
-
-static const JSPropertySpec sCDataFinalizerProps[] = {
-  { 0, 0, 0, JSOP_NULLWRAPPER, JSOP_NULLWRAPPER }
 };
 
 static const JSFunctionSpec sCDataFinalizerFunctions[] = {
@@ -1353,8 +1349,7 @@ JS_InitCTypesClass(JSContext* cx, JSObject *globalArg)
   if (!prototype)
     return false;
 
-  if (!JS_DefineProperties(cx, prototype, sCDataFinalizerProps) ||
-      !JS_DefineFunctions(cx, prototype, sCDataFinalizerFunctions))
+  if (!JS_DefineFunctions(cx, prototype, sCDataFinalizerFunctions))
     return false;
 
   if (!JS_DefineProperty(cx, ctor, "prototype", OBJECT_TO_JSVAL(prototype),
@@ -4761,16 +4756,15 @@ StructType::Create(JSContext* cx, unsigned argc, jsval* vp)
 }
 
 static void
-PostBarrierCallback(JSTracer *trc, void *k, void *d)
+PostBarrierCallback(JSTracer *trc, JSString *key, void *data)
 {
     typedef HashMap<JSFlatString*,
                     UnbarrieredFieldInfo,
                     FieldHashPolicy,
                     SystemAllocPolicy> UnbarrieredFieldInfoHash;
 
-    JSString *prior = static_cast<JSString*>(k);
-    UnbarrieredFieldInfoHash *table = reinterpret_cast<UnbarrieredFieldInfoHash*>(d);
-    JSString *key = prior;
+    UnbarrieredFieldInfoHash *table = reinterpret_cast<UnbarrieredFieldInfoHash*>(data);
+    JSString *prior = key;
     JS_CallStringTracer(trc, &key, "CType fieldName");
     table->rekeyIfMoved(JS_ASSERT_STRING_IS_FLAT(prior), JS_ASSERT_STRING_IS_FLAT(key));
 }

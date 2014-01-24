@@ -634,42 +634,8 @@ class Automation(object):
       return
 
     self.haveDumpedScreen = True;
+    automationutils.dumpScreen(utilityPath)
 
-    # Need to figure out which OS-dependant tool to use
-    if self.UNIXISH:
-      utility = [os.path.join(utilityPath, "screentopng")]
-    elif self.IS_MAC:
-      utility = ['/usr/sbin/screencapture', '-C', '-x', '-t', 'png']
-    elif self.IS_WIN32:
-      utility = [os.path.join(utilityPath, "screenshot.exe")]
-
-    # Always write screenshots to a file - bug 749421 related
-    imgoutput = 'file'
-
-    # Get dir where to write the file
-    env = self.environment()
-    parent_dir = env.get('MOZ_UPLOAD_DIR', '')
-    if not parent_dir:
-      self.log.info('Failed to retrieve MOZ_UPLOAD_DIR env var')
-      return
-
-    # Run the capture tool to file the screenshot in the MOZ_UPLOAD_DIR
-    try:
-        tmpfd, imgfilename = tempfile.mkstemp(suffix='.png',
-                                              prefix='mozilla-test-fail-screenshot_',
-                                              dir=parent_dir)
-        os.close(tmpfd)
-        dumper = self.Process(utility + [imgfilename])
-    except OSError, err:
-      self.log.info("Failed to start %s for screenshot: %s",
-                    utility[0], err.strerror)
-      return
-
-    # Check whether the capture utility ran successfully
-    dumper_out, dumper_err = dumper.communicate()
-    if dumper.returncode != 0:
-      self.log.info("%s exited with code %d", utility, dumper.returncode)
-      return
 
   def killAndGetStack(self, processPID, utilityPath, debuggerInfo):
     """Kill the process, preferrably in a way that gets us a stack trace.

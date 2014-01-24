@@ -2605,7 +2605,10 @@ class Debugger::ScriptQuery {
      * condition occurred.
      */
     void consider(JSScript *script) {
-        if (oom || script->selfHosted())
+        // We check for presence of script->code() because it is possible that
+        // the script was created and thus exposed to GC, but *not* fully
+        // initialized from fullyInit{FromEmitter,Trivial} due to errors.
+        if (oom || script->selfHosted() || !script->code())
             return;
         JSCompartment *compartment = script->compartment();
         if (!compartments.has(compartment))
@@ -2997,6 +3000,19 @@ DebuggerScript_getSourceMapUrl(JSContext *cx, unsigned argc, Value *vp)
         args.rval().setNull();
     }
 
+    return true;
+}
+
+static bool
+DebuggerScript_getGlobal(JSContext *cx, unsigned argc, Value *vp)
+{
+    THIS_DEBUGSCRIPT_SCRIPT(cx, argc, vp, "(get global)", args, obj, script);
+    Debugger *dbg = Debugger::fromChildJSObject(obj);
+
+    RootedValue v(cx, ObjectValue(script->global()));
+    if (!dbg->wrapDebuggeeValue(cx, &v))
+        return false;
+    args.rval().set(v);
     return true;
 }
 
@@ -3663,6 +3679,7 @@ static const JSPropertySpec DebuggerScript_properties[] = {
     JS_PSG("sourceLength", DebuggerScript_getSourceLength, 0),
     JS_PSG("staticLevel", DebuggerScript_getStaticLevel, 0),
     JS_PSG("sourceMapURL", DebuggerScript_getSourceMapUrl, 0),
+    JS_PSG("global", DebuggerScript_getGlobal, 0),
     JS_PS_END
 };
 
@@ -3875,8 +3892,8 @@ DebuggerSource_getElement(JSContext *cx, unsigned argc, Value *vp)
 static bool
 DebuggerSource_getElementProperty(JSContext *cx, unsigned argc, Value *vp)
 {
-    THIS_DEBUGSOURCE_REFERENT(cx, argc, vp, "(get elementProperty)", args, obj, sourceObject);
-    args.rval().set(sourceObject->elementProperty());
+    THIS_DEBUGSOURCE_REFERENT(cx, argc, vp, "(get elementAttributeName)", args, obj, sourceObject);
+    args.rval().set(sourceObject->elementAttributeName());
     return Debugger::fromChildJSObject(obj)->wrapDebuggeeValue(cx, args.rval());
 }
 
@@ -3885,7 +3902,7 @@ static const JSPropertySpec DebuggerSource_properties[] = {
     JS_PSG("url", DebuggerSource_getUrl, 0),
     JS_PSG("element", DebuggerSource_getElement, 0),
     JS_PSG("displayURL", DebuggerSource_getDisplayURL, 0),
-    JS_PSG("elementProperty", DebuggerSource_getElementProperty, 0),
+    JS_PSG("elementAttributeName", DebuggerSource_getElementProperty, 0),
     JS_PS_END
 };
 
