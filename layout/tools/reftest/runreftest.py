@@ -7,15 +7,16 @@ Runs the reftest test harness.
 """
 
 from optparse import OptionParser
-import json
-import re
-import sys
-import shutil
-import os
-import threading
-import subprocess
 import collections
+import json
 import multiprocessing
+import os
+import re
+import shutil
+import subprocess
+import sys
+import threading
+
 SCRIPT_DIRECTORY = os.path.abspath(os.path.realpath(os.path.dirname(sys.argv[0])))
 sys.path.insert(0, SCRIPT_DIRECTORY)
 
@@ -26,7 +27,6 @@ from automationutils import (
         isURL,
         processLeakLog
 )
-
 import mozprofile
 
 def categoriesToRegex(categoryList):
@@ -346,8 +346,8 @@ class RefTest(object):
 
 class ReftestOptions(OptionParser):
 
-  def __init__(self, automation):
-    self.automation = automation
+  def __init__(self, automation=None):
+    self.automation = automation or Automation()
     OptionParser.__init__(self)
     defaults = {}
 

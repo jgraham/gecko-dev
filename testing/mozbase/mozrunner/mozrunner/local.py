@@ -82,7 +82,7 @@ class LocalRunner(Runner):
                  kp_kwargs=None, clean_profile=None, process_class=None, **kwargs):
 
         super(LocalRunner, self).__init__(profile, clean_profile=clean_profile, kp_kwargs=kp_kwargs,
-                                               process_class=process_class, env=env, **kwargs)
+                                          process_class=process_class, env=env, **kwargs)
 
         # find the binary
         self.binary = binary
@@ -191,7 +191,7 @@ class LocalRunner(Runner):
             # this run uses the managed processhandler
             self.process_handler = self.process_class(cmd, env=self.env, **self.kp_kwargs)
             self.process_handler.run(timeout, outputTimeout)
-    
+
 
     def _wrap_command(self, cmd):
         """

@@ -475,7 +475,6 @@ class B2GRemoteReftest(RefTest):
         return path
 
 
-
 def run_remote_reftests(parser, options, args):
     auto = B2GRemoteAutomation(None, "fennec", context_chrome=True)
 
@@ -592,6 +591,7 @@ def main(args=sys.argv[1:]):
     if options.desktop:
         return run_desktop_reftests(parser, options, args)
     return run_remote_reftests(parser, options, args)
+
 
 if __name__ == "__main__":
     sys.exit(main())

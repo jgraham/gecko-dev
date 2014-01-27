@@ -142,7 +142,6 @@ class B2GDesktopReftest(RefTest):
         log.testFail(msg % (self.last_test, self.timeout))
 
         # kill process to get a stack
-        log.info("killing process to get stack")
         self.runner.stop(sig=signal.SIGABRT)
 
 
