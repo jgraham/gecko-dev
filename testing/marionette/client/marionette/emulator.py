@@ -360,7 +360,7 @@ window.addEventListener('mozbrowserloadend', function loaded(aEvent) {
     window.removeEventListener('mozbrowserloadend', loaded);
     marionetteScriptFinished();
   }
-});""", script_timeout=60000)
+});""", script_timeout=500000)
         print '...done'
         if created_session:
             marionette.delete_session()
