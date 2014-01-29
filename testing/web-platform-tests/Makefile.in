@@ -4,6 +4,8 @@
 
 include $(topsrcdir)/config/rules.mk
 
+ifneq ($(OS_ARCH),WINNT)
+
 WPT_HARNESS = \
   wpttests \
   runtests.py \
@@ -31,3 +33,5 @@ stage-package:
 	@(cd $(srcdir) && tar $(TAR_CREATE_FLAGS) - $(WPT_HARNESS)) | (cd $(PKG_STAGE)/web-platform-tests && tar -xf -)
 	@(cd $(srcdir) && tar $(TAR_CREATE_FLAGS) - $(WPT_TESTS)) | (cd $(PKG_STAGE)/web-platform-tests && tar -xf -)
 	@(cd $(srcdir) && tar $(TAR_CREATE_FLAGS) - $(WPT_METADATA)) | (cd $(PKG_STAGE)/web-platform-tests && tar -xf -)
+
+endif
