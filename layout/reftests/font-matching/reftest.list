@@ -2,7 +2,7 @@
 
 # basic tests for bug 538730
 != synthetic-bold-1.html synthetic-bold-1-ref.html
-skip-if(Android && AndroidVersion>15) != synthetic-bold-2.html synthetic-bold-2-ref.html
+skip-if(Android&&AndroidVersion>15) != synthetic-bold-2.html synthetic-bold-2-ref.html
 
 # synthetic bold/italic tests
 != defaultfont-bold.html defaultfont.html
