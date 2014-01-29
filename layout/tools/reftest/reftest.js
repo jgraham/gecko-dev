@@ -235,7 +235,6 @@ this.OnRefTestLoad = function OnRefTestLoad(win)
     var env = CC["@mozilla.org/process/environment;1"].
               getService(CI.nsIEnvironment);
     gVerbose = !!env.get("MOZ_REFTEST_VERBOSE");
-    gVerbose = true;
 
     var prefs = Components.classes["@mozilla.org/preferences-service;1"].
                 getService(Components.interfaces.nsIPrefBranch);
