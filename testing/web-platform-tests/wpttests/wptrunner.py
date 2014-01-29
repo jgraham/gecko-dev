@@ -21,6 +21,7 @@ import traceback
 
 import marionette
 import mozprocess
+import mozprofile
 from mozprofile.profile import FirefoxProfile
 from mozprofile.permissions import ServerLocations
 from mozrunner import FirefoxRunner
@@ -279,7 +280,7 @@ class TestRunner(object):
                 if not result_flag.is_set():
                     result_flag.set()
                     result = (test.result_cls("CRASH", None), [])
-            logger.error(unicode(e))
+            logger.warning(unicode(e))
         finally:
             self.timer.cancel()
 
@@ -479,8 +480,8 @@ class FirefoxBrowser(Browser):
         env = os.environ.copy()
         env['MOZ_CRASHREPORTER_NO_REPORT'] = '1'
 
-        locations = ServerLocations(os.path.join(here, "server-locations.txt"))
-        profile = FirefoxProfile(locations=locations)
+        locations = ServerLocations(filename=os.path.join(here, "server-locations.txt"))
+        profile = FirefoxProfile(locations=locations, proxy=True)
         profile.set_preferences({"marionette.defaultPrefs.enabled": True,
                                  "marionette.defaultPrefs.port": self.marionette_port,
                                  "dom.disable_open_during_load": False,
@@ -640,10 +641,6 @@ class TestRunnerManager(threading.Thread):
         #leaves this thread hung
         self.logger.debug("Init called, starting browser and runner")
         with self.init_lock:
-            def init_failed():
-                self.logger.error("Init failed")
-                self.init_failed()
-
             #To guard against cases where we fail to connect with marionette for
             #whatever reason
             #TODO: make this timeout configurable
