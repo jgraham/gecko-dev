@@ -538,7 +538,9 @@ stage-mozbase: make-stage-dir
 	$(MAKE) -C $(DEPTH)/testing/mozbase stage-package
 
 stage-web-platform-tests: make-stage-dir
+ifneq ($(OS_ARCH),WINNT)
 	$(MAKE) -C $(DEPTH)/testing/web-platform-tests stage-package
+endif
 
 .PHONY: \
   mochitest \
