@@ -50,8 +50,9 @@ def create_parser_update():
     parser = argparse.ArgumentParser("web-platform-tests-update",
                                      description="Update script for web-platform-tests tests.")
 
-    parser.add_argument("--run", action="store", choices=["try", "local", "logfile"],
-                        help="Place to run tests and update expected data")
+    parser.add_argument("--rev", action="store", help="Revision to sync to")
+    parser.add_argument("--run", action="store", choices=["try", "local", "logfile", "none"],
+                        default="try", help="Place to run tests and update expected data")
     #Should make this required iff run=local
     parser.add_argument("--binary", action="store", type=abs_path,
                         help="Binary to run tests against")

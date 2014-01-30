@@ -34,10 +34,10 @@ class RepositoryError(Exception):
     pass
 
 class WebPlatformTests(object):
-    def __init__(self, remote_url, repo_path, remote_branch="master"):
+    def __init__(self, remote_url, repo_path, rev="origin/master"):
         self.remote_url = remote_url
         self.repo_path = repo_path
-        self.remote_branch = remote_branch
+        self.target_rev = rev
         self.local_branch = uuid.uuid4().hex
 
     def update(self):
@@ -45,7 +45,7 @@ class WebPlatformTests(object):
             os.makedirs(self.repo_path)
         if not vcs.is_git_root(self.repo_path):
             git("clone", self.remote_url, ".", repo=self.repo_path)
-            git("checkout", "-b", self.local_branch, self.remote_branch, repo=self.repo_path)
+            git("checkout", "-b", self.local_branch, self.target_rev, repo=self.repo_path)
             assert vcs.is_git_root(self.repo_path)
         else:
             if git("status", "--porcelain", repo=self.repo_path):
@@ -53,7 +53,7 @@ class WebPlatformTests(object):
 
             git("fetch",
                 self.remote_url,
-                "%s:%s" % (self.remote_branch,
+                "%s:%s" % (self.target_rev,
                            self.local_branch),
                 repo=self.repo_path)
             git("checkout", self.local_branch, repo=self.repo_path)
@@ -187,8 +187,8 @@ class TryRunner(object):
         self.bug = bug
         self.server = Try(config["try"]["url"])
 
-    def run(self, mozilla_tree, log_file):
-        self.bug.comment("Pushing hg revision %s to try" % mozilla_tree.revision)
+    def do_run(self, mozilla_tree, log_file):
+#        self.bug.comment("Pushing hg revision %s to try" % mozilla_tree.revision)
         self.server.push(mozilla_tree)
 
         sys.exit(0)
@@ -270,9 +270,13 @@ def main(**kwargs):
     #bug = bz.create_bug("Doing update of web-platform tests")
     bug = None
 
+    rev = config["command-args"].get("rev")
+    if rev is None:
+        rev = config["web-platform-tests"].get("branch", "master")
+
     wpt = WebPlatformTests(config["web-platform-tests"]["remote_url"],
                            sync_path,
-                           remote_branch=config["web-platform-tests"].get("branch", "master"))
+                           rev=rev)
 
     wpt.update()
     try:
@@ -289,21 +293,22 @@ def main(**kwargs):
         mozilla_tree.add_new(os.path.relpath(test_path, mozilla_tree.root))
         mozilla_tree.refresh_patch(include=[test_path, metadata_path])
 
-        runner = {"try": TryRunner,
-                  "local": LocalRunner,
-                  "logfile": ExistingLogRunner}[config["command-args"]["run"]](config, bug)
+        if config["command-args"]["run"] != "none":
+            runner = {"try": TryRunner,
+                      "local": LocalRunner,
+                      "logfile": ExistingLogRunner}[config["command-args"]["run"]](config, bug)
 
-        with tempfile.TemporaryFile() as log_file:
-            runner.do_run(mozilla_tree, log_file)
-            log_file.seek(0)
-            mozilla_tree.create_patch("web-platform-tests_update_%s_metadata"  % wpt.rev,
-                                      "Bug %i - Update web-platform-tests expected data to revision %s" % (
-                                          bug.id if bug else 0, wpt.rev
-                                      ))
-            needs_human = metadata.update(sync_path, metadata_path, log_file, rev_old=initial_rev)
-            if not mozilla_tree.is_clean():
-                mozilla_tree.add_new(os.path.relpath(metadata_path, mozilla_tree.root))
-                mozilla_tree.refresh_patch(include=[metadata_path])
+            with tempfile.TemporaryFile() as log_file:
+                runner.do_run(mozilla_tree, log_file)
+                log_file.seek(0)
+                mozilla_tree.create_patch("web-platform-tests_update_%s_metadata"  % wpt.rev,
+                                          "Bug %i - Update web-platform-tests expected data to revision %s" % (
+                                              bug.id if bug else 0, wpt.rev
+                                          ))
+                needs_human = metadata.update(sync_path, metadata_path, log_file, rev_old=initial_rev)
+                if not mozilla_tree.is_clean():
+                    mozilla_tree.add_new(os.path.relpath(metadata_path, mozilla_tree.root))
+                    mozilla_tree.refresh_patch(include=[metadata_path])
 
         sys.exit(1)
 
