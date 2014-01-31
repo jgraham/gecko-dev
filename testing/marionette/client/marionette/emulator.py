@@ -162,7 +162,7 @@ class Emulator(object):
         process has terminated).
         """
         return self._emulator_launched and self.proc is not None \
-                                    and self.proc.poll() is not None
+                                       and self.proc.poll() is not None
 
     def check_for_minidumps(self, test_name=None):
         return self.b2g.check_for_crashes(test_name=test_name)
@@ -355,12 +355,14 @@ waitFor(
 
         marionette.set_context(marionette.CONTEXT_CONTENT)
         marionette.execute_async_script("""
+log('waiting for mozbrowserloadend');
 window.addEventListener('mozbrowserloadend', function loaded(aEvent) {
+  log('received mozbrowserloadend for ' + aEvent.target.src);
   if (aEvent.target.src.indexOf('ftu') != -1 || aEvent.target.src.indexOf('homescreen') != -1) {
     window.removeEventListener('mozbrowserloadend', loaded);
     marionetteScriptFinished();
   }
-});""", script_timeout=500000)
+});""", script_timeout=120000)
         print '...done'
         if created_session:
             marionette.delete_session()

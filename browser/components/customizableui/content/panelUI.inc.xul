@@ -15,7 +15,9 @@
       </vbox>
 
       <footer id="PanelUI-footer">
-        <toolbarbutton id="PanelUI-fxa-status" label="&fxaSignIn.label;"
+        <toolbarbutton id="PanelUI-fxa-status"
+                       defaultlabel="&fxaSignIn.label;"
+                       errorlabel="&fxaSignInError.label;"
                        oncommand="gFxAccounts.toggle(event);"
                        hidden="true"/>
 
@@ -150,7 +152,7 @@
       <vbox id="PanelUI-characterEncodingView-customlist"
             class="PanelUI-characterEncodingView-list"/>
       <vbox>
-        <label value="&charsetMenuAutodet.label;"/>
+        <label id="PanelUI-characterEncodingView-autodetect-label"/>
         <vbox id="PanelUI-characterEncodingView-autodetect"
               class="PanelUI-characterEncodingView-list"/>
       </vbox>
