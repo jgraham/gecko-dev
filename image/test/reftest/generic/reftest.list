@@ -1,1 +1,1 @@
-fails-if(Android&&AndroidVersion==17) HTTP == accept-image-catchall.html accept-image-catchall-ref.html
+skip-if(B2GDT) fails-if(Android&&AndroidVersion==17) HTTP == accept-image-catchall.html accept-image-catchall-ref.html # bug 958518

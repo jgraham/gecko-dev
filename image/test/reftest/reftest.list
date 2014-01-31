@@ -6,18 +6,18 @@ skip-if(Android) == colordepth.html about:blank
 #
 # http://www.schaik.com/pngsuite/pngsuite.html
 # http://www.libpng.org/pub/png/pngsuite.html
-skip-if(B2G) include pngsuite-basic-n/reftest.list      # bug 783632
-skip-if(B2G) include pngsuite-basic-i/reftest.list      # bug 783632
-skip-if(B2G) include pngsuite-ancillary/reftest.list    # bug 783632
-skip-if(B2G) include pngsuite-background/reftest.list   # bug 783632
-skip-if(B2G) include pngsuite-chunkorder/reftest.list   # bug 783632
-skip-if(B2G) include pngsuite-corrupted/reftest.list    # bug 783632
-skip-if(B2G) include pngsuite-filtering/reftest.list    # bug 783632
-skip-if(B2G) include pngsuite-gamma/reftest.list        # bug 783632
-skip-if(B2G) include pngsuite-oddsizes/reftest.list     # bug 783632
-skip-if(B2G) include pngsuite-palettes/reftest.list     # bug 783632
-skip-if(B2G) include pngsuite-transparency/reftest.list # bug 783632
-skip-if(B2G) include pngsuite-zlib/reftest.list         # bug 783632
+skip-if(B2G||B2GDT) include pngsuite-basic-n/reftest.list      # bug 783632, bug 966444
+skip-if(B2G||B2GDT) include pngsuite-basic-i/reftest.list      # bug 783632, bug 966444
+skip-if(B2G||B2GDT) include pngsuite-ancillary/reftest.list    # bug 783632, bug 966444
+skip-if(B2G||B2GDT) include pngsuite-background/reftest.list   # bug 783632, bug 966444
+skip-if(B2G||B2GDT) include pngsuite-chunkorder/reftest.list   # bug 783632, bug 966444
+skip-if(B2G||B2GDT) include pngsuite-corrupted/reftest.list    # bug 783632, bug 966444
+skip-if(B2G||B2GDT) include pngsuite-filtering/reftest.list    # bug 783632, bug 966444
+skip-if(B2G||B2GDT) include pngsuite-gamma/reftest.list        # bug 783632, bug 966444
+skip-if(B2G||B2GDT) include pngsuite-oddsizes/reftest.list     # bug 783632, bug 966444
+skip-if(B2G||B2GDT) include pngsuite-palettes/reftest.list     # bug 783632, bug 966444
+skip-if(B2G||B2GDT) include pngsuite-transparency/reftest.list # bug 783632, bug 966444
+skip-if(B2G||B2GDT) include pngsuite-zlib/reftest.list         # bug 783632, bug 966444
 
 # BMP tests
 skip-if(Android) include bmp/reftest.list
