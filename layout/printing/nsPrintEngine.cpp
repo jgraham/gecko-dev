@@ -2033,6 +2033,18 @@ nsPrintEngine::UpdateSelectionAndShrinkPrintObject(nsPrintObject* aPO,
     nsIPageSequenceFrame* pageSequence = aPO->mPresShell->GetPageSequenceFrame();
     NS_ENSURE_STATE(pageSequence);
     pageSequence->GetSTFPercent(aPO->mShrinkRatio);
+    // Limit the shrink-to-fit scaling for some text-ish type of documents.
+    nsAutoString contentType;
+    aPO->mPresShell->GetDocument()->GetContentType(contentType);
+    if (contentType.EqualsLiteral("application/xhtml+xml") ||
+        StringBeginsWith(contentType, NS_LITERAL_STRING("text/"))) {
+      int32_t limitPercent = 
+        Preferences::GetInt("print.shrink-to-fit.scale-limit-percent", 20);
+      limitPercent = std::max(0, limitPercent);
+      limitPercent = std::min(100, limitPercent);
+      float minShrinkRatio = float(limitPercent) / 100;
+      aPO->mShrinkRatio = std::max(aPO->mShrinkRatio, minShrinkRatio);
+    }
   }
   return NS_OK;
 }

@@ -279,10 +279,10 @@ JS_ConvertArgumentsVA(JSContext *cx, unsigned argc, jsval *argv, const char *for
                 return false;
             *sp = STRING_TO_JSVAL(str);
             if (c == 'W') {
-                JSStableString *stable = str->ensureStable(cx);
-                if (!stable)
+                JSFlatString *flat = str->ensureFlat(cx);
+                if (!flat)
                     return false;
-                *va_arg(ap, const jschar **) = stable->chars().get();
+                *va_arg(ap, const jschar **) = flat->chars();
             } else {
                 *va_arg(ap, JSString **) = str;
             }
@@ -614,6 +614,8 @@ JS_ShutDown(void)
                 "TIME.  FIX THIS!\n");
     }
 #endif
+
+    WorkerThreadState().finish();
 
     PRMJ_NowShutdown();
 
@@ -1302,7 +1304,9 @@ JS_ResolveStandardClass(JSContext *cx, HandleObject obj, HandleId id, bool *reso
         if (stdnm->clasp->flags & JSCLASS_IS_ANONYMOUS)
             return true;
 
-        if (!obj->as<GlobalObject>().ensureConstructor(cx, JSCLASS_CACHED_PROTO_KEY(stdnm->clasp)))
+        Rooted<GlobalObject*> global(cx, &obj->as<GlobalObject>());
+        JSProtoKey key = JSCLASS_CACHED_PROTO_KEY(stdnm->clasp);
+        if (!GlobalObject::ensureConstructor(cx, global, key))
             return false;
 
         *resolved = true;
@@ -4308,6 +4312,10 @@ JS::ReadOnlyCompileOptions::copyPODOptions(const ReadOnlyCompileOptions &rhs)
     werrorOption = rhs.werrorOption;
     asmJSOption = rhs.asmJSOption;
     sourcePolicy = rhs.sourcePolicy;
+    introducer = rhs.introducer;
+    introductionLineno = rhs.introductionLineno;
+    introductionOffset = rhs.introductionOffset;
+    hasIntroductionInfo = rhs.hasIntroductionInfo;
 }
 
 JSPrincipals *
@@ -4334,6 +4342,7 @@ JS::OwningCompileOptions::~OwningCompileOptions()
     // OwningCompileOptions always owns these, so these casts are okay.
     js_free(const_cast<char *>(filename_));
     js_free(const_cast<jschar *>(sourceMapURL_));
+    js_free(const_cast<char *>(introducerFilename_));
 }
 
 bool
@@ -4346,7 +4355,8 @@ JS::OwningCompileOptions::copy(JSContext *cx, const ReadOnlyCompileOptions &rhs)
     setElement(rhs.element());
 
     return (setFileAndLine(cx, rhs.filename(), rhs.lineno) &&
-            setSourceMapURL(cx, rhs.sourceMapURL()));
+            setSourceMapURL(cx, rhs.sourceMapURL()) &&
+            setIntroducerFilename(cx, rhs.introducerFilename()));
 }
 
 bool
@@ -4390,6 +4400,23 @@ JS::OwningCompileOptions::setSourceMapURL(JSContext *cx, const jschar *s)
     js_free(const_cast<jschar *>(sourceMapURL_));
 
     sourceMapURL_ = copy;
+    return true;
+}
+
+bool
+JS::OwningCompileOptions::setIntroducerFilename(JSContext *cx, const char *s)
+{
+    char *copy = nullptr;
+    if (s) {
+        copy = JS_strdup(cx, s);
+        if (!copy)
+            return false;
+    }
+
+    // OwningCompileOptions always owns introducerFilename_, so this cast is okay.
+    js_free(const_cast<char *>(introducerFilename_));
+
+    introducerFilename_ = copy;
     return true;
 }
 
@@ -5485,7 +5512,7 @@ JS_ParseJSON(JSContext *cx, const jschar *chars, uint32_t len, JS::MutableHandle
     CHECK_REQUEST(cx);
 
     RootedValue reviver(cx, NullValue());
-    return ParseJSONWithReviver(cx, JS::StableCharPtr(chars, len), len, reviver, vp);
+    return ParseJSONWithReviver(cx, ConstTwoByteChars(chars, len), len, reviver, vp);
 }
 
 JS_PUBLIC_API(bool)
@@ -5493,7 +5520,7 @@ JS_ParseJSONWithReviver(JSContext *cx, const jschar *chars, uint32_t len, Handle
 {
     AssertHeapIsIdle(cx);
     CHECK_REQUEST(cx);
-    return ParseJSONWithReviver(cx, StableCharPtr(chars, len), len, reviver, vp);
+    return ParseJSONWithReviver(cx, ConstTwoByteChars(chars, len), len, reviver, vp);
 }
 
 /************************************************************************/

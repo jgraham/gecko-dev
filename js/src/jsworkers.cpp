@@ -467,6 +467,20 @@ GlobalWorkerThreadState::GlobalWorkerThreadState()
 }
 
 void
+GlobalWorkerThreadState::finish()
+{
+    if (threads) {
+        for (size_t i = 0; i < threadCount; i++)
+            threads[i].destroy();
+        js_free(threads);
+    }
+
+    PR_DestroyCondVar(consumerWakeup);
+    PR_DestroyCondVar(producerWakeup);
+    PR_DestroyLock(workerLock);
+}
+
+void
 GlobalWorkerThreadState::lock()
 {
     JS_ASSERT(!isLocked());

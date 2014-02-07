@@ -85,6 +85,8 @@ class GlobalWorkerThreadState
     GlobalWorkerThreadState();
 
     bool ensureInitialized();
+    void finish();
+
     void lock();
     void unlock();
 
