@@ -109,8 +109,10 @@ class TestsMetadata(object):
         test_manifest = manifest.load(self.manifest_path)
         return test_manifest
 
-    def update_manifest(self):
+    def update_manifest(self, force_rebuild=False):
         manifest.setup_git(self.test_root)
+        if force_rebuild:
+            self.manifest = manifest.Manifest(None)
         manifest.update(self.manifest)
         manifest.write(self.manifest, self.manifest_path)
 

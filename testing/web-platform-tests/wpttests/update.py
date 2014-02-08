@@ -58,7 +58,7 @@ class WebPlatformTests(object):
                 repo=self.repo_path)
             git("checkout", self.local_branch, repo=self.repo_path)
         git("submodule", "init", repo=self.repo_path)
-        git("submodule", "update", "--recursive", repo=self.repo_path)
+        git("submodule", "update", "--init", "--recursive", repo=self.repo_path)
 
     @property
     def rev(self):
@@ -284,7 +284,7 @@ def main(**kwargs):
         initial_metadata = metadata.TestsMetadata(sync_path, metadata_path)
         initial_rev = initial_metadata.rev
         wpt.copy_work_tree(test_path)
-        initial_metadata.update_manifest()
+        initial_metadata.update_manifest(force_rebuild=True)
 
         mozilla_tree.create_patch("web-platform-tests_update_%s"  % wpt.rev,
                                   "Bug %i - Update web-platform-tests to revision %s" % (

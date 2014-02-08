@@ -8,9 +8,9 @@ import sys
 import os
 import urlparse
 import json
-from Queue import Queue, Empty
+from Queue import Empty
 import multiprocessing
-from multiprocessing import Process, Pipe, current_process
+from multiprocessing import Process, Pipe, current_process, Queue
 import threading
 import socket
 import hashlib
@@ -30,6 +30,7 @@ import structuredlog
 import metadata
 import wpttest
 import wptcommandline
+
 
 here = os.path.split(__file__)[0]
 
@@ -61,6 +62,7 @@ metadata files are used to store the expected test results.
 """
 
 logger = structuredlog.getOutputLogger("WPT")
+
 
 def setup_stdlib_logger():
     logging.root.handlers = []
@@ -137,7 +139,7 @@ Stop = object()
 
 
 class TestRunner(object):
-    def __init__(self, http_server_url, command_pipe, marionette_port=None, binary=None):
+    def __init__(self, http_server_url, command_queue, result_queue, marionette_port=None, binary=None):
         """Base class for actually running tests.
 
         Each test type will have a derived class overriding the do_test
@@ -149,13 +151,18 @@ class TestRunner(object):
 
         :param http_server_url: url to the main http server over which tests
                                 will be loaded
-        :param command_pipe: subprocess.Pipe used to send commands to the
-                             process
+        :param command_queue: subprocess.Queue used to send commands to the
+                              process
+        :param result_queue: subprocess.Queue used to send results to the
+                             parent TestManager process
         :param marionette_port: port number to use for marionette, or None
                                 to use a free port
         """
         self.http_server_url = http_server_url
-        self.command_pipe = command_pipe
+
+        self.command_queue = command_queue
+        self.result_queue = result_queue
+
         if marionette_port is None:
             marionette_port = get_free_port(2828)
         self.marionette_port = marionette_port
@@ -176,17 +183,27 @@ class TestRunner(object):
             logger.debug("Marionette session started")
             self.send_message("init_succeeded")
         else:
-            logger.error("Failed to connect to marionette")
+            logger.warning("Failed to connect to marionette")
             self.send_message("init_failed")
 
         if success:
-            self.browser.navigate(urlparse.urljoin(self.http_server_url, "/gecko_runner.html"))
-            self.browser.execute_script("document.title = '%s'" % threading.current_thread().name)
-
-        return success
+            try:
+                self.browser.navigate(urlparse.urljoin(self.http_server_url, "/gecko_runner.html"))
+                self.browser.execute_script("document.title = '%s'" % threading.current_thread().name)
+            except:
+                logger.warning("Failed to connect to navigate initial page")
+                self.send_message("init_failed")
 
     def teardown(self):
-        self.command_pipe.close()
+        logger.debug("TestRunner teardown")
+        self.result_queue.cancel_join_thread()
+        self.command_queue.cancel_join_thread()
+        self.result_queue.close()
+        self.result_queue = None
+        self.command_queue.close()
+        self.command_queue = None
+        del self.browser
+        self.browser = None
         #Close the marionette session
 
     def run(self):
@@ -198,7 +215,7 @@ class TestRunner(object):
                     "stop": self.stop}
         try:
             while True:
-                command, args = self.command_pipe.recv()
+                command, args = self.command_queue.get()
                 try:
                     rv = commands[command](*args)
                 except Exception:
@@ -298,7 +315,7 @@ class TestRunner(object):
         return Stop
 
     def send_message(self, command, *args):
-        self.command_pipe.send((command, args))
+        self.result_queue.put((command, args))
 
 
 class TestharnessTestRunner(TestRunner):
@@ -427,15 +444,18 @@ class ServoTestRunner(TestharnessTestRunner):
         result["test"] = test.url
         return TestharnessTestRunner.convert_result(self, test, result)
 
-def start_runner(runner_cls, http_server_url, marionette_port, browser_binary, command_pipe,
+def start_runner(runner_cls, http_server_url, marionette_port, browser_binary, runner_command_queue, runner_result_queue,
                  stop_flag):
     try:
-        runner = runner_cls(http_server_url, command_pipe, marionette_port=marionette_port,
+        runner = runner_cls(http_server_url, runner_command_queue, runner_result_queue, marionette_port=marionette_port,
                             binary=browser_binary)
         runner.run()
     except KeyboardInterrupt:
         stop_flag.set()
         logger.debug("Runner process got signal")
+    finally:
+        runner_command_queue = None
+        runner_result_queue = None
 
 
 class ProcessHandler(mozprocess.ProcessHandlerMixin):
@@ -449,6 +469,7 @@ class Browser(object):
         self.binary = binary
         self.logger = logger
         self.marionette_port = marionette_port
+        self.runner = None
 
     def start(self):
         raise NotImplementedError
@@ -502,8 +523,8 @@ class FirefoxBrowser(Browser):
 
     def stop(self):
         self.logger.debug("Stopping browser")
-        logger.debug("%r" % self.runner.process_handler)
-        self.runner.stop()
+        if self.runner is not None:
+            self.runner.stop()
 
     def pid(self):
         if self.runner.process_handler is not None:
@@ -550,11 +571,13 @@ class TestRunnerManager(threading.Thread):
         self.tests_queue = tests_queue
         self.run_info = run_info
 
-        # Flags used to shot down this thread if we get a sigint
+        # Flags used to shut down this thread if we get a sigint
         self.parent_stop_flag = stop_flag
         self.child_stop_flag = multiprocessing.Event()
 
-        self.command_pipe = None
+        self.command_queue = None
+        self.remote_queue = None
+
         self.browser = None
         self.test_runner_proc = None
         self.runner_cls = runner_cls
@@ -594,17 +617,18 @@ class TestRunnerManager(threading.Thread):
                             "test_ended": self.test_ended,
                             "restart_test": self.restart_test}
                 try:
-                    has_data = self.command_pipe.poll(1)
+                    command, data = self.command_queue.get(True, 1)
                 except IOError:
                     if not self.should_stop():
                         self.logger.error("Got IOError from poll")
                         self.restart_runner()
+                except Empty:
+                    command = None
 
                 if self.should_stop():
                     break
 
-                if has_data:
-                    command, data = self.command_pipe.recv()
+                if command is not None:
                     if commands[command](*data) is Stop:
                         break
                 else:
@@ -627,7 +651,7 @@ class TestRunnerManager(threading.Thread):
                             self.logger.info("More tests found, but runner process died, restarting")
                             self.restart_runner()
         finally:
-            self.stop_runner(graceful=False)
+            self.stop_runner()
             self.logger.debug("TestRunnerManager main loop terminating")
 
     def should_stop(self):
@@ -640,17 +664,32 @@ class TestRunnerManager(threading.Thread):
         #sometimes stops the spawned processes initalising correctly, and
         #leaves this thread hung
         self.logger.debug("Init called, starting browser and runner")
+
+        def init_failed():
+            #This is called from a seperate thread, so we send a message to the
+            #main loop so we get back onto the manager thread
+            logger.debug("init_failed called from timer")
+            if self.command_queue:
+                self.command_queue.put(("init_failed", ()))
+            else:
+                self.child_stop_flag.set()
+
+
         with self.init_lock:
             #To guard against cases where we fail to connect with marionette for
             #whatever reason
             #TODO: make this timeout configurable
-            self.init_timer = threading.Timer(30, self.init_failed)
+            self.init_timer = threading.Timer(30, init_failed)
             self.init_timer.start()
 
-            self.command_pipe, remote_end = Pipe()
+            assert self.command_queue is None
+            assert self.remote_queue is None
+
+            self.command_queue = Queue()
+            self.remote_queue = Queue()
 
             self.browser.start()
-            self.start_test_runner(remote_end)
+            self.start_test_runner()
 
     def init_succeeded(self):
         """Callback when we have started the browser, connected via
@@ -666,40 +705,57 @@ class TestRunnerManager(threading.Thread):
     def init_failed(self):
         """Callback when we can't connect to the browser via
         marionette for some reason"""
-        self.logger.error("Init failed")
-        self.init_timer.cancel()
-        self.send_message("stop")
         self.init_fail_count += 1
+        self.logger.error("Init failed %i" % self.init_fail_count)
+        self.init_timer.cancel()
         if self.init_fail_count < self.max_init_fails:
             self.restart_runner()
         else:
+            self.logger.warning("Test runner failed to initalise correctly; shutting down")
             return Stop
 
-    def start_test_runner(self, remote_connection):
+    def start_test_runner(self):
+        assert self.command_queue is not None
+        assert self.remote_queue is not None
         self.test_runner_proc = Process(target=start_runner,
                                         args=(self.runner_cls,
                                               self.http_server_url,
                                               self.marionette_port,
                                               self.browser_binary,
-                                              remote_connection,
+                                              self.remote_queue,
+                                              self.command_queue,
                                               self.child_stop_flag))
         self.test_runner_proc.start()
         self.logger.debug("Test runner started")
 
     def send_message(self, command, *args):
-        self.command_pipe.send((command, args))
+        self.remote_queue.put((command, args))
 
-    def stop_runner(self, graceful=True):
+    def cleanup(self):
+        self.logger.debug("TestManager cleanup")
+        self.test_runner_proc = None
+        if self.command_queue:
+            self.command_queue.close()
+            self.command_queue = None
+        if self.remote_queue:
+            self.remote_queue.close()
+            self.remote_queue = None
+
+    def stop_runner(self):
         """Stop the TestRunner and the Firefox binary."""
         self.logger.debug("Stopping runner")
-        if graceful:
-            self.test_runner_proc.join(10)
-            if self.test_runner_proc.is_alive():
-                graceful = False
-        self.browser.stop()
-        if not graceful:
-            self.test_runner_proc.terminate()
-        self.command_pipe.close()
+
+        try:
+            self.browser.stop()
+            if self.test_runner_proc:
+                self.send_message("stop")
+                self.test_runner_proc.join(10)
+                if self.test_runner_proc.is_alive():
+                    #This might leak a file handle from the queue
+                    logger.warning("Forcibly terminating runner process")
+                    self.test_runner_proc.terminate()
+        finally:
+            self.cleanup()
 
     def start_next_test(self):
         """Start the next test in the queue, or stop the
@@ -781,7 +837,7 @@ class TestRunnerManager(threading.Thread):
     def restart_runner(self):
         """Stop and restart the TestRunner"""
         logger.info("Restarting runner")
-        self.stop_runner(graceful=False)
+        self.stop_runner()
         self.init()
 
 
