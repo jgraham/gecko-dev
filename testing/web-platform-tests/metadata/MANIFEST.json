@@ -13091,24 +13091,8 @@
         "path": "selectors-api/tests/submissions/Opera/level2-baseline.html"
       }, 
       {
-        "url": "/shadow-dom/elements-and-dom-objects/csshostrule-interface/csshostrule-attributes/test-001.html", 
-        "path": "shadow-dom/elements-and-dom-objects/csshostrule-interface/csshostrule-attributes/test-001.html"
-      }, 
-      {
-        "url": "/shadow-dom/elements-and-dom-objects/csshostrule-interface/csshostrule-attributes/test-002.html", 
-        "path": "shadow-dom/elements-and-dom-objects/csshostrule-interface/csshostrule-attributes/test-002.html"
-      }, 
-      {
         "url": "/shadow-dom/elements-and-dom-objects/extensions-to-element-interface/attributes/test-001.html", 
         "path": "shadow-dom/elements-and-dom-objects/extensions-to-element-interface/attributes/test-001.html"
-      }, 
-      {
-        "url": "/shadow-dom/elements-and-dom-objects/extensions-to-element-interface/attributes/test-002.html", 
-        "path": "shadow-dom/elements-and-dom-objects/extensions-to-element-interface/attributes/test-002.html"
-      }, 
-      {
-        "url": "/shadow-dom/elements-and-dom-objects/extensions-to-element-interface/attributes/test-003.html", 
-        "path": "shadow-dom/elements-and-dom-objects/extensions-to-element-interface/attributes/test-003.html"
       }, 
       {
         "url": "/shadow-dom/elements-and-dom-objects/extensions-to-element-interface/attributes/test-004.html", 
@@ -13233,14 +13217,6 @@
       {
         "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-methods/test-007.html", 
         "path": "shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-methods/test-007.html"
-      }, 
-      {
-        "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-methods/test-008.html", 
-        "path": "shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-methods/test-008.html"
-      }, 
-      {
-        "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-methods/test-009.html", 
-        "path": "shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-methods/test-009.html"
       }, 
       {
         "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-methods/test-010.html", 
@@ -18415,14 +18391,6 @@
         "path": "conformance-checkers/html-its/translate/xml/translate9xml.xml"
       }, 
       {
-        "url": "/conformance-checkers/html/media-queries/003-novalid.html", 
-        "path": "conformance-checkers/html/media-queries/003-novalid.html"
-      }, 
-      {
-        "url": "/conformance-checkers/html/media-queries/016-novalid.html", 
-        "path": "conformance-checkers/html/media-queries/016-novalid.html"
-      }, 
-      {
         "url": "/conformance-checkers/html/media-queries/generate.py", 
         "path": "conformance-checkers/html/media-queries/generate.py"
       }, 
@@ -20691,6 +20659,18 @@
         "path": "webdriver/element_state/visibility_test.py"
       }, 
       {
+        "url": "/webdriver/modal/__init__.py", 
+        "path": "webdriver/modal/__init__.py"
+      }, 
+      {
+        "url": "/webdriver/modal/alerts_quit_test.py", 
+        "path": "webdriver/modal/alerts_quit_test.py"
+      }, 
+      {
+        "url": "/webdriver/modal/alerts_test.py", 
+        "path": "webdriver/modal/alerts_test.py"
+      }, 
+      {
         "url": "/webdriver/navigation/__init__.py", 
         "path": "webdriver/navigation/__init__.py"
       }, 
@@ -22425,5 +22405,5 @@
     ]
   }, 
   "local_changes": [], 
-  "rev": "60cfc669eca9548dbaea4782767c252b094d15a0"
+  "rev": "c7f8c512845a6254db88de322bd96920f0a285f1"
 }
