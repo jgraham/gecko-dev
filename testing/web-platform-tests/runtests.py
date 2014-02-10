@@ -8,8 +8,7 @@ deps = ['marionette',
         'mozprocess',
         'mozprofile',
         'mozrunner',
-        'mozinfo'
-       ]
+        'mozinfo']
 
 here = os.path.dirname(__file__)
 mozbase = os.path.realpath(os.path.join(here, '..', 'mozbase'))

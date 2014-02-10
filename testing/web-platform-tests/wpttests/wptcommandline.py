@@ -7,6 +7,7 @@ import os
 import argparse
 from multiprocessing import cpu_count
 
+from mozlog.structured import commandline
 
 def abs_path(path):
     return os.path.abspath(path)
@@ -35,14 +36,15 @@ def create_parser(allow_mandatory=True):
                         help="Test types to run")
     parser.add_argument("--processes", action="store", type=int, default=int(1.5 * cpu_count()),
                         help="Number of simultaneous processes to use")
-    parser.add_argument("--xvfb", action="store_true",
-                        help="Run processes that require the display under xvfb")
     parser.add_argument("--include", action="append", help="URL prefix to include")
-    parser.add_argument("--log-stdout", action="store_true", help="Enable logging to stdout")
-    parser.add_argument("-o", dest="output_file", action="store", help="File to write log to")
+
+    parser.add_argument("-o", dest="output_file", action="store", type=abs_path)
+    parser.add_argument("--log-stdout", action="store_true")
+
     if allow_mandatory:
         parser.add_argument("--product", action="store", choices=["firefox", "servo"],
                             default="firefox")
+    commandline.add_logging_group(parser)
     return parser
 
 
@@ -51,13 +53,17 @@ def create_parser_update():
                                      description="Update script for web-platform-tests tests.")
 
     parser.add_argument("--rev", action="store", help="Revision to sync to")
-    parser.add_argument("--run", action="store", choices=["try", "local", "logfile", "none"],
+    parser.add_argument("--run-type", action="store", choices=["try", "logfile"],
                         default="try", help="Place to run tests and update expected data")
-    #Should make this required iff run=local
-    parser.add_argument("--binary", action="store", type=abs_path,
-                        help="Binary to run tests against")
+    parser.add_argument("--no-check-clean", action="store_true", default=False,
+                        help="Don't check the working directory is clean before updating")
+    parser.add_argument("--no-expected", dest="update_expected",
+                        action="store_false", default=True,
+                        help="Don't update the expected results, just resync the tests")
+    parser.add_argument("--no-sync", dest="sync", action="store_false", default=True,
+                        help="Don't resync the tests, just update the expected results")
     #Should make this required iff run=logfile
-    parser.add_argument("--run-log", action="store", type=abs_path,
+    parser.add_argument("--run-log", action="append", type=abs_path,
                         help="Log file from run of tests")
     return parser
 

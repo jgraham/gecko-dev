@@ -35,13 +35,16 @@ class WebPlatformTestsRunner(MozbuildObject):
     """Run web platform tests."""
 
     def __init__(self, topsrcdir, settings, log_manager, topobjdir=None):
-        from wpttests import machlogging, structuredlog
+        from wpttests import machlogging
+        from mozlog.structured import structuredlog
+
         log_manager = machlogging.StructuredLoggingManager()
-        self._logger = structuredlog.getOutputLogger("WPT.mach")
+        self._logger = structuredlog.StructuredLogger("web-platform-tests.mach")
         MozbuildObject.__init__(self, log_manager, settings, log_manager, topobjdir)
 
     def run_tests(self, **kwargs):
         # TODO Bug 794506 remove once mach integrates with virtualenv.
+
         build_path = os.path.join(self.topobjdir, 'build')
         if build_path not in sys.path:
             sys.path.append(build_path)
@@ -57,13 +60,9 @@ class WebPlatformTestsRunner(MozbuildObject):
         if kwargs["metadata_root"] is None:
             kwargs["metadata_root"] = os.path.join(self.topobjdir, '_tests', 'web-platform-tests', "metadata")
 
-        output_file = kwargs.pop("output_file", None)
-        if output_file is not None:
-            kwargs["output_file"] = open(output_file, "w")
-
-
         kwargs["capture_stdio"] = False
 
+        logger = wptrunner.setup_logging(kwargs, {})
         self.log_manager.register_structured_logger(wptrunner.logger)
         self.log_manager.add_terminal_logging()
         result = wptrunner.run_tests(**kwargs)
@@ -73,18 +72,15 @@ class WebPlatformTestsRunner(MozbuildObject):
 class WebPlatformTestsUpdater(MozbuildObject):
     """Update web platform tests."""
     def __init__(self, topsrcdir, settings, log_manager, topobjdir=None):
-        from wpttests import machlogging, structuredlog
+        from wpttests import machlogging
+        from mozlog.structured import structuredlog
+
         log_manager = machlogging.StructuredLoggingManager()
-        self._logger = structuredlog.getOutputLogger("WPT.update.mach")
+        self._logger = structuredlog.StructuredLogger("web-platform-tests.update.mach")
         MozbuildObject.__init__(self, log_manager, settings, log_manager, topobjdir)
 
     def run_update(self, **kwargs):
         from wpttests import update
-
-        if kwargs["binary"] is None:
-            kwargs["binary"] = os.path.join(self.bindir, 'firefox')
-
-        print(kwargs)
 
         update.main(**kwargs)
 

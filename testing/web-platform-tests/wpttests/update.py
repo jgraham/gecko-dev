@@ -182,7 +182,21 @@ class Try(object):
         hg("qpop", repo=mozilla_tree.root)
         hg("qremove", patch_name, repo=mozilla_tree.root)
 
-class TryRunner(object):
+class Runner(object):
+    def __init__(self, config, bug):
+        self.bug = bug
+        self.config = config
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.cleanup()
+
+    def cleanup(self):
+        pass
+
+class TryRunner(Runner):
     def __init__(self, config, bug):
         self.bug = bug
         self.server = Try(config["try"]["url"])
@@ -203,31 +217,13 @@ class TryRunner(object):
         log_file.write(logs.read())
 
 
-class LocalRunner(object):
+class LogFilesRunner(Runner):
     def __init__(self, config, bug):
         self.config = config
         self.bug = bug
 
-    def do_run(self, mozilla_tree, log_file):
-        wptrunner.run_tests(binary=self.config["command-args"].get_path("binary"),
-                            tests_root=self.config["mozilla-central"].get_path("test_path"),
-                            metadata_root=self.config["mozilla-central"].get_path("metadata_path"),
-                            test_types=["testharness", "reftest"],
-                            output_file=log_file,
-                            processes=int(cpu_count() * 1.5),
-                            log_stdout=True)
-        log_file.seek(0)
-        with open("wpt-update.log", "w") as f:
-            f.write(log_file.read())
-
-class ExistingLogRunner(object):
-    def __init__(self, config, bug):
-        self.config = config
-        self.bug = bug
-
-    def do_run(self, mozilla_tree, log_file):
-        with open(self.config["command-args"]["run_log"]) as f:
-            log_file.write(f.read())
+    def do_run(self, mozilla_tree):
+        return self.config["command-args"]["run_log"]
 
 class ConfigDict(dict):
     def get_path(self, key):
@@ -250,87 +246,106 @@ def ensure_exists(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-
-def main(**kwargs):
-    config = read_config(kwargs)
-
-    sync_path = config["web-platform-tests"].get_path("sync_path")
-    test_path = config["mozilla-central"].get_path("test_path")
-    metadata_path = config["mozilla-central"].get_path("metadata_path")
-
-    ensure_exists(sync_path)
-    ensure_exists(test_path)
-    ensure_exists(metadata_path)
-
-    mozilla_tree = MozillaTree()
-    if not mozilla_tree.is_clean():
-        sys.stderr.write("Working tree is not clean\n")
-        sys.exit(1)
-
-    #bug = bz.create_bug("Doing update of web-platform tests")
-    bug = None
-
-    rev = config["command-args"].get("rev")
-    if rev is None:
-        rev = config["web-platform-tests"].get("branch", "master")
-
-    wpt = WebPlatformTests(config["web-platform-tests"]["remote_url"],
-                           sync_path,
-                           rev=rev)
-
+def sync_tests(config, paths, mozilla_tree, wpt, bug):
     wpt.update()
+
     try:
         #bug.comment("Updating to %s" % wpt.rev)
-        initial_metadata = metadata.TestsMetadata(sync_path, metadata_path)
-        initial_rev = initial_metadata.rev
-        wpt.copy_work_tree(test_path)
-        initial_metadata.update_manifest(force_rebuild=True)
+        initial_manifest = metadata.load_test_manifest(paths["sync"], paths["metadata"])
+        wpt.copy_work_tree(paths["test"])
+        new_manifest= metadata.update_manifest(paths["sync"], paths["metadata"])
 
         mozilla_tree.create_patch("web-platform-tests_update_%s"  % wpt.rev,
                                   "Bug %i - Update web-platform-tests to revision %s" % (
                                       bug.id if bug else 0, wpt.rev
                                   ))
-        mozilla_tree.add_new(os.path.relpath(test_path, mozilla_tree.root))
-        mozilla_tree.refresh_patch(include=[test_path, metadata_path])
-
-        if config["command-args"]["run"] != "none":
-            runner = {"try": TryRunner,
-                      "local": LocalRunner,
-                      "logfile": ExistingLogRunner}[config["command-args"]["run"]](config, bug)
-
-            with tempfile.TemporaryFile() as log_file:
-                runner.do_run(mozilla_tree, log_file)
-                log_file.seek(0)
-                mozilla_tree.create_patch("web-platform-tests_update_%s_metadata"  % wpt.rev,
-                                          "Bug %i - Update web-platform-tests expected data to revision %s" % (
-                                              bug.id if bug else 0, wpt.rev
-                                          ))
-                needs_human = metadata.update(sync_path, metadata_path, log_file, rev_old=initial_rev)
-                if not mozilla_tree.is_clean():
-                    mozilla_tree.add_new(os.path.relpath(metadata_path, mozilla_tree.root))
-                    mozilla_tree.refresh_patch(include=[metadata_path])
-
-        sys.exit(1)
-
-        #Need to be more careful about only operating on patches that we have actually added
-
-        mozilla_tree.commit_patch_queue()
-
-        patch = mozilla_tree.make_patches()
-        bug.upload_patch(patch)
-
-        if not needs_human:
-            #bug.request_checkin() or mozilla_tree.push()
-            pass
-        else:
-            #bug.comment("Not auto updating because of unexpected changes in the following files: ")
-            pass
+        mozilla_tree.add_new(os.path.relpath(paths["test"], mozilla_tree.root))
+        mozilla_tree.refresh_patch(include=[paths["test"], paths["metadata"]])
     except Exception as e:
         #bug.comment("Update failed with error:\n %s" % traceback.format_exc())
         sys.stderr.write(traceback.format_exc())
         raise
     finally:
         pass#wpt.clean()
+
+    return initial_manifest, new_manifest
+
+def update_metadata(config, paths, mozilla_tree, wpt, initial_rev, bug):
+    try:
+        runner_cls = {"try": TryRunner,
+                      "logfile": LogFilesRunner}[config["command-args"]["run_type"]]
+
+        with runner_cls(config, bug) as runner:
+            log_files = runner.do_run(mozilla_tree)
+            mozilla_tree.create_patch("web-platform-tests_update_%s_metadata"  % wpt.rev,
+                                      "Bug %i - Update web-platform-tests expected data to revision %s" % (
+                                          bug.id if bug else 0, wpt.rev
+                                      ))
+            needs_human = metadata.update_expected(paths["sync"],
+                                                   paths["metadata"],
+                                                   log_files,
+                                                   rev_old=initial_rev)
+            if not mozilla_tree.is_clean():
+                mozilla_tree.add_new(os.path.relpath(paths["metadata"], mozilla_tree.root))
+                mozilla_tree.refresh_patch(include=[paths["metadata"]])
+    except Exception as e:
+        #bug.comment("Update failed with error:\n %s" % traceback.format_exc())
+        sys.stderr.write(traceback.format_exc())
+        raise
+    finally:
+        pass#wpt.clean()
+
+
+def main(**kwargs):
+    config = read_config(kwargs)
+
+    paths = {"sync": config["web-platform-tests"].get_path("sync_path"),
+             "test": config["mozilla-central"].get_path("test_path"),
+             "metadata": config["mozilla-central"].get_path("metadata_path")}
+
+    for path in paths.itervalues():
+        ensure_exists(path)
+
+    mozilla_tree = MozillaTree()
+    if not mozilla_tree.is_clean():
+        sys.stderr.write("Working tree is not clean\n")
+        if not config["command-args"]["no_check_clean"]:
+            sys.exit(1)
+
+    rev = config["command-args"].get("rev")
+    if rev is None:
+        rev = config["web-platform-tests"].get("branch", "master")
+
+    wpt = WebPlatformTests(config["web-platform-tests"]["remote_url"],
+                           paths["sync"],
+                           rev=rev)
+
+    #bug = bz.create_bug("Doing update of web-platform tests")
+    bug = None
+
+    initial_rev = None
+    if config["command-args"]["sync"]:
+        initial_manifest, new_manifest = sync_tests(config, paths, mozilla_tree, wpt, bug)
+        initial_rev = initial_manifest.rev
+
+    if config["command-args"]["update_expected"]:
+        update_metadata(config, paths, mozilla_tree, wpt, initial_rev, bug)
+
+    sys.exit(1)
+
+    #Need to be more careful about only operating on patches that we have actually added
+
+    mozilla_tree.commit_patch_queue()
+
+    patch = mozilla_tree.make_patches()
+    bug.upload_patch(patch)
+
+    if not needs_human:
+        #bug.request_checkin() or mozilla_tree.push()
+        pass
+    else:
+        #bug.comment("Not auto updating because of unexpected changes in the following files: ")
+        pass
 
 if __name__ == "__main__":
     main(run="try")

@@ -5,11 +5,7 @@
 DEFAULT_TIMEOUT = 10 #seconds
 LONG_TIMEOUT = 60 #seconds
 
-import structuredlog
-
 import mozinfo
-
-logger = structuredlog.getOutputLogger("WPT")
 
 #These are quite similar to moztest, but slightly different
 class Result(object):
@@ -45,18 +41,18 @@ class TestharnessSubtestResult(SubtestResult):
     default_expected = "PASS"
     statuses = set(["PASS", "FAIL", "TIMEOUT", "NOTRUN"])
 
-class RunInfo(object):
+class RunInfo(dict):
     def __init__(self, debug):
-        self.platform = mozinfo.info
-        self.debug = debug
+        self.update(mozinfo.info)
+        self["debug"] = debug
 
 class Test(object):
     result_cls = None
     subtest_result_cls = None
 
-    def __init__(self, url, expected, timeout=None, path=None):
+    def __init__(self, url, expected_metadata, timeout=None, path=None):
         self.url = url
-        self.expected = expected
+        self._expected_metadata = expected_metadata
         self.timeout = timeout
         self.path = path
 
@@ -67,19 +63,41 @@ class Test(object):
     def id(self):
         return self.url
 
-    def disabled(self, run_info, subtest=None):
-        if subtest is None:
-            subtest = "FILE"
+    @property
+    def keys(self):
+        return tuple()
 
-        return self.expected.get(subtest=subtest, key="disabled") is not None
+    def _get_metadata(self, subtest):
+        if self._expected_metadata is None:
+            return None
 
-    def expected_status(self, run_info, subtest=None):
+        if subtest is not None:
+            metadata = self._expected_metadata.get_subtest(subtest)
+        else:
+            metadata = self._expected_metadata
+        return metadata
+
+    def disabled(self, subtest=None):
+        metadata = self._get_metadata(subtest)
+        if metadata is None:
+            return False
+
+        return metadata.disabled()
+
+    def expected(self, subtest=None):
         if subtest is None:
             default = self.result_cls.default_expected
         else:
             default = self.subtest_result_cls.default_expected
-        return self.expected.get(subtest=subtest, key="status", default=default).upper()
 
+        metadata = self._get_metadata(subtest)
+        if metadata is None:
+            return default
+
+        try:
+            return metadata.get("expected")
+        except KeyError:
+            return default
 
 class TestharnessTest(Test):
     result_cls = TestharnessResult
@@ -104,7 +122,7 @@ class ReftestTest(Test):
         if ref_type not in ("==", "!="):
             raise ValueError
         self.ref_type = ref_type
-        self.expected = expected
+        self._expected_metadata = expected
         self.timeout = timeout
         self.path = path
 
@@ -112,10 +130,16 @@ class ReftestTest(Test):
     def id(self):
         return self.url, self.ref_type, self.ref_url
 
-def from_manifest(manifest_test, test_metadata):
-    test_cls = {"reftest":ReftestTest,
-                "testharness":TestharnessTest,
-                "manual":ManualTest}[manifest_test.item_type]
+    @property
+    def keys(self):
+        return ("reftype", "refurl")
+
+manifest_test_cls = {"reftest":ReftestTest,
+                     "testharness":TestharnessTest,
+                     "manual":ManualTest}
+
+def from_manifest(manifest_test, expected_metadata):
+    test_cls = manifest_test_cls[manifest_test.item_type]
 
     timeout = LONG_TIMEOUT if manifest_test.timeout == "long" else DEFAULT_TIMEOUT
 
@@ -123,11 +147,11 @@ def from_manifest(manifest_test, test_metadata):
         return test_cls(manifest_test.url,
                         manifest_test.ref_url,
                         manifest_test.ref_type,
-                        test_metadata.get_expected(manifest_test),
+                        expected_metadata,
                         timeout=timeout,
                         path=manifest_test.path)
     else:
         return test_cls(manifest_test.url,
-                        test_metadata.get_expected(manifest_test),
+                        expected_metadata,
                         timeout=timeout,
                         path=manifest_test.path)

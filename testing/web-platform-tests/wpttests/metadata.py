@@ -6,48 +6,62 @@ import sys
 import os
 import subprocess
 from collections import defaultdict
-import copy
-import itertools
+import types
+import tempfile
+import shutil
+import uuid
+from collections import defaultdict
 
-import structuredlog
+from mozlog.structured import structuredlog
+from mozlog.structured import reader
+
 import wpttest
 import expected
 from vcs import git
+import manifestupdate
+import expected
+import mozmanifest
 manifest = None # Module that will be imported relative to test_root
 
-logger = structuredlog.getOutputLogger("WPT")
+logger = structuredlog.StructuredLogger("web-platform-tests")
 
-# Inputs
-#   - Old SHA1, New SHA1, old expected results, run log (from build that was previously green)
+def manifest_path(metadata_root):
+    return os.path.join(metadata_root, "MANIFEST.json")
 
-# Outputs:
-#   - New expected results
+def load_test_manifest(test_root, metadata_root):
+    do_test_relative_imports(test_root)
+    return manifest.load(manifest_path(metadata_root))
 
-#Possibilities:
-# * New test
-#   - Use results as expected results
+def update_manifest(git_root, metadata_root):
+    manifest.setup_git(git_root)
+    #Create an entirely new manifest
+    new_manifest = manifest.Manifest(None)
+    manifest.update(new_manifest)
+    manifest.write(new_manifest, manifest_path(metadata_root))
+    return new_manifest
 
-# Existing test
-#  * Result is expected
-#    - Use existing expected
-#  * Test is disabled
-#    * File unchanged
-#      - Test wasn't run so no change
-#    * File changed
-#      - Notify so test can be reexamined
-#      - Improves if we can also detect changes in helper files
-#  * Result is changed
-#    * File changed
-#      - use new result
-#    * File unchanged
-#      - manual review
+def update_expected(test_root, metadata_root, log_file_names, rev_old=None, rev_new="HEAD"):
+    """Update the metadata files for web-platform-tests based on
+    the results obtained in a previous run"""
 
-# Test removed
-#  - Delete expected result
+    manifest = load_test_manifest(test_root, metadata_root)
 
-# Open issues
-#
-# - Results from multiple platforms/configurations
+    if rev_old is not None:
+        rev_old = git("rev-parse", rev_old, repo=test_root).strip()
+    rev_new = git("rev-parse", rev_new, repo=test_root).strip()
+
+    if rev_old is not None:
+        change_data = load_change_data(rev_old, rev_new, repo=test_root)
+    else:
+        change_data = {}
+
+    expected_map = update_from_logs(metadata_root, manifest, *log_file_names)
+
+    write_changes(metadata_root, expected_map)
+
+    results_changed = [item for item in expected_map.itervalues() if item.modified]
+
+    return unexpected_changes(change_data, results_changed)
 
 def do_test_relative_imports(test_root):
     global manifest
@@ -83,243 +97,265 @@ def load_change_data(rev_old, rev_new, repo):
         rv[item[1]] = status_keys[item[0]]
     return rv
 
-
-def test_id(item):
-    if isinstance(item, list):
-        test_id = tuple(item)
-    else:
-        test_id = item
-    return test_id
-
-
-class TestsMetadata(object):
-    def __init__(self, test_root, metadata_root):
-        self.test_root = test_root
-        self.metadata_root = metadata_root
-        self.manifest_path = os.path.abspath(os.path.join(self.metadata_root, "MANIFEST.json"))
-        self.manifest = self._load_manifest(test_root)
-
-        self.rev = self.manifest.rev
-
-    def _load_manifest(self, test_root):
-        if manifest is None:
-            do_test_relative_imports(test_root)
-
-        logger.debug("Using manifest at %s" % self.manifest_path)
-        test_manifest = manifest.load(self.manifest_path)
-        return test_manifest
-
-    def update_manifest(self, force_rebuild=False):
-        manifest.setup_git(self.test_root)
-        if force_rebuild:
-            self.manifest = manifest.Manifest(None)
-        manifest.update(self.manifest)
-        manifest.write(self.manifest, self.manifest_path)
-
-    def get_expected(self, test):
-        expected_path = os.path.join(self.metadata_root, test.path + ".ini")
-        if not os.path.exists(expected_path):
-            expected_data = expected.ExpectedData(expected_path)
-        else:
-            with open(expected_path) as f:
-                expected_data = expected.load(f, expected_path)
-        return expected_data
-
-
-class ResultCollection(object):
-    def __init__(self):
-        self.harness = None
-        self.subtests = {}
-
-
-def load_results(tests, log_data):
-    rv = {}
-    for item in structuredlog.action_filter(log_data,
-                                            set(["test_start", "test_end", "test_status"])):
-        if item["action"] == "test_start":
-            id = test_id(item["test"])
-            rv[id] = ResultCollection()
-        elif item["action"] == "test_end":
-            try:
-                id = test_id(item["test"])
-                test = tests[id]
-                rv[id].harness = test.result_cls(item["status"],
-                                                 item.get("message", None),
-                                                 item.get("expected", None))
-            except KeyError:
-                print rv
-        elif item["action"] == "test_status":
-            id = test_id(item["test"])
-            test = tests[id]
-            rv[id].subtests[item["subtest"]] = test.subtest_result_cls(item["subtest"],
-                                                                       item["status"],
-                                                                       item.get("message", None),
-                                                                       item.get("expected", None))
+def unexpected_changes(change_data, files_changed):
+    rv = []
+    for fn in files_changed:
+        if change_data.get(fn) != "M":
+            rv.append(fn)
     return rv
 
-def delete_old_expected(metadata_root, manifest):
-    possible_paths = set()
-    for test_type, items in manifest:
-        for item in items:
-            if item.item_type not in ("helper", "manual"):
-                possible_paths.add(os.path.join(metadata_root, item.path + ".ini"))
+# For each testrun
+# Load all files and scan for the suite_start entry
+# Build a hash of filename: properties
+# For each different set of properties, gather all chunks
+# For each chunk in the set of chunks, go through all tests
+# for each test, make a map of {conditionals: [(platform, new_value)]}
+# Repeat for each platform
+# For each test in the list of tests:
+#   for each conditional:
+#      If all the new values match (or there aren't any) retain that conditional
+#      If any new values mismatch mark the test as needing human attention
+#   Check if all the RHS values are the same; if so collapse the conditionals
 
-    for path, dirnames, filenames in os.walk(metadata_root):
-        for filename in filenames:
-            if filename.endswith(".ini"):
-                file_path = os.path.join(path, filename)
-                if file_path not in possible_paths:
-                    logger.info("Deleting old expected file %s" % file_path)
-                    os.unlink(file_path)
+def update_from_logs(metadata_path, manifest, *log_filenames):
+    expected_map, id_path_map = create_test_tree(metadata_path, manifest)
+    updater = ExpectedUpdater(expected_map, id_path_map)
+    for log_filename in log_filenames:
+        with open(log_filename) as f:
+            updater.update_from_log(f)
 
-def update_expected(run_info, change_data, tests, results):
-    tests_needing_review = set()
+    for tree in expected_map.itervalues():
+        for test in tree.iterchildren():
+            for subtest in test.iterchildren():
+                subtest.coalesce_expected()
+            test.coalesce_expected()
 
-    for test_id, test in tests.iteritems():
-        result = results.get(test_id, None)
-
-        new_expected, needs_review = new_expected_test(test,
-                                                       run_info,
-                                                       result,
-                                                       change_data.get(test.path,
-                                                                       "unchanged"))
-
-        expected_path = test.expected.path
-        if os.path.exists(expected_path):
-            os.unlink(expected_path)
-
-        if new_expected is not None and not new_expected.empty():
-            expected_dir = os.path.split(expected_path)[0]
-            if not os.path.exists(expected_dir):
-                os.makedirs(expected_dir)
-
-            with open(expected_path, "w") as f:
-                expected.dump(new_expected, f)
-
-        if needs_review:
-            tests_needing_review.add(test)
-
-    return tests_needing_review
-
-def new_expected_test(test, run_info, result, change_status):
-    review_needed = False
-    if result:
-        assert not test.disabled(run_info)
-        new_expected, review_needed  = get_new_expected(test,
-                                                        run_info,
-                                                        result,
-                                                        change_status)
-    #Need some run_info to pass in here
-    elif test.disabled(run_info):
-        new_expected = test.expected.copy()
-    else:
-        logger.error("Missing result for test %s" % (test.id,))
-        new_expected = None
-
-    return new_expected, review_needed
+    return expected_map
 
 
-def get_new_expected(test, run_info, result, change_status):
-    if change_status not in ["new", "modified", "unchanged"]:
-        raise ValueError, "Unexpected change status " + change_status
+def write_changes(metadata_path, expected_map):
+    #First write the new manifest files to a temporary directory
+    temp_path = tempfile.mkdtemp()
+    write_new_expected(temp_path, expected_map)
+    shutil.copyfile(os.path.join(metadata_path, "MANIFEST.json"),
+                    os.path.join(temp_path, "MANIFEST.json"))
 
-    if change_status == "new":
-        if not test.expected.empty():
-            logger.error("%r had status new, but already has expected data" % test.id)
+    #Then move the old manifest files to a new location
+    temp_path_2 = metadata_path + str(uuid.uuid4)
+    os.rename(metadata_path, temp_path_2)
+    #Move the new files to the destination location and remove the old files
+    os.rename(temp_path, metadata_path)
+    shutil.rmtree(temp_path_2)
 
-    new_expected = test.expected.copy()
+def write_new_expected(metadata_path, expected_map):
+    #Serialize the data back to a file
+    for tree in expected_map.itervalues():
+        if not tree.is_empty:
+            manifest_str = mozmanifest.serialize(tree.node, skip_empty_data=True)
+            assert manifest_str != ""
+            path = expected.expected_path(metadata_path, tree.test_path)
+            dir = os.path.split(path)[0]
+            if not os.path.exists(dir):
+                os.makedirs(dir)
+            with open(path, "w") as f:
+                f.write(manifest_str.encode("utf8"))
 
-    review_needed = False
+class ExpectedUpdater(object):
+    def __init__(self, expected_tree, id_path_map):
+        self.expected_tree = expected_tree
+        self.id_path_map = id_path_map
+        self.run_info = None
+        self.action_map = {"suite_start": self.suite_start,
+                           "test_start": self.test_start,
+                           "test_status": self.test_status,
+                           "test_end": self.test_end}
+        self.tests_visited = {}
 
-    for subtest_name, subtest_result in itertools.chain([(None, result.harness)],
-                                                        result.subtests.iteritems()):
-        if subtest_result is None:
-            print test.id, subtest_name
+        self.test_cache = {}
 
-        updated_unchanged = set_expected_status(new_expected,
-                                                subtest_name,
-                                                    change_status,
-                                                subtest_result.status,
-                                                subtest_result.expected,
-                                                subtest_result.default_expected)
-        review_needed = review_needed or updated_unchanged
+    def update_from_log(self, log_file):
+        self.run_info = None
+        log_reader = reader.read(log_file)
+        print log_reader
+        for map_value in reader.map_action(log_reader,
+                                           self.action_map):
+            # Ignore the return value
+            pass
+
+    def suite_start(self, data):
+        self.run_info = data["run_info"]
+
+    def test_id(self, id):
+        if type(id) in types.StringTypes:
+            return id
+        else:
+            return tuple(id)
+
+    def test_start(self, data):
+        test_id = self.test_id(data["test"])
+        test = self.expected_tree[self.id_path_map[test_id]].get_test(test_id)
+        self.test_cache[test_id] = test
+
+        if test_id not in self.tests_visited:
+            self.tests_visited[test_id] = set()
+
+    def test_status(self, data):
+        test_id = self.test_id(data["test"])
+        test = self.test_cache[test_id]
+        test_cls = wpttest.manifest_test_cls[test.test_type]
+
+        subtest = test.get_subtest(data["subtest"])
+
+        self.tests_visited[test.id].add(data["subtest"])
+
+        result = test_cls.subtest_result_cls(
+            data["subtest"],
+            data["status"],
+            data["message"] if "message" in data else None)
+
+        subtest.set_result(self.run_info, result)
 
 
-    #Remove tests that weren't run
-    missing_tests = set()
-    for subtest in new_expected.iter_subtests():
-        if subtest not in result.subtests and not test.disabled(run_info, subtest):
-            missing_tests.add(subtest)
-            if change_status == "unchanged":
-                review_needed = True
+    def test_end(self, data):
+        test_id = self.test_id(data["test"])
+        test = self.test_cache[test_id]
+        test_cls = wpttest.manifest_test_cls[test.test_type]
 
-    for subtest in missing_tests:
-        new_expected.remove_subtest(subtest)
+        result = test_cls.result_cls(
+            data["status"],
+            data["message"] if "message" in data else None)
 
-    return new_expected, review_needed
+        test.set_result(self.run_info, result)
+        del self.test_cache[test_id]
+
+def create_test_tree(metadata_path, manifest):
+    expected_map = {}
+    test_id_path_map = {}
+    exclude_types = frozenset(["helper", "manual"])
+    for test_path, tests in manifest:
+        # This is a very silly way to exclude types
+        # but the API in manifest.py should be updated
+        if list(tests)[0].item_type in exclude_types:
+            continue
+
+        expected_data = load_expected(metadata_path, test_path, tests)
+        if expected_data is None:
+            expected_data = create_expected(test_path, tests)
+        expected_map[test_path] = expected_data
+
+        for test in tests:
+            test_id_path_map[test.id] = test_path
+
+    return expected_map, test_id_path_map
+
+def create_expected(test_path, tests):
+    expected = manifestupdate.ExpectedManifest(None, test_path)
+    for test in tests:
+        expected.append(manifestupdate.TestNode.create(test.item_type, test.id))
+    return expected
+
+def load_expected(metadata_path, test_path, tests):
+    expected_manifest = manifestupdate.get_manifest(metadata_path, test_path)
+    if expected_manifest is None:
+        return
+
+    tests_by_id = {(item.id, item) for item in tests}
+
+    # Remove expected data for tests that no longer exist
+    for test in expected_manifest.iterchildren():
+        if not test.id in tests_by_id:
+            test.remove()
+
+    # Add tests that don't have expected data
+    for test in tests:
+        if not expected_manifest.has_test(test.id):
+            expected_manifest.append(manifestupdate.TestNode.create(test.item_type, test.id))
+
+    return expected
 
 
-def set_expected_status(new_expected, subtest_name, change_status, status,
-                        expected, default_expected):
-    if expected is not None:
-        #Result was unexpected
-        if status != default_expected:
-            if not new_expected.has_subtest(subtest_name):
-                new_expected.add_subtest(subtest_name)
-            new_expected.set(subtest_name, "status", status)
 
-        elif new_expected.has_subtest(subtest_name):
-            new_expected.clear(subtest_name, "status")
+def group_conditionals(values):
+    by_property = defaultdict(set)
+    for status, run_info_values in values.iteritems():
+        for run_info in run_info_values:
+            for prop_name, prop_value in run_info.iteritems():
+                by_property[(prop_name, prop_value)].add(status)
 
-        return change_status == "unchanged"
+    for key, statuses in by_property.copy().iteritems():
+        if len(statuses) == len(values.keys()):
+            del by_property[key]
 
-    return False
+    properties = set(item[0] for item in by_property.iterkeys())
 
-def load_tests(tests_metadata):
-    rv = {}
+    prop_order = ["debug", "os", "version", "processor", "bits"]
+    include_props = []
 
-    for path, items in tests_metadata.manifest:
-        for manifest_item in items:
-            if manifest_item.item_type in ("manual", "helper"):
+    for prop in prop_order:
+        if prop in properties:
+            include_props.append(prop)
+
+    conditions = {}
+
+    for status, run_info_values in values.iteritems():
+        for run_info in run_info_values:
+            prop_set = tuple((prop, run_info[prop]) for prop in include_props)
+            if prop_set in conditions:
                 continue
 
-            test = wpttest.from_manifest(manifest_item, tests_metadata)
+            expr = make_expr(prop_set, status)
+            conditions[prop_set] = (expr, status)
 
-            rv[test.id] = test
-    return rv
+    return conditions.values()
 
-def update(test_root, metadata_root, log, rev_old=None, rev_new="HEAD"):
-    """Update the metadata files for web-platform-tests based on
-    the results obtained in a previous run"""
+def make_expr(prop_set, status):
+    """Create an AST that returns the value ``status`` given all the
+    properties in prop_set match."""
+    if len(prop_set) == 0:
+        return mozmanifest.ValueNode(status)
 
-    warnings = {}
-    statuses = {}
+    root = mozmanifest.ConditionalNode()
 
-    tests_metadata = TestsMetadata(test_root, metadata_root)
+    no_value_props = set(["debug"])
 
-    if rev_old is None:
-        rev_old = tests_metadata.rev
-
-    if rev_old is not None:
-        rev_old = git("rev-parse", rev_old, repo=test_root).strip()
-    rev_new = git("rev-parse", rev_new, repo=test_root).strip()
-
-    if rev_old is not None:
-        change_data = load_change_data(rev_old, rev_new, repo=test_root)
+    expressions = []
+    for prop, value in prop_set:
+        number_types = (int, float, long)
+        value_cls = (mozmanifest.NumberNode
+                     if type(value) in number_types
+                     else mozmanifest.StringNode)
+        print prop, prop in no_value_props
+        if prop not in no_value_props:
+            expressions.append(
+                mozmanifest.BinaryExpressionNode(
+                    mozmanifest.BinaryOperatorNode("=="),
+                    mozmanifest.VariableNode(prop),
+                    value_cls(value)
+            ))
+        else:
+            if value:
+                expressions.append(mozmanifest.VariableNode(prop))
+            else:
+                expressions.append(
+                    mozmanifest.UnaryExpressionNode(
+                        mozmanifest.UnaryOperatorNode("not"),
+                        mozmanifest.VariableNode(prop)
+                    ))
+    if len(expressions) > 1:
+        prev = expressions[-1]
+        for curr in reversed(expressions[:-1]):
+            node = mozmanifest.BinaryExpressionNode(
+                mozmanifest.BinaryOperatorNode("and"),
+                curr,
+                prev)
+            prev = node
     else:
-        change_data = {}
+        node = expressions[0]
 
-    run_info = wpttest.RunInfo(False)
+    root.append(node)
+    root.append(mozmanifest.StringNode(status))
 
-    tests = load_tests(tests_metadata)
-
-    test_results = load_results(tests, structuredlog.read_logs(log))
-
-    delete_old_expected(metadata_root, tests_metadata.manifest)
-
-    tests_needing_review = update_expected(run_info, change_data, tests, test_results)
-    return tests_needing_review
-
+    return root
 
 if __name__ == "__main__":
     args = sys.argv[1:]
