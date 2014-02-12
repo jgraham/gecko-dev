@@ -1173,10 +1173,12 @@ ScriptFrameIter::numFrameSlots() const
     switch (data_.state_) {
       case DONE:
         break;
-     case JIT: {
+      case JIT: {
 #ifdef JS_ION
-        if (data_.ionFrames_.isOptimizedJS())
-            return ionInlineFrames_.snapshotIterator().slots() - ionInlineFrames_.script()->nfixed();
+        if (data_.ionFrames_.isOptimizedJS()) {
+            return ionInlineFrames_.snapshotIterator().allocations() -
+                ionInlineFrames_.script()->nfixed();
+        }
         jit::BaselineFrame *frame = data_.ionFrames_.baselineFrame();
         return frame->numValueSlots() - data_.ionFrames_.script()->nfixed();
 #else
@@ -1201,7 +1203,7 @@ ScriptFrameIter::frameSlotValue(size_t index) const
         if (data_.ionFrames_.isOptimizedJS()) {
             jit::SnapshotIterator si(ionInlineFrames_.snapshotIterator());
             index += ionInlineFrames_.script()->nfixed();
-            return si.maybeReadSlotByIndex(index);
+            return si.maybeReadAllocByIndex(index);
         }
 
         index += data_.ionFrames_.script()->nfixed();
@@ -1220,10 +1222,17 @@ ScriptFrameIter::frameSlotValue(size_t index) const
 #endif
 
 #ifdef DEBUG
-/* static */
-bool NonBuiltinScriptFrameIter::includeSelfhostedFrames() {
-    static char* env = getenv("MOZ_SHOW_ALL_JS_FRAMES");
-    return (bool)env;
+bool
+js::SelfHostedFramesVisible()
+{
+    static bool checked = false;
+    static bool visible = false;
+    if (!checked) {
+        checked = true;
+        char *env = getenv("MOZ_SHOW_ALL_JS_FRAMES");
+        visible = !!env;
+    }
+    return visible;
 }
 #endif
 
