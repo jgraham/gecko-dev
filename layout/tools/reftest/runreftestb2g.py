@@ -415,6 +415,7 @@ class B2GRemoteReftest(RefTest):
         prefs["browser.homescreenURL"] = "app://test-container.gaiamobile.org/index.html"
         prefs["browser.manifestURL"] = "app://test-container.gaiamobile.org/manifest.webapp"
         prefs["browser.tabs.remote"] = True 
+        prefs["browser.tabs.remote.autostart"] = True
         prefs["dom.ipc.tabs.disabled"] = False
         prefs["dom.mozBrowserFramesEnabled"] = True
         prefs["font.size.inflation.emPerLine"] = 0
