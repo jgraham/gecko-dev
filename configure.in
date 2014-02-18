@@ -5033,6 +5033,8 @@ dnl enable once PeerConnection lands
     MOZ_SRTP=1
     AC_DEFINE(MOZ_SCTP)
     AC_DEFINE(MOZ_SRTP)
+else
+    MOZ_SYNTH_PICO=
 fi
 
 AC_SUBST(MOZ_WEBRTC)
@@ -8615,6 +8617,11 @@ AC_SUBST(MOZ_FOLD_LIBS)
 
 AC_SUBST(MOZ_ENABLE_SZIP)
 AC_SUBST(MOZ_SZIP_FLAGS)
+
+if test "$MOZ_DEBUG"; then
+    MOZ_EM_DEBUG=1
+fi
+AC_SUBST(MOZ_EM_DEBUG)
 
 if test -n "$COMPILE_ENVIRONMENT"; then
 AC_MSG_CHECKING([for posix_fallocate])
