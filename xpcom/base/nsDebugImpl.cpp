@@ -8,6 +8,10 @@
 
 #include "mozilla/Atomics.h"
 
+#include <vector>
+#include <string>
+#include <cstdio>
+
 #include "nsDebugImpl.h"
 #include "nsDebug.h"
 #ifdef MOZ_CRASHREPORTER
@@ -75,6 +79,9 @@ static const char *sMultiprocessDescription = nullptr;
 
 static Atomic<int32_t> gAssertionCount;
 
+// Yeah, this is not even kind of thread safe.
+static std::vector<std::string> gAssertionList;
+
 NS_IMPL_QUERY_INTERFACE2(nsDebugImpl, nsIDebug, nsIDebug2)
 
 NS_IMETHODIMP_(nsrefcnt)
@@ -133,6 +140,11 @@ NS_IMETHODIMP
 nsDebugImpl::GetAssertionCount(int32_t* aResult)
 {
   *aResult = gAssertionCount;
+  while (!gAssertionList.empty()) {
+    const std::string& cur = gAssertionList.back();
+    printf_stderr("###AssertRecord: %s\n", cur.c_str());
+    gAssertionList.pop_back();
+  }
   return NS_OK;
 }
 
@@ -256,7 +268,7 @@ StuffFixedBuffer(void *closure, const char *buf, uint32_t len)
 {
   if (!len)
     return 0;
-  
+
   FixedBuffer *fb = (FixedBuffer*) closure;
 
   // strip the trailing null, we add it again later
@@ -383,6 +395,14 @@ NS_DebugBreak(uint32_t aSeverity, const char *aStr, const char *aExpr,
    // Now we deal with assertions
    gAssertionCount++;
 
+   char assertBuffer[1024];
+   std::sprintf(assertBuffer, "[%d] %s: %s: `%s`, in %s:%d",
+                base::GetCurrentProcId(),
+                sevString,
+                aStr, aExpr, aFile, aLine);
+
+   gAssertionList.push_back(std::string(assertBuffer));
+
    switch (GetAssertBehavior()) {
    case NS_ASSERT_WARN:
      return;
@@ -412,7 +432,7 @@ NS_DebugBreak(uint32_t aSeverity, const char *aStr, const char *aExpr,
    case NS_ASSERT_UNINITIALIZED: // Default to "trap" behavior
      Break(buf.buffer);
      return;
-   }   
+   }
 }
 
 static void
@@ -465,7 +485,7 @@ Break(const char *aMsg)
   if ((ignoreDebugger == 2) || !::IsDebuggerPresent()) {
     DWORD code = IDRETRY;
 
-    /* Create the debug dialog out of process to avoid the crashes caused by 
+    /* Create the debug dialog out of process to avoid the crashes caused by
      * Windows events leaking into our event loop from an in process dialog.
      * We do this by launching windbgdlg.exe (built in xpcom/windbgdlg).
      * See http://bugzilla.mozilla.org/show_bug.cgi?id=54792
@@ -503,7 +523,7 @@ Break(const char *aMsg)
       raise(SIGABRT);
       //If we are ignored exit this way..
       _exit(3);
-         
+
     case IDIGNORE:
       return;
     }
