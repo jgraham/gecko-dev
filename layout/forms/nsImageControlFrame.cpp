@@ -22,7 +22,7 @@ IntPointDtorFunc(void *aObject, nsIAtom *aPropertyName,
 }
 
 
-#define nsImageControlFrameSuper nsImageFrame
+typedef nsImageFrame nsImageControlFrameSuper;
 class nsImageControlFrame : public nsImageControlFrameSuper,
                             public nsIFormControlFrame
 {
@@ -30,7 +30,7 @@ public:
   nsImageControlFrame(nsStyleContext* aContext);
   ~nsImageControlFrame();
 
-  virtual void DestroyFrom(nsIFrame* aDestructRoot);
+  virtual void DestroyFrom(nsIFrame* aDestructRoot) MOZ_OVERRIDE;
   virtual void Init(nsIContent*      aContent,
                     nsIFrame*        aParent,
                     nsIFrame*        aPrevInFlow) MOZ_OVERRIDE;
@@ -38,32 +38,33 @@ public:
   NS_DECL_QUERYFRAME
   NS_DECL_FRAMEARENA_HELPERS
 
-  virtual nsresult Reflow(nsPresContext*          aPresContext,
-                    nsHTMLReflowMetrics&     aDesiredSize,
-                    const nsHTMLReflowState& aReflowState,
-                    nsReflowStatus&          aStatus);
+  virtual nsresult Reflow(nsPresContext*           aPresContext,
+                          nsHTMLReflowMetrics&     aDesiredSize,
+                          const nsHTMLReflowState& aReflowState,
+                          nsReflowStatus&          aStatus) MOZ_OVERRIDE;
 
   virtual nsresult HandleEvent(nsPresContext* aPresContext,
-                         WidgetGUIEvent* aEvent,
-                         nsEventStatus* aEventStatus);
+                               WidgetGUIEvent* aEvent,
+                               nsEventStatus* aEventStatus) MOZ_OVERRIDE;
 
-  virtual nsIAtom* GetType() const;
+  virtual nsIAtom* GetType() const MOZ_OVERRIDE;
 
 #ifdef ACCESSIBILITY
   virtual mozilla::a11y::AccType AccessibleType() MOZ_OVERRIDE;
 #endif
 
 #ifdef DEBUG_FRAME_DUMP
-  virtual nsresult GetFrameName(nsAString& aResult) const {
+  virtual nsresult GetFrameName(nsAString& aResult) const MOZ_OVERRIDE {
     return MakeFrameName(NS_LITERAL_STRING("ImageControl"), aResult);
   }
 #endif
 
   virtual nsresult GetCursor(const nsPoint&    aPoint,
-                       nsIFrame::Cursor& aCursor);
+                             nsIFrame::Cursor& aCursor) MOZ_OVERRIDE;
   // nsIFormContromFrame
-  virtual void SetFocus(bool aOn, bool aRepaint);
-  virtual nsresult SetFormProperty(nsIAtom* aName, const nsAString& aValue);
+  virtual void SetFocus(bool aOn, bool aRepaint) MOZ_OVERRIDE;
+  virtual nsresult SetFormProperty(nsIAtom* aName, 
+                                   const nsAString& aValue) MOZ_OVERRIDE;
 };
 
 
