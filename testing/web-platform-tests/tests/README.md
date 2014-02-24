@@ -27,8 +27,7 @@ Because web-platform-tests uses git submodules, you must ensure that
 these are up to date. In the root of your checkout, run:
 
 ```
-git submodule init
-git submodule update --recursive
+git submodule update --init --recursive
 ```
 
 The test environment can then be started using
@@ -147,8 +146,8 @@ The way to contribute is just as usual:
 
 * fork this repository (and make sure you're still relatively in sync
   with it if you forked a while ago);
-* create a branch for your changes, `git checkout -b
-  submission/your-name`;
+* create a branch for your changes:
+  `git checkout -b submission/your-name/topic`;
 * make your changes;
 * push that to your repo;
 * and send in a pull request based on the above.
@@ -166,3 +165,9 @@ public-html-testsuite@w3.org mailing list (low traffic) by
 [signing up to our mailing list](mailto:public-html-testsuite-request@w3.org?subject=subscribe).
 
 [contributing]: https://github.com/w3c/web-platform-tests/blob/master/CONTRIBUTING.md
+
+Documentation
+-------------
+
+* [How to write and review tests](http://testthewebforward.org/docs/)
+* [Documentation for the wptserve server](http://wptserve.readthedocs.org/en/latest/)
