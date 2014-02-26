@@ -97,12 +97,12 @@ ShadowAfter(const OpInsertAfter& op)
 }
 
 static ShadowLayerParent*
-ShadowContainer(const OpAppendChild& op)
+ShadowContainer(const OpPrependChild& op)
 {
   return cast(op.containerParent());
 }
 static ShadowLayerParent*
-ShadowChild(const OpAppendChild& op)
+ShadowChild(const OpPrependChild& op)
 {
   return cast(op.childLayerParent());
 }
@@ -204,10 +204,13 @@ LayerTransactionParent::RecvUpdate(const InfallibleTArray<Edit>& cset,
     return true;
   }
 
+  // Clear fence handles used in previsou transaction.
+  ClearPrevFenceHandles();
+
   EditReplyVector replyv;
 
   {
-    AutoResolveRefLayers resolve(mShadowLayersManager->GetCompositionManager());
+    AutoResolveRefLayers resolve(mShadowLayersManager->GetCompositionManager(this));
     layer_manager()->BeginTransaction();
   }
 
@@ -270,6 +273,9 @@ LayerTransactionParent::RecvUpdate(const InfallibleTArray<Edit>& cset,
       const OpSetLayerAttributes& osla = edit.get_OpSetLayerAttributes();
       ShadowLayerParent* layerParent = AsLayerComposite(osla);
       Layer* layer = layerParent->AsLayer();
+      if (!layer) {
+        return false;
+      }
       const LayerAttributes& attrs = osla.attrs();
 
       const CommonLayerAttributes& common = attrs.common();
@@ -401,16 +407,32 @@ LayerTransactionParent::RecvUpdate(const InfallibleTArray<Edit>& cset,
       MOZ_LAYERS_LOG(("[ParentSide] InsertAfter"));
 
       const OpInsertAfter& oia = edit.get_OpInsertAfter();
-      ShadowContainer(oia)->AsContainerLayerComposite()->InsertAfter(
-        ShadowChild(oia)->AsLayer(), ShadowAfter(oia)->AsLayer());
+      Layer* child = ShadowChild(oia)->AsLayer();
+      if (!child) {
+        return false;
+      }
+      ContainerLayerComposite* container = ShadowContainer(oia)->AsContainerLayerComposite();
+      if (!container ||
+          !container->InsertAfter(child, ShadowAfter(oia)->AsLayer()))
+      {
+        return false;
+      }
       break;
     }
-    case Edit::TOpAppendChild: {
-      MOZ_LAYERS_LOG(("[ParentSide] AppendChild"));
+    case Edit::TOpPrependChild: {
+      MOZ_LAYERS_LOG(("[ParentSide] PrependChild"));
 
-      const OpAppendChild& oac = edit.get_OpAppendChild();
-      ShadowContainer(oac)->AsContainerLayerComposite()->InsertAfter(
-        ShadowChild(oac)->AsLayer(), nullptr);
+      const OpPrependChild& oac = edit.get_OpPrependChild();
+      Layer* child = ShadowChild(oac)->AsLayer();
+      if (!child) {
+        return false;
+      }
+      ContainerLayerComposite* container = ShadowContainer(oac)->AsContainerLayerComposite();
+      if (!container ||
+          !container->InsertAfter(child, nullptr))
+      {
+        return false;
+      }
       break;
     }
     case Edit::TOpRemoveChild: {
@@ -418,23 +440,47 @@ LayerTransactionParent::RecvUpdate(const InfallibleTArray<Edit>& cset,
 
       const OpRemoveChild& orc = edit.get_OpRemoveChild();
       Layer* childLayer = ShadowChild(orc)->AsLayer();
-      ShadowContainer(orc)->AsContainerLayerComposite()->RemoveChild(childLayer);
+      if (!childLayer) {
+        return false;
+      }
+      ContainerLayerComposite* container = ShadowContainer(orc)->AsContainerLayerComposite();
+      if (!container ||
+          !container->RemoveChild(childLayer))
+      {
+        return false;
+      }
       break;
     }
     case Edit::TOpRepositionChild: {
       MOZ_LAYERS_LOG(("[ParentSide] RepositionChild"));
 
       const OpRepositionChild& orc = edit.get_OpRepositionChild();
-      ShadowContainer(orc)->AsContainerLayerComposite()->RepositionChild(
-        ShadowChild(orc)->AsLayer(), ShadowAfter(orc)->AsLayer());
+      Layer* child = ShadowChild(orc)->AsLayer();
+      if (!child) {
+        return false;
+      }
+      ContainerLayerComposite* container = ShadowContainer(orc)->AsContainerLayerComposite();
+      if (!container ||
+          !container->RepositionChild(child, ShadowAfter(orc)->AsLayer()))
+      {
+        return false;
+      }
       break;
     }
     case Edit::TOpRaiseToTopChild: {
       MOZ_LAYERS_LOG(("[ParentSide] RaiseToTopChild"));
 
       const OpRaiseToTopChild& rtc = edit.get_OpRaiseToTopChild();
-      ShadowContainer(rtc)->AsContainerLayerComposite()->RepositionChild(
-        ShadowChild(rtc)->AsLayer(), nullptr);
+      Layer* child = ShadowChild(rtc)->AsLayer();
+      if (!child) {
+        return false;
+      }
+      ContainerLayerComposite* container = ShadowContainer(rtc)->AsContainerLayerComposite();
+      if (!container ||
+          !container->RepositionChild(child, nullptr))
+      {
+        return false;
+      }
       break;
     }
     case Edit::TCompositableOperation: {
@@ -444,7 +490,9 @@ LayerTransactionParent::RecvUpdate(const InfallibleTArray<Edit>& cset,
     }
     case Edit::TOpAttachCompositable: {
       const OpAttachCompositable& op = edit.get_OpAttachCompositable();
-      Attach(cast(op.layerParent()), cast(op.compositableParent()), false);
+      if (!Attach(cast(op.layerParent()), cast(op.compositableParent()), false)) {
+        return false;
+      }
       cast(op.compositableParent())->SetCompositorID(
         mLayerManager->GetCompositor()->GetCompositorID());
       break;
@@ -453,7 +501,9 @@ LayerTransactionParent::RecvUpdate(const InfallibleTArray<Edit>& cset,
       const OpAttachAsyncCompositable& op = edit.get_OpAttachAsyncCompositable();
       CompositableParent* compositableParent = CompositableMap::Get(op.containerID());
       MOZ_ASSERT(compositableParent, "CompositableParent not found in the map");
-      Attach(cast(op.layerParent()), compositableParent, true);
+      if (!Attach(cast(op.layerParent()), compositableParent, true)) {
+        return false;
+      }
       compositableParent->SetCompositorID(mLayerManager->GetCompositor()->GetCompositorID());
       break;
     }
@@ -463,7 +513,7 @@ LayerTransactionParent::RecvUpdate(const InfallibleTArray<Edit>& cset,
   }
 
   {
-    AutoResolveRefLayers resolve(mShadowLayersManager->GetCompositionManager());
+    AutoResolveRefLayers resolve(mShadowLayersManager->GetCompositionManager(this));
     layer_manager()->EndTransaction(nullptr, nullptr, LayerManager::END_NO_IMMEDIATE_REDRAW);
   }
 
@@ -499,7 +549,12 @@ LayerTransactionParent::RecvGetOpacity(PLayerParent* aParent,
     return false;
   }
 
-  *aOpacity = cast(aParent)->AsLayer()->GetLocalOpacity();
+  Layer* layer = cast(aParent)->AsLayer();
+  if (!layer) {
+    return false;
+  }
+
+  *aOpacity = layer->GetLocalOpacity();
   return true;
 }
 
@@ -515,6 +570,9 @@ LayerTransactionParent::RecvGetTransform(PLayerParent* aParent,
   // from the shadow transform by undoing the translations in
   // AsyncCompositionManager::SampleValue.
   Layer* layer = cast(aParent)->AsLayer();
+  if (!layer) {
+    return false;
+  }
   gfx::To3DMatrix(layer->AsLayerComposite()->GetShadowTransform(), *aTransform);
   if (ContainerLayer* c = layer->AsContainerLayer()) {
     aTransform->ScalePost(1.0f/c->GetInheritedXScale(),
@@ -542,13 +600,19 @@ LayerTransactionParent::RecvGetTransform(PLayerParent* aParent,
   return true;
 }
 
-void
+bool
 LayerTransactionParent::Attach(ShadowLayerParent* aLayerParent,
                                CompositableParent* aCompositable,
                                bool aIsAsyncVideo)
 {
-  LayerComposite* layer = aLayerParent->AsLayer()->AsLayerComposite();
-  MOZ_ASSERT(layer);
+  Layer* baselayer = aLayerParent->AsLayer();
+  if (!baselayer) {
+    return false;
+  }
+  LayerComposite* layer = baselayer->AsLayerComposite();
+  if (!layer) {
+    return false;
+  }
 
   Compositor* compositor
     = static_cast<LayerManagerComposite*>(aLayerParent->AsLayer()->Manager())->GetCompositor();
@@ -557,7 +621,7 @@ LayerTransactionParent::Attach(ShadowLayerParent* aLayerParent,
   MOZ_ASSERT(compositable);
   if (!layer->SetCompositableHost(compositable)) {
     // not all layer types accept a compositable, see bug 967824
-    return;
+    return false;
   }
   compositable->Attach(aLayerParent->AsLayer(),
                        compositor,
@@ -565,6 +629,8 @@ LayerTransactionParent::Attach(ShadowLayerParent* aLayerParent,
                          ? CompositableHost::ALLOW_REATTACH
                            | CompositableHost::KEEP_ATTACHED
                          : CompositableHost::NO_FLAGS);
+
+  return true;
 }
 
 bool
@@ -642,6 +708,11 @@ bool
 LayerTransactionParent::DeallocPTextureParent(PTextureParent* actor)
 {
   return TextureHost::DestroyIPDLActor(actor);
+}
+
+bool LayerTransactionParent::IsSameProcess() const
+{
+  return OtherProcess() == ipc::kInvalidProcessHandle;
 }
 
 } // namespace layers
