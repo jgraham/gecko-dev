@@ -21,7 +21,7 @@ from mozlog.structured.formatters import JSONFormatter
 
 from testrunner import TestRunner, ManagerGroup
 import browser
-import metadata2
+import metadata
 import manifestexpected
 import wpttest
 import wptcommandline
@@ -237,8 +237,8 @@ def queue_tests(test_root, metadata_root, test_types, run_info, include_filters)
     test_ids = []
     tests_by_type = defaultdict(Queue)
 
-    metadata2.do_test_relative_imports(test_root)
-    manifest = metadata2.manifest.load(os.path.join(metadata_root, "MANIFEST.json"))
+    metadata.do_test_relative_imports(test_root)
+    manifest = metadata.manifest.load(os.path.join(metadata_root, "MANIFEST.json"))
 
     for test_path, tests in manifest:
         # This is a very silly way to exclude types
