@@ -176,7 +176,6 @@ class ExpectedUpdater(object):
     def update_from_log(self, log_file):
         self.run_info = None
         log_reader = reader.read(log_file)
-        print log_reader
         for map_value in reader.map_action(log_reader,
                                            self.action_map):
             # Ignore the return value
@@ -241,6 +240,7 @@ def create_test_tree(metadata_path, manifest):
         expected_data = load_expected(metadata_path, test_path, tests)
         if expected_data is None:
             expected_data = create_expected(test_path, tests)
+
         expected_map[test_path] = expected_data
 
         for test in tests:
@@ -259,7 +259,7 @@ def load_expected(metadata_path, test_path, tests):
     if expected_manifest is None:
         return
 
-    tests_by_id = {(item.id, item) for item in tests}
+    tests_by_id = {item.id: item for item in tests}
 
     # Remove expected data for tests that no longer exist
     for test in expected_manifest.iterchildren():
@@ -271,91 +271,8 @@ def load_expected(metadata_path, test_path, tests):
         if not expected_manifest.has_test(test.id):
             expected_manifest.append(manifestupdate.TestNode.create(test.item_type, test.id))
 
-    return expected
+    return expected_manifest
 
-
-
-def group_conditionals(values):
-    by_property = defaultdict(set)
-    for status, run_info_values in values.iteritems():
-        for run_info in run_info_values:
-            for prop_name, prop_value in run_info.iteritems():
-                by_property[(prop_name, prop_value)].add(status)
-
-    for key, statuses in by_property.copy().iteritems():
-        if len(statuses) == len(values.keys()):
-            del by_property[key]
-
-    properties = set(item[0] for item in by_property.iterkeys())
-
-    prop_order = ["debug", "os", "version", "processor", "bits"]
-    include_props = []
-
-    for prop in prop_order:
-        if prop in properties:
-            include_props.append(prop)
-
-    conditions = {}
-
-    for status, run_info_values in values.iteritems():
-        for run_info in run_info_values:
-            prop_set = tuple((prop, run_info[prop]) for prop in include_props)
-            if prop_set in conditions:
-                continue
-
-            expr = make_expr(prop_set, status)
-            conditions[prop_set] = (expr, status)
-
-    return conditions.values()
-
-def make_expr(prop_set, status):
-    """Create an AST that returns the value ``status`` given all the
-    properties in prop_set match."""
-    if len(prop_set) == 0:
-        return mozmanifest.ValueNode(status)
-
-    root = mozmanifest.ConditionalNode()
-
-    no_value_props = set(["debug"])
-
-    expressions = []
-    for prop, value in prop_set:
-        number_types = (int, float, long)
-        value_cls = (mozmanifest.NumberNode
-                     if type(value) in number_types
-                     else mozmanifest.StringNode)
-        print prop, prop in no_value_props
-        if prop not in no_value_props:
-            expressions.append(
-                mozmanifest.BinaryExpressionNode(
-                    mozmanifest.BinaryOperatorNode("=="),
-                    mozmanifest.VariableNode(prop),
-                    value_cls(value)
-            ))
-        else:
-            if value:
-                expressions.append(mozmanifest.VariableNode(prop))
-            else:
-                expressions.append(
-                    mozmanifest.UnaryExpressionNode(
-                        mozmanifest.UnaryOperatorNode("not"),
-                        mozmanifest.VariableNode(prop)
-                    ))
-    if len(expressions) > 1:
-        prev = expressions[-1]
-        for curr in reversed(expressions[:-1]):
-            node = mozmanifest.BinaryExpressionNode(
-                mozmanifest.BinaryOperatorNode("and"),
-                curr,
-                prev)
-            prev = node
-    else:
-        node = expressions[0]
-
-    root.append(node)
-    root.append(mozmanifest.StringNode(status))
-
-    return root
 
 if __name__ == "__main__":
     args = sys.argv[1:]

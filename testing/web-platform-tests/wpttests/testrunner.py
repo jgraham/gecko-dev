@@ -95,7 +95,6 @@ class TestRunner(object):
                 self.send_message("init_failed")
 
     def teardown(self):
-        print "teardown start"
         self.result_queue.cancel_join_thread()
         self.command_queue.cancel_join_thread()
         self.result_queue.close()
@@ -104,7 +103,6 @@ class TestRunner(object):
         self.command_queue = None
         del self.browser
         self.browser = None
-        print "teardown"
         #Close the marionette session
 
     def run(self):

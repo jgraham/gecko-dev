@@ -1,9 +1,9 @@
 import os
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
-from mozmanifest.node import DataNode
+from mozmanifest.node import DataNode, ConditionalNode, BinaryExpressionNode, BinaryOperatorNode, VariableNode, StringNode, NumberNode, UnaryExpressionNode, UnaryOperatorNode, KeyValueNode
 from mozmanifest.backends import conditional
-from mozmanifest.backends.conditional import ManifestItem
+from mozmanifest.backends.conditional import ManifestItem, ConditionalValue
 
 import expected
 
@@ -35,16 +35,18 @@ class ExpectedManifest(ManifestItem):
 
     def _remove_child(self, child):
         del self.child_map[child.id]
-        ManifestItem.remove_child(self, child)
+        ManifestItem._remove_child(self, child)
         assert len(self.child_map) == len(self.children)
 
     def get_test(self, test_id):
         return self.child_map[test_id]
 
+    def has_test(self, test_id):
+        return test_id in self.child_map
+
 class TestNode(ManifestItem):
     def __init__(self, node):
         ManifestItem.__init__(self, node)
-        self.name = node.data
         self.updated_expected = []
         self.new_expected = []
         self.subtests = {}
@@ -117,41 +119,64 @@ class TestNode(ManifestItem):
             self.root.modified = True
 
     def coalesce_expected(self):
+        if self.new_expected and not all(self.new_expected[0].status == result.status for result in self.new_expected):
+            import pdb
+            #pdb.set_trace()
+
         final_conditionals = []
 
-        for conditional, values in self.updated_expected:
-            if not values:
-                final_conditionals.append(conditional)
-            elif all(values[0].status == status for run_info, status in values):
+        try:
+            unconditional_status = self.get("expected")
+        except KeyError:
+            unconditional_status = self.default_status
+
+        for conditional_value, results in self.updated_expected:
+            if not results:
+                #The conditional didn't match anything in these runs so leave it alone
+                final_conditionals.append(conditional_value)
+            elif all(results[0].status == result.status for result in results):
                 #All the new values for this conditional matched, so update the node
-                value = values[0]
-                if value == self.default_status:
-                    conditional.remove()
+                result = results[0]
+                if result.status == unconditional_status and conditional_value.condition_node is not None:
+                    self.remove_value("expected", conditional_value)
                 else:
-                    conditional.value = values[0][1]
-                    final_conditionals.append(conditional)
-            else:
+                    conditional_value.value = result.status
+                    final_conditionals.append(conditional_value)
+            elif conditional_value.condition_node is not None:
                 # Blow away the existing condition and rebuild from scratch
                 # This isn't sure to work if we have a conditional later that matches
                 # these values too, but we can hope, verify that we get the results
                 # we expect, and if not let a human sort it out
-                conditional.remove()
-                self.new_expected.extend(values)
+                self.remove_value("expected", conditional_value)
+                self.new_expected.extend(results)
 
         if self.new_expected:
-            if all(self.new_expected[0].status == status
-                   for run_info, status in self.new_expected):
+            if all(self.new_expected[0].status == result.status
+                   for result in self.new_expected):
                 status = self.new_expected[0].status
                 if status != self.default_status:
                     self.set("expected", status, condition=None)
                     final_conditionals.append(self._data["expected"][-1])
             else:
-                by_status = {(result.status, result.run_info) for result in self.new_expected}
-                for conditional, status in group_conditionals(self.new_expected):
-                    self.set("expected", status, condition=conditional)
-                    final_conditionals.append(ConditionalValue(
-                        ManifestCompiler.compile(None, conditional),
-                        self._data["expected"].children[-1]))
+                for conditional_node, status in group_conditionals(self.new_expected):
+                    if status != unconditional_status:
+                        self.set("expected", status, condition=conditional_node.children[0])
+                        final_conditionals.append(self._data["expected"][-1])
+
+        if ("expected" in self._data and
+            len(self._data["expected"]) > 0 and
+            self._data["expected"][-1].condition_node is None and
+            self._data["expected"][-1].value == self.default_status):
+
+            self.remove_value("expected", self._data["expected"][-1])
+
+        if ("expected" in self._data and
+            len(self._data["expected"]) == 0):
+            for child in self.node.children:
+                if (isinstance(child, KeyValueNode) and
+                    child.data == "expected"):
+                    child.remove()
+                    break
 
     def _add_key_value(self, node, values):
         ManifestItem._add_key_value(self, node, values)
@@ -173,9 +198,9 @@ class TestNode(ManifestItem):
             return subtest
 
 class SubtestNode(TestNode):
-    def __init__(self, tree_node):
-        TestNode.__init__(self, tree_node)
-        self._test = None
+    def __init__(self, node):
+        assert isinstance(node, DataNode)
+        TestNode.__init__(self, node)
 
     @classmethod
     def create(cls, name):
@@ -188,6 +213,87 @@ class SubtestNode(TestNode):
         if self._data:
             return False
         return True
+
+def group_conditionals(values):
+    by_property = defaultdict(set)
+    for result in values:
+        run_info, status = result
+        for prop_name, prop_value in run_info.iteritems():
+            by_property[(prop_name, prop_value)].add(status)
+
+    for key, statuses in by_property.copy().iteritems():
+        if len(statuses) == len(values):
+            del by_property[key]
+
+    properties = set(item[0] for item in by_property.iterkeys())
+
+    prop_order = ["debug", "os", "version", "processor", "bits"]
+    include_props = []
+
+    for prop in prop_order:
+        if prop in properties:
+            include_props.append(prop)
+
+    conditions = {}
+
+    for result in values:
+        run_info, status = result
+        prop_set = tuple((prop, run_info[prop]) for prop in include_props)
+        if prop_set in conditions:
+            continue
+
+        expr = make_expr(prop_set, status)
+        conditions[prop_set] = (expr, status)
+
+    return conditions.values()
+
+def make_expr(prop_set, status):
+    """Create an AST that returns the value ``status`` given all the
+    properties in prop_set match."""
+    if len(prop_set) == 0:
+        return mozmanifest.ValueNode(status)
+
+    root = ConditionalNode()
+
+    no_value_props = set(["debug"])
+
+    expressions = []
+    for prop, value in prop_set:
+        number_types = (int, float, long)
+        value_cls = (NumberNode
+                     if type(value) in number_types
+                     else StringNode)
+        if prop not in no_value_props:
+            expressions.append(
+                BinaryExpressionNode(
+                    BinaryOperatorNode("=="),
+                    VariableNode(prop),
+                    value_cls(unicode(value))
+            ))
+        else:
+            if value:
+                expressions.append(VariableNode(prop))
+            else:
+                expressions.append(
+                    UnaryExpressionNode(
+                        UnaryOperatorNode("not"),
+                        VariableNode(prop)
+                    ))
+    if len(expressions) > 1:
+        prev = expressions[-1]
+        for curr in reversed(expressions[:-1]):
+            node = BinaryExpressionNode(
+                BinaryOperatorNode("and"),
+                curr,
+                prev)
+            prev = node
+    else:
+        node = expressions[0]
+
+    root.append(node)
+    root.append(StringNode(status))
+
+    return root
 
 def get_manifest(metadata_root, test_path):
     manifest_path = expected.expected_path(metadata_root, test_path)

@@ -27,7 +27,6 @@ def do_test_relative_imports(test_root):
 
     sys.path.insert(0, os.path.join(test_root))
     sys.path.insert(0, os.path.join(test_root, "tools", "scripts"))
-    print sys.path
     import manifest
 
 class RepositoryError(Exception):
@@ -277,10 +276,15 @@ def update_metadata(config, paths, mozilla_tree, wpt, initial_rev, bug):
 
         with runner_cls(config, bug) as runner:
             log_files = runner.do_run(mozilla_tree)
-            mozilla_tree.create_patch("web-platform-tests_update_%s_metadata"  % wpt.rev,
-                                      "Bug %i - Update web-platform-tests expected data to revision %s" % (
-                                          bug.id if bug else 0, wpt.rev
-                                      ))
+            try:
+                #XXX remove try/except
+                mozilla_tree.create_patch("web-platform-tests_update_%s_metadata"  % wpt.rev,
+                                          "Bug %i - Update web-platform-tests expected data to revision %s" % (
+                                              bug.id if bug else 0, wpt.rev
+                                          ))
+            except subprocess.CalledProcessError:
+                #Patch with that name already exists, probably
+                pass
             needs_human = metadata.update_expected(paths["sync"],
                                                    paths["metadata"],
                                                    log_files,

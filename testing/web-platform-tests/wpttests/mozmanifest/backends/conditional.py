@@ -1,3 +1,6 @@
+import operator
+from functools import partial
+
 from ..node import NodeVisitor, ConditionalNode, KeyValueNode, ValueNode
 from ..parser import parse
 
@@ -33,7 +36,7 @@ class ConditionalValue(object):
 
 class Compiler(NodeVisitor):
     def compile(self, tree, data_cls_getter=None, **kwargs):
-        self.kwargs = kwargs
+        self._kwargs = kwargs
 
         if data_cls_getter is None:
             self.data_cls_getter = lambda x, y:ManifestItem
@@ -41,24 +44,25 @@ class Compiler(NodeVisitor):
             self.data_cls_getter = data_cls_getter
 
         self.tree = tree
-        self.test_path = test_path
-        self.output_node = self.data_cls_getter(None, None)(None, **self.kwargs)
+        self.output_node = None
         self.visit(tree)
         return self.output_node
 
     def visit_DataNode(self, node):
         output_parent = self.output_node
-        output_node = self.data_cls_getter(self.output_node, node)(node)
-
-        self.output_node = output_node
+        if self.output_node is None:
+            assert node.parent is None
+            self.output_node = self.data_cls_getter(None, None)(None, **self._kwargs)
+        else:
+            self.output_node = self.data_cls_getter(self.output_node, node)(node)
 
         for child in node.children:
             self.visit(child)
 
         if output_parent is not None:
             # Append to the parent *after* processing all the node data
-            output_parent.append(output_node)
-        self.output_node = self.output_node.parent
+            output_parent.append(self.output_node)
+            self.output_node = self.output_node.parent
 
     def visit_KeyValueNode(self, node):
         key_name = node.data
@@ -73,7 +77,7 @@ class Compiler(NodeVisitor):
         return (lambda x:True, node.data)
 
     def visit_ConditionalNode(self, node):
-        return self.visit(node.children[0]), self.visit(node.children[1])[1]
+        return self.visit(node.children[0]), self.visit(node.children[1])
 
     def visit_StringNode(self, node):
         indexes = [self.visit(child) for child in node.children]
@@ -82,13 +86,13 @@ class Compiler(NodeVisitor):
             for index in indexes:
                 rv = rv[index(x)]
             return rv
-        return value
+        return lambda x: node.data
 
     def visit_NumberNode(self, node):
         if "." in node.data:
-            return lambda x:float(node.data)
+            return lambda x: float(node.data)
         else:
-            return lambda x:int(node.data)
+            return lambda x: int(node.data)
 
     def visit_VariableNode(self, node):
         indexes = [self.visit(child) for child in node.children]
@@ -97,6 +101,7 @@ class Compiler(NodeVisitor):
             for index in indexes:
                 data = data[index(x)]
             return data
+        return value
 
     def visit_IndexNode(self, node):
         assert len(node.children) == 1
@@ -107,7 +112,7 @@ class Compiler(NodeVisitor):
         operator = self.visit(node.children[0])
         operand = self.visit(node.children[1])
 
-        return lambda x:operator(operand(x))
+        return lambda x: operator(operand(x))
 
     def visit_BinaryExpressionNode(self, node):
         assert len(node.children) == 3
@@ -115,7 +120,11 @@ class Compiler(NodeVisitor):
         operand_0 = self.visit(node.children[1])
         operand_1 = self.visit(node.children[2])
 
+        assert operand_0 is not None
+        assert operand_1 is not None
+
         return lambda x:operator(operand_0(x), operand_1(x))
+
 
     def visit_UnaryOperatorNode(self, node):
         return {"not": operator.not_}[node.data]
@@ -127,7 +136,7 @@ class Compiler(NodeVisitor):
                 "!=": operator.ne}[node.data]
 
 class ManifestItem(object):
-    def __init__(self, node=None):
+    def __init__(self, node=None, **kwargs):
         self.node = node
         self.parent = None
         self.children = []
@@ -155,6 +164,10 @@ class ManifestItem(object):
             node = node.parent
         return node
 
+    @property
+    def name(self):
+        return self.node.data
+
     def has_key(self, key):
         for node in [self, self.root]:
             if key in node._data:
@@ -177,35 +190,33 @@ class ManifestItem(object):
         raise KeyError
 
     def set(self, key, value, condition=None):
-        found = False
+        #First try to update the existing value
         if key in self._data:
             cond_values = self._data[key]
             for cond_value in cond_values:
                 if cond_value.condition_node == condition:
                     cond_value.value = value
-                    break
+                    return
 
-        if not found:
-            node = KeyValueNode(key)
-            value_node = ValueNode(value)
-            if condition is not None:
-                conditional_node = ConditionalNode()
-                conditional_node.append(condition)
-                conditional_node.append(value_node)
-                node.append(conditional_node)
-                node.append(conditional_node)
-                node.append(value_node)
-                func = ManifestCompiler().compile(None, condition)
-            else:
-                node.append(value_node)
-                func = lambda x: True
 
-            cond_value = ConditionalValue(value_node, func)
+        node = KeyValueNode(key)
+        value_node = ValueNode(value)
+        if condition is not None:
+            conditional_node = ConditionalNode()
+            conditional_node.append(condition)
+            conditional_node.append(value_node)
+            node.append(conditional_node)
+            func = Compiler().compile(condition)
+        else:
+            node.append(value_node)
+            func = lambda x: True
 
-            if key not in self._data:
-                self._data[key] = []
-            self._data[key].append(cond_value)
-            self.node.append(node)
+        cond_value = ConditionalValue(value_node, func)
+
+        if key not in self._data:
+            self._data[key] = []
+        self._data[key].append(cond_value)
+        self.node.append(node)
 
     def _add_key_value(self, node, values):
         """Called during construction to set a key-value node"""
@@ -251,11 +262,14 @@ class ManifestItem(object):
         for item in self._flatten().itervalues():
             yield item
 
+    def remove_value(self, key, value):
+        self._data[key].remove(value)
+        value.remove()
+
 def compile_ast(ast, data_cls_getter=None, **kwargs):
-    return Compiler().compile(ast, None, data_cls_getter=None, **kwargs)
+    return Compiler().compile(ast, data_cls_getter=data_cls_getter, **kwargs)
 
 def compile(stream, data_cls_getter=None, **kwargs):
     return compile_ast(parse(stream),
-                       expr_data,
                        data_cls_getter=data_cls_getter,
                        **kwargs)

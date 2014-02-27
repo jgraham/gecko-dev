@@ -1,3 +1,5 @@
+import operator
+
 from ..node import NodeVisitor
 from ..parser import parse
 
@@ -65,7 +67,7 @@ class Compiler(NodeVisitor):
             return int(node.data)
 
     def visit_VariableNode(self, node):
-        value = self.output_node[node.data]
+        value = self.expr_data[node.data]
         for child in node.children:
             value = self.visit(child)(value)
         return value

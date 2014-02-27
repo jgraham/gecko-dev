@@ -50,9 +50,6 @@ metadata files are used to store the expected test results.
 
 """
 
-print structuredlog.__file__
-print dir(structuredlog)
-
 logger = None
 
 
@@ -75,7 +72,6 @@ def setup_stdlib_logger():
 
 
 def do_test_relative_imports(test_root):
-    print test_root
     global serve
 
     sys.path.insert(0, os.path.join(test_root))
