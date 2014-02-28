@@ -25,7 +25,7 @@
 #include "vm/Xdr.h"
 
 namespace JS {
-struct ObjectsExtraSizes;
+struct ClassInfo;
 }
 
 namespace js {
@@ -354,7 +354,7 @@ class JSObject : public js::ObjectImpl
         return lastProperty()->hasTable();
     }
 
-    void addSizeOfExcludingThis(mozilla::MallocSizeOf mallocSizeOf, JS::ObjectsExtraSizes *sizes);
+    void addSizeOfExcludingThis(mozilla::MallocSizeOf mallocSizeOf, JS::ClassInfo *info);
 
     bool hasIdempotentProtoChain() const;
 
@@ -1285,6 +1285,10 @@ DenseRangeRef::mark(JSTracer *trc)
                        owner->getDenseElements() + clampedStart, "element");
 }
 #endif
+
+/* Set *resultp to tell whether obj has an own property with the given id. */
+bool
+HasOwnProperty(JSContext *cx, HandleObject obj, HandleId id, bool *resultp);
 
 template <AllowGC allowGC>
 extern bool
