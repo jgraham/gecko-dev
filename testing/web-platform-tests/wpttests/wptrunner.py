@@ -229,8 +229,97 @@ class ServoTestRunner(TestharnessTestRunner):
         result["test"] = test.url
         return TestharnessTestRunner.convert_result(self, test, result)
 
+class TestChunker(object):
+    def __init__(self, manifest, total_chunks, chunk_number):
+        self.total_chunks = total_chunks
+        self.manifest = manifest
+        self.chunk_number = chunk_number
+        assert self.chunk_number <= self.total_chunks
 
-def queue_tests(test_root, metadata_root, test_types, run_info, include_filters):
+    def __iter__(self):
+        raise NotImplementedError
+
+class Unchunked(TestChunker):
+    def __init__(self, *args, **kwargs):
+        TestChunker.__init__(self, *args, **kwargs)
+        assert self.total_chunks == 1
+
+    def __iter__(self):
+        for item in self.manifest:
+            yield item
+
+class HashChunker(TestChunker):
+    def __iter__(self):
+        chunk_index = self.chunk_number - 1
+        for test_path, tests in self.manifest:
+            if hash(test_path) % self.total_chunks == chunk_index:
+                yield test_path, tests
+
+class EqualTimeChunker(TestChunker):
+    """Chunker that uses the test timeout as a proxy for the running time of the test"""
+    def __init__(self, *args, **kwargs):
+        TestChunker.__init__(self, *args, **kwargs)
+        self.indicies = self._make_chunks()
+
+    def _make_chunks(self):
+        # For each directory containing tests, calculate the mzximum execution time after running all
+        # the tests in that directory. Then work out the index into the manifest corresponding to the
+        # directories at fractions of m/N of the running time where m=1..N-1 and N is the total number
+        # of chunks. Return an array of these indicies
+
+        total_time = 0
+        path_times = []
+        manifest_len = 0
+
+        for i, (test_path, tests) in enumerate(self.manifest):
+            if list(tests)[0].item_type in ("manual", "helper"):
+                continue
+
+            test_dir = tuple(os.path.split(test_path)[0].split(os.path.sep)[:3])
+
+            # Path times is an array of (path, index at start, time at end)
+            if not path_times:
+                assert i == 0
+                path_times.append([test_dir, 0, 0])
+            elif path_times[-1][0] != test_dir:
+                path_times.append([test_dir, i, path_times[-1][-1]])
+
+            for test in tests:
+                timeout = wpttest.LONG_TIMEOUT if test.timeout == "long" else wpttest.DEFAULT_TIMEOUT
+                path_times[-1][-1] += timeout
+                total_time += timeout
+
+            manifest_len += 1
+
+        time_per_chunk = float(total_time) / self.total_chunks
+
+        indicies = [0]
+        next_time = time_per_chunk
+        for i, path_time in enumerate(path_times):
+            if (path_times[i+1][2] > next_time and
+                path_times[i][2] <= next_time):
+                index = path_times[i+1][1] if (abs(path_times[i+1][2] - next_time) <
+                                               abs(path_times[i][2] - next_time)) else path_time[1]
+                indicies.append(index)
+                next_time += time_per_chunk
+                if len(indicies) == self.total_chunks:
+                    break
+        indicies.append(manifest_len)
+
+        assert len(indicies) == self.total_chunks + 1
+
+        return indicies
+
+    def __iter__(self):
+        low, high = self.indicies[self.chunk_number - 1], self.indicies[self.chunk_number]
+        for i, item in enumerate(self.manifest):
+            if i == high:
+                break
+            if i >= low:
+                yield item
+
+def queue_tests(test_root, metadata_root, test_types, run_info, include_filters,
+                chunk_type, total_chunks, chunk_number):
     """Read in the tests from the manifest file and add them to a queue"""
     test_ids = []
     tests_by_type = defaultdict(Queue)
@@ -238,7 +327,13 @@ def queue_tests(test_root, metadata_root, test_types, run_info, include_filters)
     metadata.do_test_relative_imports(test_root)
     manifest = metadata.manifest.load(os.path.join(metadata_root, "MANIFEST.json"))
 
-    for test_path, tests in manifest:
+    chunked_manifest = {"none": Unchunked,
+                        "hash": HashChunker,
+                        "equal_time": EqualTimeChunker}[chunk_type](manifest,
+                                                                    total_chunks,
+                                                                    chunk_number)
+
+    for test_path, tests in chunked_manifest:
         # This is a very silly way to exclude types
         # but the API in manifest.py should be updated
         test_type = list(tests)[0].item_type
@@ -309,7 +404,8 @@ test_runner_classes = {"firefox": {"reftest": ReftestTestRunner,
                        "servo": {"testharness": ServoTestRunner}}
 
 def run_tests(binary, tests_root, metadata_root, test_types,
-              processes=1, include=None, capture_stdio=True, product="firefox"):
+              processes=1, include=None, capture_stdio=True, product="firefox",
+              chunk_type="none", total_chunks=1, chunk_number=1):
     logging_queue = None
     original_stdio = (sys.stdout, sys.stderr)
 
@@ -337,7 +433,8 @@ def run_tests(binary, tests_root, metadata_root, test_types,
             base_server = "http://%s:%i" % (test_environment.config["host"],
                                             test_environment.config["ports"]["http"][0])
             test_ids, test_queues = queue_tests(tests_root, metadata_root,
-                                                test_types, run_info, include)
+                                                test_types, run_info, include,
+                                                chunk_type, total_chunks, chunk_number)
             logger.suite_start(test_ids, run_info)
             for test_type in test_types:
                 tests_queue = test_queues[test_type]

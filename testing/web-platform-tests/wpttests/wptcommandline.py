@@ -38,6 +38,15 @@ def create_parser(allow_mandatory=True):
                         help="Number of simultaneous processes to use")
     parser.add_argument("--include", action="append", help="URL prefix to include")
 
+    parser.add_argument("--total-chunks", action="store", type=int, default=1,
+                        help="Total number of chunks to use")
+    parser.add_argument("--chunk-number", action="store", type=int, default=1,
+                        help="Chunk number to run")
+    parser.add_argument("--chunk-type", action="store", choices=["none", "equal_time", "hash"],
+                        default="none", help="Chunking type to use")
+
+
+    #Legacy options until mozharness is updated
     parser.add_argument("-o", dest="output_file", action="store", type=abs_path)
     parser.add_argument("--log-stdout", action="store_true")
 
