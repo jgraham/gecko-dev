@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import urlparse
 from Queue import Empty
 import multiprocessing
-from multiprocessing import Process, Pipe, current_process, Queue
+from multiprocessing import Process, current_process, Queue
 import threading
 import socket
 import uuid
@@ -95,11 +95,7 @@ class TestRunner(object):
                 self.send_message("init_failed")
 
     def teardown(self):
-        self.result_queue.cancel_join_thread()
-        self.command_queue.cancel_join_thread()
-        self.result_queue.close()
         self.result_queue = None
-        self.command_queue.close()
         self.command_queue = None
         del self.browser
         self.browser = None
@@ -215,11 +211,12 @@ class TestRunner(object):
         self.result_queue.put((command, args))
 
 
-def start_runner(runner_cls, http_server_url, marionette_port, browser_binary, runner_command_queue, runner_result_queue,
+def start_runner(runner_cls, http_server_url, marionette_port, browser_binary,
+                 runner_command_queue, runner_result_queue,
                  stop_flag):
     try:
-        runner = runner_cls(http_server_url, runner_command_queue, runner_result_queue, marionette_port=marionette_port,
-                            binary=browser_binary)
+        runner = runner_cls(http_server_url, runner_command_queue, runner_result_queue,
+                            marionette_port=marionette_port, binary=browser_binary)
         runner.run()
     except KeyboardInterrupt:
         stop_flag.set()
@@ -258,8 +255,8 @@ class TestRunnerManager(threading.Thread):
         self.parent_stop_flag = stop_flag
         self.child_stop_flag = multiprocessing.Event()
 
-        self.command_queue = None
-        self.remote_queue = None
+        self.command_queue = Queue()
+        self.remote_queue = Queue()
 
         self.browser = None
         self.test_runner_proc = None
@@ -336,6 +333,7 @@ class TestRunnerManager(threading.Thread):
                             self.restart_runner()
         finally:
             self.stop_runner()
+            self.teardown()
             self.logger.debug("TestRunnerManager main loop terminating")
 
     def should_stop(self):
@@ -365,12 +363,6 @@ class TestRunnerManager(threading.Thread):
             #TODO: make this timeout configurable
             self.init_timer = threading.Timer(30, init_failed)
             self.init_timer.start()
-
-            assert self.command_queue is None
-            assert self.remote_queue is None
-
-            self.command_queue = Queue()
-            self.remote_queue = Queue()
 
             self.browser.start()
             self.start_test_runner()
@@ -417,13 +409,34 @@ class TestRunnerManager(threading.Thread):
 
     def cleanup(self):
         self.logger.debug("TestManager cleanup")
+        while True:
+            try:
+                self.command_queue.get_nowait()
+            except Empty:
+                break
+
+        while True:
+            try:
+                self.remote_queue.get_nowait()
+            except Empty:
+                break
+
+    def teardown(self):
+        self.logger.critical("TestManager teardown")
         self.test_runner_proc = None
-        if self.command_queue:
-            self.command_queue.close()
-            self.command_queue = None
-        if self.remote_queue:
-            self.remote_queue.close()
-            self.remote_queue = None
+        self.command_queue.cancel_join_thread()
+        self.remote_queue.cancel_join_thread()
+        self.remote_queue.close()
+        self.command_queue.close()
+        self.logger.critical(repr(self.command_queue._reader))
+        self.logger.critical(repr(self.command_queue._writer))
+        self.logger.critical(repr(self.command_queue._writer))
+        self.command_queue = None
+        self.remote_queue.close()
+        self.logger.critical(repr(self.remote_queue._reader))
+        self.logger.critical(repr(self.remote_queue._writer))
+        self.logger.critical(repr(self.remote_queue._writer))
+        self.remote_queue = None
 
     def stop_runner(self):
         """Stop the TestRunner and the Firefox binary."""
