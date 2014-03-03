@@ -16,11 +16,9 @@ BEGIN_TELEPHONY_NAMESPACE
 class TelephonyChild : public PTelephonyChild
 {
 public:
-  static PTelephonyChild*
-  GetSingleton(nsITelephonyListener* aListener);
+  TelephonyChild(nsITelephonyListener* aListener);
 
 protected:
-  TelephonyChild(nsITelephonyListener* aListener);
   virtual ~TelephonyChild() {}
 
   virtual void
@@ -57,9 +55,6 @@ protected:
                                  const uint16_t& aNotification) MOZ_OVERRIDE;
 
 private:
-  static PTelephonyChild* sSingleton;
-  static bool sActorDestroyed;
-
   nsCOMPtr<nsITelephonyListener> mListener;
 };
 
