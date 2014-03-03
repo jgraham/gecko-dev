@@ -32,7 +32,7 @@ digits = "0123456789"
 open_parens = "[("
 close_parens = "])"
 parens = open_parens + close_parens
-operator_chars = "="
+operator_chars = "=!"
 
 unary_operators = ["not"]
 binary_operators = ["==", "!=", "and", "or"]
@@ -193,6 +193,7 @@ class Tokenizer(object):
             self.state = self.value_state
 
     def value_state(self):
+        self.skip_whitespace()
         index_0 = self.index
         if self.char() in ("'", '"'):
             quote_char = self.char()
@@ -265,7 +266,7 @@ class Tokenizer(object):
             raise ParseError("EOL in expression")
         elif c in "'\"":
             self.consume()
-            yield (token_types.string, self.read_string(c))
+            yield (token_types.string, decode(self.read_string(c)))
         elif c == "#":
             raise ParseError("Comment before end of expression")
         elif c == ":":
@@ -275,7 +276,7 @@ class Tokenizer(object):
         elif c in parens:
             self.consume()
             yield (token_types.paren, c)
-        elif c in operators:
+        elif c in ("!", "="):
             self.state = self.operator_state
         elif c in digits:
             self.state = self.digit_state
@@ -294,7 +295,7 @@ class Tokenizer(object):
             else:
                 self.state = self.expr_state
                 break
-        yield (token_types.ident, token)
+        yield (token_types.ident, self.line[index_0:self.index])
 
     def digit_state(self):
         index_0 = self.index
@@ -312,7 +313,7 @@ class Tokenizer(object):
                 seen_dot = True
             elif c in parens:
                 break
-            elif c in operators:
+            elif c in operator_chars:
                 break
             elif c == " ":
                 break
@@ -334,7 +335,7 @@ class Tokenizer(object):
                 break
             elif c in parens:
                 break
-            elif c in operators:
+            elif c in operator_chars:
                 break
             elif c == " ":
                 break

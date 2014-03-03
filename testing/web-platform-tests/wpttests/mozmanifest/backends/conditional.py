@@ -197,9 +197,18 @@ class ManifestItem(object):
                 if cond_value.condition_node == condition:
                     cond_value.value = value
                     return
+            #If there isn't a conditional match reuse the existing KeyValueNode as the
+            #parent
+            node = None
+            for child in self.node.children:
+                if child.data == key:
+                    node = child
+            assert node is not None
 
+        else:
+            node = KeyValueNode(key)
+            self.node.append(node)
 
-        node = KeyValueNode(key)
         value_node = ValueNode(value)
         if condition is not None:
             conditional_node = ConditionalNode()
@@ -216,7 +225,7 @@ class ManifestItem(object):
         if key not in self._data:
             self._data[key] = []
         self._data[key].append(cond_value)
-        self.node.append(node)
+
 
     def _add_key_value(self, node, values):
         """Called during construction to set a key-value node"""

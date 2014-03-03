@@ -14,10 +14,12 @@ import hashlib
 from collections import defaultdict
 import logging
 import traceback
+from StringIO import StringIO
 
 from mozlog.structured import structuredlog, commandline
 from mozlog.structured.handlers import StreamHandler
 from mozlog.structured.formatters import JSONFormatter
+from mozprocess import ProcessHandler
 
 from testrunner import TestRunner, ManagerGroup
 import browser
@@ -198,7 +200,7 @@ class ServoTestRunner(TestharnessTestRunner):
     def run_test(self, test):
         self.result_data = None
         self.result_flag = threading.Event()
-        proc = ProcessHandler(self.binary, [urlparse.urljoin(self.http_server_url, test.url)],
+        proc = ProcessHandler([self.binary, urlparse.urljoin(self.http_server_url, test.url)],
                               processOutputLine=[self.on_output])
         proc.run()
         #Now wait to get the output we expect, or until we reach the timeout
@@ -264,12 +266,27 @@ def queue_tests(test_root, metadata_root, test_types, run_info, include_filters)
     return test_ids, tests_by_type
 
 
-class LoggingWrapper(object):
+class LogThread(threading.Thread):
+    def __init__(self, queue, logger, level):
+        self.queue = queue
+        self.log_func = getattr(logger, level)
+        threading.Thread.__init__(self)
+
+    def run(self):
+        while True:
+            msg = self.queue.get()
+            if msg is None:
+                break
+            else:
+                self.log_func(msg)
+        self.queue.close()
+
+
+class LoggingWrapper(StringIO):
     """Wrapper for file like objects to redirect output to logger
     instead"""
-    def __init__(self, logger, level="info", prefix=None):
-        self.logger = logger
-        self.log_func = getattr(self.logger, level)
+    def __init__(self, queue, prefix=None):
+        self.queue = queue
         self.prefix = prefix
 
     def write(self, data):
@@ -279,7 +296,7 @@ class LoggingWrapper(object):
             data = data[:-1]
         if self.prefix is not None:
             data = "%s: %s" % (self.prefix, data)
-        self.log_func(data)
+        self.queue.put(data)
 
     def flush(self):
         pass
@@ -293,13 +310,17 @@ test_runner_classes = {"firefox": {"reftest": ReftestTestRunner,
 
 def run_tests(binary, tests_root, metadata_root, test_types,
               processes=1, include=None, capture_stdio=True, product="firefox"):
-
+    logging_queue = None
     original_stdio = (sys.stdout, sys.stderr)
-    if capture_stdio:
-        sys.stdout = LoggingWrapper(logger, prefix="STDOUT")
-        sys.stderr = LoggingWrapper(logger, level="info", prefix="STDERR")
 
     try:
+        if capture_stdio:
+            logging_queue = Queue()
+            logging_thread = LogThread(logging_queue, logger, "info")
+            sys.stdout = LoggingWrapper(logging_queue, prefix="STDOUT")
+            sys.stderr = LoggingWrapper(logging_queue, prefix="STDERR")
+            logging_thread.start()
+
         do_test_relative_imports(tests_root)
 
         run_info = wpttest.RunInfo(False)
@@ -349,12 +370,12 @@ def run_tests(binary, tests_root, metadata_root, test_types,
                 queue.cancel_join_thread()
         sys.exit(1)
     finally:
+        if capture_stdio and logging_queue is not None:
+            logging_queue.put(None)
+
         sys.stdout, sys.stderr = original_stdio
 
     logger.info("Got %i unexpected results" % unexpected_count)
-
-    if capture_stdio:
-        sys.stdout, sys.stderr = original_stdio
 
     return manager_group.unexpected_count() == 0
 
