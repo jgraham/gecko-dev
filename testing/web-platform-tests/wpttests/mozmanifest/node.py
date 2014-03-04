@@ -54,7 +54,19 @@ class DataNode(Node):
             self.children.insert(index, other)
 
 class KeyValueNode(Node):
-    pass
+    def append(self, other):
+        # Append that retains the invariant that conditional nodes
+        # come before unconditional nodes
+        other.parent = self
+        if isinstance(other, ValueNode):
+            if self.children:
+                assert not isinstance(self.children[-1], ValueNode)
+            self.children.append(other)
+        else:
+            if self.children and isinstance(self.children[-1], ValueNode):
+                self.children.insert(len(self.children) - 1, other)
+            else:
+                self.children.append(other)
 
 class ValueNode(Node):
     def append(self, other):

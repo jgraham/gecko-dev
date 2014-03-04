@@ -296,7 +296,8 @@ class TestRunnerManager(threading.Thread):
                             "init_failed": self.init_failed,
                             "test_ended": self.test_ended,
                             "restart_test": self.restart_test,
-                            "log": self.log}
+                            "log": self.log,
+                            "error": self.error}
                 try:
                     command, data = self.command_queue.get(True, 1)
                 except IOError:
@@ -422,20 +423,13 @@ class TestRunnerManager(threading.Thread):
                 break
 
     def teardown(self):
-        self.logger.critical("TestManager teardown")
         self.test_runner_proc = None
         self.command_queue.cancel_join_thread()
         self.remote_queue.cancel_join_thread()
         self.remote_queue.close()
         self.command_queue.close()
-        self.logger.critical(repr(self.command_queue._reader))
-        self.logger.critical(repr(self.command_queue._writer))
-        self.logger.critical(repr(self.command_queue._writer))
         self.command_queue = None
         self.remote_queue.close()
-        self.logger.critical(repr(self.remote_queue._reader))
-        self.logger.critical(repr(self.remote_queue._writer))
-        self.logger.critical(repr(self.remote_queue._writer))
         self.remote_queue = None
 
     def stop_runner(self):
@@ -540,6 +534,9 @@ class TestRunnerManager(threading.Thread):
     def log(self, level, message):
         getattr(self.logger, level)(message)
 
+    def error(self, message):
+        self.logger.error(message)
+        self.restart_runner()
 
 class ManagerGroup(object):
     def __init__(self, suite_name, runner_cls, run_info, size, server_url, binary_path,

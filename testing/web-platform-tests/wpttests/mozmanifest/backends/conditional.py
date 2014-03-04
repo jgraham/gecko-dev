@@ -203,6 +203,7 @@ class ManifestItem(object):
             for child in self.node.children:
                 if child.data == key:
                     node = child
+                    break
             assert node is not None
 
         else:
@@ -222,9 +223,14 @@ class ManifestItem(object):
 
         cond_value = ConditionalValue(value_node, func)
 
+        # Update the cache of child values. This is pretty annoying and maybe
+        # it should just work directly on the tree
         if key not in self._data:
             self._data[key] = []
-        self._data[key].append(cond_value)
+        if self._data[key] and self._data[key][-1].condition_node is None:
+            self._data[key].insert(len(self._data[key]) - 1, cond_value)
+        else:
+            self._data[key].append(cond_value)
 
 
     def _add_key_value(self, node, values):

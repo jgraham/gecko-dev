@@ -1,7 +1,7 @@
 import os
 from collections import namedtuple, defaultdict
 
-from mozmanifest.node import DataNode, ConditionalNode, BinaryExpressionNode, BinaryOperatorNode, VariableNode, StringNode, NumberNode, UnaryExpressionNode, UnaryOperatorNode, KeyValueNode
+from mozmanifest.node import DataNode, ConditionalNode, BinaryExpressionNode, BinaryOperatorNode, VariableNode, StringNode, NumberNode, UnaryExpressionNode, UnaryOperatorNode, KeyValueNode, ValueNode
 from mozmanifest.backends import conditional
 from mozmanifest.backends.conditional import ManifestItem, ConditionalValue
 
@@ -119,10 +119,6 @@ class TestNode(ManifestItem):
             self.root.modified = True
 
     def coalesce_expected(self):
-        if self.new_expected and not all(self.new_expected[0].status == result.status for result in self.new_expected):
-            import pdb
-            #pdb.set_trace()
-
         final_conditionals = []
 
         try:
@@ -137,7 +133,8 @@ class TestNode(ManifestItem):
             elif all(results[0].status == result.status for result in results):
                 #All the new values for this conditional matched, so update the node
                 result = results[0]
-                if result.status == unconditional_status and conditional_value.condition_node is not None:
+                if (result.status == unconditional_status and
+                    conditional_value.condition_node is not None):
                     self.remove_value("expected", conditional_value)
                 else:
                     conditional_value.value = result.status
@@ -149,10 +146,16 @@ class TestNode(ManifestItem):
                 # we expect, and if not let a human sort it out
                 self.remove_value("expected", conditional_value)
                 self.new_expected.extend(results)
+            elif conditional_value.condition_node is None:
+                self.new_expected.extend(result for result in results
+                                         if result.status != unconditional_status)
+
+        # It is an invariant that nothing in new_expected matches an existing
+        # condition except for the default condition
 
         if self.new_expected:
             if all(self.new_expected[0].status == result.status
-                   for result in self.new_expected):
+                   for result in self.new_expected) and not self.updated_expected:
                 status = self.new_expected[0].status
                 if status != self.default_status:
                     self.set("expected", status, condition=None)
@@ -221,9 +224,12 @@ def group_conditionals(values):
         for prop_name, prop_value in run_info.iteritems():
             by_property[(prop_name, prop_value)].add(status)
 
-    for key, statuses in by_property.copy().iteritems():
-        if len(statuses) == len(values):
-            del by_property[key]
+    # If we have more than one value, remove any properties that are common
+    # for all the values
+    if len(values) > 1:
+        for key, statuses in by_property.copy().iteritems():
+            if len(statuses) == len(values):
+                del by_property[key]
 
     properties = set(item[0] for item in by_property.iterkeys())
 
@@ -250,10 +256,9 @@ def group_conditionals(values):
 def make_expr(prop_set, status):
     """Create an AST that returns the value ``status`` given all the
     properties in prop_set match."""
-    if len(prop_set) == 0:
-        return mozmanifest.ValueNode(status)
-
     root = ConditionalNode()
+
+    assert len(prop_set) > 0
 
     no_value_props = set(["debug"])
 

@@ -40,7 +40,7 @@ def create_parser(allow_mandatory=True):
 
     parser.add_argument("--total-chunks", action="store", type=int, default=1,
                         help="Total number of chunks to use")
-    parser.add_argument("--chunk-number", action="store", type=int, default=1,
+    parser.add_argument("--this-chunk", action="store", type=int, default=1,
                         help="Chunk number to run")
     parser.add_argument("--chunk-type", action="store", choices=["none", "equal_time", "hash"],
                         default="none", help="Chunking type to use")

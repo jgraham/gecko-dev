@@ -405,9 +405,12 @@ test_runner_classes = {"firefox": {"reftest": ReftestTestRunner,
 
 def run_tests(binary, tests_root, metadata_root, test_types,
               processes=1, include=None, capture_stdio=True, product="firefox",
-              chunk_type="none", total_chunks=1, chunk_number=1):
+              chunk_type="none", total_chunks=1, this_chunk=1):
     logging_queue = None
     original_stdio = (sys.stdout, sys.stderr)
+
+    #XXX remove this
+    processes = min(4, processes)
 
     try:
         if capture_stdio:
@@ -434,7 +437,7 @@ def run_tests(binary, tests_root, metadata_root, test_types,
                                             test_environment.config["ports"]["http"][0])
             test_ids, test_queues = queue_tests(tests_root, metadata_root,
                                                 test_types, run_info, include,
-                                                chunk_type, total_chunks, chunk_number)
+                                                chunk_type, total_chunks, this_chunk)
             logger.suite_start(test_ids, run_info)
             for test_type in test_types:
                 tests_queue = test_queues[test_type]
