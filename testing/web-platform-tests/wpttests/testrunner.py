@@ -21,18 +21,20 @@ from mozlog.structured import structuredlog
 Stop = object()
 
 class TestRunner(object):
-    def __init__(self, command_queue, result_queue, executor):
+    def __init__(self, test_queue, command_queue, result_queue, executor):
         """Class implementing the main loop for running tests.
 
         This class delegates the job of actually running a test to the executor
         that is passed in.
 
+        :param test_queue: subprocess.Queue containing the tests to run
         :param command_queue: subprocess.Queue used to send commands to the
                               process
         :param result_queue: subprocess.Queue used to send results to the
                              parent TestManager process
         :param executor: TestExecutor object that will actually run a test.
         """
+        self.test_queue = test_queue
         self.command_queue = command_queue
         self.result_queue = result_queue
 
@@ -42,15 +44,15 @@ class TestRunner(object):
     def __enter__(self):
         return self
 
-    def __exit__(self, *args, **kwargs):
+    def __exit__(self, exc_type, exc_value, traceback):
         self.teardown()
 
     def setup(self):
         self.executor.setup(self)
 
     def teardown(self):
-        print self.name + " TestRunner teardown"
         self.executor.teardown()
+        self.send_message("runner_teardown")
         self.result_queue = None
         self.command_queue = None
         self.browser = None
@@ -63,7 +65,6 @@ class TestRunner(object):
                     "stop": self.stop}
         while True:
             command, args = self.command_queue.get()
-            print self.name + " " + command
             try:
                 rv = commands[command](*args)
             except Exception:
@@ -73,23 +74,33 @@ class TestRunner(object):
             else:
                 if rv is Stop:
                     break
-        print self.name + " Exiting"
 
     def stop(self):
         return Stop
 
-    def run_test(self, test):
+    def run_test(self):
+        if not self.executor.is_alive():
+            self.send_message("restart_runner")
+            return
+        try:
+            # Need to block here just to allow for contention with other processes
+            test = self.test_queue.get(block=True, timeout=1)
+        except Empty:
+            self.send_message("log", "info", "No more tests")
+            return Stop
+        else:
+            self.send_message("test_start", test)
         return self.executor.run_test(test)
 
     def send_message(self, command, *args):
         self.result_queue.put((command, args))
 
 
-def start_runner(runner_command_queue, runner_result_queue, browser,
-                 executor_cls, executor_kwargs, stop_flag):
+def start_runner(test_queue, runner_command_queue, runner_result_queue,
+                 browser, executor_cls, executor_kwargs, stop_flag):
     try:
         executor = executor_cls(browser, **executor_kwargs)
-        with TestRunner(runner_command_queue, runner_result_queue, executor) as runner:
+        with TestRunner(test_queue, runner_command_queue, runner_result_queue, executor) as runner:
             try:
                 runner.run()
             except KeyboardInterrupt:
@@ -100,8 +111,12 @@ def start_runner(runner_command_queue, runner_result_queue, browser,
         runner_command_queue = None
         runner_result_queue = None
 
-count_lock = threading.Lock()
-thread_count = 0
+
+manager_count = 0
+def get_manager_number():
+    global manager_count
+    local = manager_count = manager_count + 1
+    return local
 
 class TestRunnerManager(threading.Thread):
     init_lock = threading.Lock()
@@ -111,17 +126,17 @@ class TestRunnerManager(threading.Thread):
         """Thread that owns a single TestRunner process and any processes required
         by the TestRunner (e.g. the Firefox binary).
 
-        TestRunnerManagers are in control of the overall testing process. Over
-        the lifetime of a testrun, the TestRunnerManager will:
+        TestRunnerManagers are responsible for launching the browser process and the
+        runner process, and for logging the test progress. The actual test running
+        is done by the TestRunner. In particular they:
 
         * Start the binary of the program under test
         * Start the TestRunner
-        * Cause tests to be run:
-          - Pull a test off the test queue
-          - Forward the test to the TestRunner
-          - Collect the test results and output them
-          - Take any remedial action required e.g. restart crashed or hung
-            processes
+        * Tell the TestRunner to start a test, if any
+        * Log that the test started
+        * Log the test results
+        * Take any remedial action required e.g. restart crashed or hung
+          processes
         """
         self.suite_name = suite_name
         self.tests_queue = tests_queue
@@ -136,17 +151,14 @@ class TestRunnerManager(threading.Thread):
         self.parent_stop_flag = stop_flag
         self.child_stop_flag = multiprocessing.Event()
 
-        global thread_count
-        with count_lock:
-            self.manager_number = thread_count
-            thread_count += 1
+        self.manager_number = get_manager_number()
 
-        self.command_queue = Queue(name="Command Queue %s" % self.manager_number)
-        self.remote_queue = Queue(name="Remote Queue %s" % self.manager_number)
+        self.command_queue = Queue()
+        self.remote_queue = Queue()
 
         self.test_runner_proc = None
 
-        threading.Thread.__init__(self, name="TestrunnerManager %i" % self.manager_number)
+        threading.Thread.__init__(self, name="Thread-TestrunnerManager-%i" % self.manager_number)
         # This is started in the actual new thread
         self.logger = None
 
@@ -161,6 +173,9 @@ class TestRunnerManager(threading.Thread):
         self.init_fail_count = 0
         self.max_init_fails = 5
         self.init_timer = None
+
+        self.restart_count = 0
+        self.max_restarts = 5
 
     def run(self):
         """Main loop for the TestManager.
@@ -177,8 +192,10 @@ class TestRunnerManager(threading.Thread):
             while True:
                 commands = {"init_succeeded": self.init_succeeded,
                             "init_failed": self.init_failed,
+                            "test_start": self.test_start,
                             "test_ended": self.test_ended,
-                            "restart_test": self.restart_test,
+                            "restart_runner": self.restart_runner,
+                            "runner_teardown": self.runner_teardown,
                             "log": self.log,
                             "error": self.error}
                 try:
@@ -186,7 +203,9 @@ class TestRunnerManager(threading.Thread):
                 except IOError:
                     if not self.should_stop():
                         self.logger.error("Got IOError from poll")
-                        self.restart_runner()
+                        self.restart_count += 1
+                        if self.restart_runner() is Stop:
+                            break
                 except Empty:
                     command = None
 
@@ -194,28 +213,30 @@ class TestRunnerManager(threading.Thread):
                     break
 
                 if command is not None:
+                    self.restart_count = 0
                     if commands[command](*data) is Stop:
                         break
                 else:
                     if not self.test_runner_proc.is_alive():
+                        if not self.command_queue.empty():
+                            # We got a new message so process that
+                            continue
+
+                        # If we got to here the runner presumably shut down
+                        # unexpectedly
                         self.logger.info("Test runner process shut down")
-                        if self.tests_queue.empty() and self.test is None:
-                            # This happens when we run out of tests;
-                            # We ask the runner to stop, it shuts itself
-                            # down and then we end up here
-                            # An alternate implementation strategy would be to have the
-                            # runner signal that it is done just before it terminates
-                            self.browser.stop()
-                            self.logger.debug("No more tests")
-                            break
-                        elif self.test is not None:
+
+                        if self.test is not None:
                             # This could happen if the test runner crashed for some other
                             # reason
-                            self.logger.info("Last test did not complete, restarting")
-                            self.restart_test(self.test)
-                        else:
-                            self.logger.info("More tests found, but runner process died, restarting")
-                            self.restart_runner()
+                            # Need to consider the unlikely case where one test causes the
+                            # runner process to repeatedly die
+                            self.logger.info("Last test did not complete, requeueing")
+                            self.requeue_test(self.test)
+                        self.logger.info("More tests found, but runner process died, restarting")
+                        self.restart_count += 1
+                        if self.restart_runner() is Stop:
+                            break
         finally:
             self.stop_runner()
             self.teardown()
@@ -258,10 +279,7 @@ class TestRunnerManager(threading.Thread):
         self.logger.debug("Init succeeded")
         self.init_timer.cancel()
         self.init_fail_count = 0
-        if self.test is not None:
-            return self.start_test(self.test)
-        else:
-            return self.start_next_test()
+        self.start_next_test()
 
     def init_failed(self):
         """Callback when we can't connect to the browser via
@@ -279,13 +297,14 @@ class TestRunnerManager(threading.Thread):
         assert self.command_queue is not None
         assert self.remote_queue is not None
         self.test_runner_proc = Process(target=start_runner,
-                                        args=(self.remote_queue,
+                                        args=(self.tests_queue,
+                                              self.remote_queue,
                                               self.command_queue,
                                               self.browser,
                                               self.executor_cls,
                                               self.executor_kwargs,
                                               self.child_stop_flag),
-                                        name="TestRunner %i" % self.manager_number)
+                                        name="Thread-TestRunner-%i" % self.manager_number)
         self.test_runner_proc.start()
         self.logger.debug("Test runner started")
 
@@ -308,7 +327,6 @@ class TestRunnerManager(threading.Thread):
 
     def teardown(self):
         self.logger.info("teardown in testrunnermanager")
-        self.logger.info(self.test_runner_proc.is_alive())
         self.test_runner_proc = None
         # self.command_queue.cancel_join_thread()
         # self.remote_queue.cancel_join_thread()
@@ -319,52 +337,45 @@ class TestRunnerManager(threading.Thread):
         self.command_queue = None
         self.remote_queue = None
 
+    def ensure_runner_stopped(self):
+        if not self.test_runner_proc:
+            return
+
+        self.test_runner_proc.join(10)
+        if self.test_runner_proc.is_alive():
+            # This might leak a file handle from the queue
+            self.logger.warning("Forcibly terminating runner process")
+            self.test_runner_proc.terminate()
+            self.test_runner_proc.join(10)
+        else:
+            self.logger.info("Testrunner exited with code %i" % self.test_runner_proc.exitcode)
+
+    def runner_teardown(self):
+        self.ensure_runner_stopped()
+        return Stop
+
     def stop_runner(self):
         """Stop the TestRunner and the Firefox binary."""
         self.logger.info("Stopping runner")
-
         try:
             self.browser.stop()
-            if self.test_runner_proc:
+            if self.test_runner_proc.is_alive():
                 self.send_message("stop")
-                self.test_runner_proc.join(10)
-                if self.test_runner_proc.is_alive():
-                    # This might leak a file handle from the queue
-                    self.logger.warning("Forcibly terminating runner process")
-                    self.test_runner_proc.terminate()
-                else:
-                    self.logger.info("Testrunner exited with code %i" % self.test_runner_proc.exitcode)
-                self.test_runner_proc.join(10)
+                self.ensure_runner_stopped()
         finally:
             self.cleanup()
 
     def start_next_test(self):
-        """Start the next test in the queue, or stop the
-        TestRunner if there are no more tests."""
-        assert self.test is None
-        try:
-            test = self.tests_queue.get(False)
-        except Empty:
-            self.logger.debug("No more tests")
-            return Stop
-        else:
-            self.logger.test_start(test.id)
-            self.start_test(test)
+        self.send_message("run_test")
 
-    def start_test(self, test):
-        """Send the message to actually start a test"""
+    def requeue_test(self):
+        self.test_queue.put(self.test)
+        self.test = None
+
+    def test_start(self, test):
         self.test = test
         self.logger.debug("Starting test %r" % (test.id,))
-        assert self.test_runner_proc.is_alive()
-        assert self.browser.is_alive()
-        self.send_message("run_test", self.test)
-
-    def restart_test(self, test):
-        """Restart the runner and restart the current test.
-        This can happen if the browser crashed after completing
-        the previous test"""
-        assert test == self.test
-        self.restart_runner()
+        self.logger.test_start(test.id)
 
     def test_ended(self, test, results):
         """Handle the end of a test.
@@ -417,6 +428,8 @@ class TestRunnerManager(threading.Thread):
 
     def restart_runner(self):
         """Stop and restart the TestRunner"""
+        if self.restart_count >= self.max_restarts:
+            return Stop
         self.logger.info("Restarting runner")
         self.stop_runner()
         self.init()

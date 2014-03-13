@@ -267,7 +267,6 @@ def queue_tests(test_root, metadata_root, test_types, run_info, include_filters,
         expected_file = manifestexpected.get_manifest(metadata_root, test_path, run_info)
         for manifest_test in tests:
             test_type = manifest_test.item_type
-            tests_by_type[test_type].name = "Test Queue %s" % test_type
             if expected_file is not None:
                 expected = expected_file.get_test(manifest_test.id)
             else:
@@ -285,7 +284,7 @@ class LogThread(threading.Thread):
     def __init__(self, queue, logger, level):
         self.queue = queue
         self.log_func = getattr(logger, level)
-        threading.Thread.__init__(self, name="Log Thread")
+        threading.Thread.__init__(self, name="Thread-Log")
 
     def run(self):
         while True:
@@ -353,7 +352,7 @@ def run_tests(tests_root, metadata_root, test_types, binary=None, processes=1,
 
     try:
         if capture_stdio:
-            logging_queue = Queue(name="logging_queue")
+            logging_queue = Queue()
             logging_thread = LogThread(logging_queue, logger, "info")
             sys.stdout = LoggingWrapper(logging_queue, prefix="STDOUT")
             sys.stderr = LoggingWrapper(logging_queue, prefix="STDERR")
