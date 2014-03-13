@@ -88,8 +88,13 @@ class FileHandler(object):
             data = self.get_data(response, path, byte_ranges)
             response.content = data
             query = urlparse.parse_qs(request.url_parts.query)
+
+            pipeline = None
             if "pipe" in query:
                 pipeline = Pipeline(query["pipe"][-1])
+            elif os.path.splitext(path)[0].endswith(".sub"):
+                pipeline = Pipeline("sub")
+            if pipeline is not None:
                 response = pipeline(request, response)
 
             return response
@@ -105,12 +110,11 @@ class FileHandler(object):
 
     def load_headers(self, path):
         try:
-            headers_file = open(path + ".headers")
+            with open(path + ".headers") as headers_file:
+                return [tuple(item.strip() for item in line.split(":", 1))
+                        for line in headers_file if line]
         except IOError:
             return []
-        else:
-            return [tuple(item.strip() for item in line.split(":", 1))
-                    for line in headers_file if line]
 
     def get_data(self, response, path, byte_ranges):
         with open(path) as f:

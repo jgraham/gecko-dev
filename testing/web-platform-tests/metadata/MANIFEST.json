@@ -6933,6 +6933,10 @@
         "path": "XMLHttpRequest/setrequestheader-invalid-arguments.htm"
       }, 
       {
+        "url": "/XMLHttpRequest/setrequestheader-open-setrequestheader.htm", 
+        "path": "XMLHttpRequest/setrequestheader-open-setrequestheader.htm"
+      }, 
+      {
         "url": "/XMLHttpRequest/status-async.htm", 
         "path": "XMLHttpRequest/status-async.htm"
       }, 
@@ -7127,6 +7131,18 @@
       {
         "url": "/cors/status.htm", 
         "path": "cors/status.htm"
+      }, 
+      {
+        "url": "/custom-elements/concepts/custom-elements-type-allowed-chars-first-char.html", 
+        "path": "custom-elements/concepts/custom-elements-type-allowed-chars-first-char.html"
+      }, 
+      {
+        "url": "/custom-elements/concepts/custom-elements-type-allowed-chars.html", 
+        "path": "custom-elements/concepts/custom-elements-type-allowed-chars.html"
+      }, 
+      {
+        "url": "/custom-elements/concepts/custom-elements-type-naming.html", 
+        "path": "custom-elements/concepts/custom-elements-type-naming.html"
       }, 
       {
         "url": "/dom/collections/HTMLCollection-empty-name.html", 
@@ -8347,6 +8363,18 @@
         "path": "html/browsers/history/the-location-interface/security_location_0.htm"
       }, 
       {
+        "url": "/html/browsers/the-window-object/accessing-other-browsing-contexts/indexed-browsing-contexts-01.html", 
+        "path": "html/browsers/the-window-object/accessing-other-browsing-contexts/indexed-browsing-contexts-01.html"
+      }, 
+      {
+        "url": "/html/browsers/the-window-object/accessing-other-browsing-contexts/indexed-browsing-contexts-02.html", 
+        "path": "html/browsers/the-window-object/accessing-other-browsing-contexts/indexed-browsing-contexts-02.html"
+      }, 
+      {
+        "url": "/html/browsers/the-window-object/accessing-other-browsing-contexts/indexed-browsing-contexts-03.html", 
+        "path": "html/browsers/the-window-object/accessing-other-browsing-contexts/indexed-browsing-contexts-03.html"
+      }, 
+      {
         "url": "/html/browsers/the-window-object/named-access-on-the-window-object/window-null-names.html", 
         "path": "html/browsers/the-window-object/named-access-on-the-window-object/window-null-names.html"
       }, 
@@ -9281,6 +9309,10 @@
         "path": "html/rendering/bindings/the-progress-element-0/progress.html"
       }, 
       {
+        "url": "/html/semantics/disabled-elements/disabledElement.html", 
+        "path": "html/semantics/disabled-elements/disabledElement.html"
+      }, 
+      {
         "url": "/html/semantics/document-metadata/styling/LinkStyle.html", 
         "path": "html/semantics/document-metadata/styling/LinkStyle.html"
       }, 
@@ -9694,8 +9726,16 @@
         "path": "html/semantics/embedded-content/media-elements/interfaces/TrackEvent/createEvent.html"
       }, 
       {
+        "url": "/html/semantics/embedded-content/media-elements/loading-the-media-resource/autoplay-overrides-preload.html", 
+        "path": "html/semantics/embedded-content/media-elements/loading-the-media-resource/autoplay-overrides-preload.html"
+      }, 
+      {
         "url": "/html/semantics/embedded-content/media-elements/loading-the-media-resource/load-events-networkState.html", 
         "path": "html/semantics/embedded-content/media-elements/loading-the-media-resource/load-events-networkState.html"
+      }, 
+      {
+        "url": "/html/semantics/embedded-content/media-elements/loading-the-media-resource/load-removes-queued-error-event.html", 
+        "path": "html/semantics/embedded-content/media-elements/loading-the-media-resource/load-removes-queued-error-event.html"
       }, 
       {
         "url": "/html/semantics/embedded-content/media-elements/loading-the-media-resource/resource-selection-candidate-insert-before.html", 
@@ -9866,6 +9906,10 @@
         "path": "html/semantics/embedded-content/media-elements/networkState_initial.html"
       }, 
       {
+        "url": "/html/semantics/embedded-content/media-elements/offsets-into-the-media-resource/currentTime.html", 
+        "path": "html/semantics/embedded-content/media-elements/offsets-into-the-media-resource/currentTime.html"
+      }, 
+      {
         "url": "/html/semantics/embedded-content/media-elements/offsets-into-the-media-resource/duration.html", 
         "path": "html/semantics/embedded-content/media-elements/offsets-into-the-media-resource/duration.html"
       }, 
@@ -9912,6 +9956,18 @@
       {
         "url": "/html/semantics/embedded-content/media-elements/readyState_initial.html", 
         "path": "html/semantics/embedded-content/media-elements/readyState_initial.html"
+      }, 
+      {
+        "url": "/html/semantics/embedded-content/media-elements/seeking/seek-to-currentTime.html", 
+        "path": "html/semantics/embedded-content/media-elements/seeking/seek-to-currentTime.html"
+      }, 
+      {
+        "url": "/html/semantics/embedded-content/media-elements/seeking/seek-to-max-value.htm", 
+        "path": "html/semantics/embedded-content/media-elements/seeking/seek-to-max-value.htm"
+      }, 
+      {
+        "url": "/html/semantics/embedded-content/media-elements/seeking/seek-to-negative-time.htm", 
+        "path": "html/semantics/embedded-content/media-elements/seeking/seek-to-negative-time.htm"
       }, 
       {
         "url": "/html/semantics/embedded-content/media-elements/src_reflects_attribute_not_source_elements.html", 
@@ -10100,18 +10156,6 @@
       {
         "url": "/html/semantics/embedded-content/media-elements/track/track-element/src-clear-cues.html", 
         "path": "html/semantics/embedded-content/media-elements/track/track-element/src-clear-cues.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/video_004.htm", 
-        "path": "html/semantics/embedded-content/media-elements/video_004.htm"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/video_007.htm", 
-        "path": "html/semantics/embedded-content/media-elements/video_007.htm"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/video_022.htm", 
-        "path": "html/semantics/embedded-content/media-elements/video_022.htm"
       }, 
       {
         "url": "/html/semantics/embedded-content/media-elements/video_loop_base.html", 
@@ -10663,8 +10707,16 @@
         "path": "html/semantics/forms/the-datalist-element/datalistelement.html"
       }, 
       {
+        "url": "/html/semantics/forms/the-datalist-element/datalistoptions.html", 
+        "path": "html/semantics/forms/the-datalist-element/datalistoptions.html"
+      }, 
+      {
         "url": "/html/semantics/forms/the-fieldset-element/HTMLFieldSetElement.html", 
         "path": "html/semantics/forms/the-fieldset-element/HTMLFieldSetElement.html"
+      }, 
+      {
+        "url": "/html/semantics/forms/the-fieldset-element/disabled.html", 
+        "path": "html/semantics/forms/the-fieldset-element/disabled.html"
       }, 
       {
         "url": "/html/semantics/forms/the-form-element/form-elements-interfaces-01.html", 
@@ -10687,8 +10739,20 @@
         "path": "html/semantics/forms/the-form-element/form-nameditem.html"
       }, 
       {
+        "url": "/html/semantics/forms/the-input-element/color.html", 
+        "path": "html/semantics/forms/the-input-element/color.html"
+      }, 
+      {
         "url": "/html/semantics/forms/the-input-element/date.html", 
         "path": "html/semantics/forms/the-input-element/date.html"
+      }, 
+      {
+        "url": "/html/semantics/forms/the-input-element/datetime-2.html", 
+        "path": "html/semantics/forms/the-input-element/datetime-2.html"
+      }, 
+      {
+        "url": "/html/semantics/forms/the-input-element/datetime-local.html", 
+        "path": "html/semantics/forms/the-input-element/datetime-local.html"
       }, 
       {
         "url": "/html/semantics/forms/the-input-element/datetime.html", 
@@ -10751,6 +10815,10 @@
         "path": "html/semantics/forms/the-input-element/text.html"
       }, 
       {
+        "url": "/html/semantics/forms/the-input-element/time-2.html", 
+        "path": "html/semantics/forms/the-input-element/time-2.html"
+      }, 
+      {
         "url": "/html/semantics/forms/the-input-element/time.html", 
         "path": "html/semantics/forms/the-input-element/time.html"
       }, 
@@ -10761,6 +10829,10 @@
       {
         "url": "/html/semantics/forms/the-input-element/week.html", 
         "path": "html/semantics/forms/the-input-element/week.html"
+      }, 
+      {
+        "url": "/html/semantics/forms/the-meter-element/meter.html", 
+        "path": "html/semantics/forms/the-meter-element/meter.html"
       }, 
       {
         "url": "/html/semantics/forms/the-option-element/option-text-backslash.html", 
@@ -11267,6 +11339,10 @@
         "path": "html/syntax/parsing/math-parse01.html"
       }, 
       {
+        "url": "/html/syntax/parsing/math-parse03.html", 
+        "path": "html/syntax/parsing/math-parse03.html"
+      }, 
+      {
         "url": "/html/syntax/parsing/named-character-references.html", 
         "path": "html/syntax/parsing/named-character-references.html"
       }, 
@@ -11489,6 +11565,10 @@
       {
         "url": "/js/builtins/WeakMap.prototype-properties.html", 
         "path": "js/builtins/WeakMap.prototype-properties.html"
+      }, 
+      {
+        "url": "/media-source/interfaces.html", 
+        "path": "media-source/interfaces.html"
       }, 
       {
         "url": "/mediacapture-streams/obtaining-local-multimedia-content/navigatorusermedia/api-present.html", 
@@ -16035,6 +16115,14 @@
     ], 
     "helper": [
       {
+        "url": "2dcontext/building-paths/canvas_complexshapes_arcto_001-ref.htm", 
+        "path": "2dcontext/building-paths/canvas_complexshapes_arcto_001-ref.htm"
+      }, 
+      {
+        "url": "2dcontext/building-paths/canvas_complexshapes_beziercurveto_001-ref.htm", 
+        "path": "2dcontext/building-paths/canvas_complexshapes_beziercurveto_001-ref.htm"
+      }, 
+      {
         "url": "/2dcontext/clear-100x50.png", 
         "path": "2dcontext/clear-100x50.png"
       }, 
@@ -16295,6 +16383,10 @@
         "path": "2dcontext/compositing/2d.composite.uncovered.pattern.source-out.png"
       }, 
       {
+        "url": "2dcontext/compositing/canvas_compositing_globalcompositeoperation_001-ref.htm", 
+        "path": "2dcontext/compositing/canvas_compositing_globalcompositeoperation_001-ref.htm"
+      }, 
+      {
         "url": "/2dcontext/conformance-requirements/2d.coordinatespace.png", 
         "path": "2dcontext/conformance-requirements/2d.coordinatespace.png"
       }, 
@@ -16527,6 +16619,10 @@
         "path": "2dcontext/green-100x50.png"
       }, 
       {
+        "url": "2dcontext/line-styles/canvas_linestyles_linecap_001-ref.htm", 
+        "path": "2dcontext/line-styles/canvas_linestyles_linecap_001-ref.htm"
+      }, 
+      {
         "url": "/2dcontext/path-objects/2d.path.fill.overlap.png", 
         "path": "2dcontext/path-objects/2d.path.fill.overlap.png"
       }, 
@@ -16579,6 +16675,14 @@
         "path": "2dcontext/shadows/2d.shadow.pattern.alpha.png"
       }, 
       {
+        "url": "2dcontext/shadows/canvas_shadows_002-ref.htm", 
+        "path": "2dcontext/shadows/canvas_shadows_002-ref.htm"
+      }, 
+      {
+        "url": "2dcontext/the-canvas-state/canvas_state_restore_001-ref.htm", 
+        "path": "2dcontext/the-canvas-state/canvas_state_restore_001-ref.htm"
+      }, 
+      {
         "url": "/2dcontext/tools/LICENSE.txt", 
         "path": "2dcontext/tools/LICENSE.txt"
       }, 
@@ -16613,6 +16717,10 @@
       {
         "url": "/2dcontext/tools/tests2dtext.yaml", 
         "path": "2dcontext/tools/tests2dtext.yaml"
+      }, 
+      {
+        "url": "2dcontext/transformations/canvas_transformations_scale_001-ref.htm", 
+        "path": "2dcontext/transformations/canvas_transformations_scale_001-ref.htm"
       }, 
       {
         "url": "/DOMEvents/tests/approved/support/ProcessingInstruction.DOMCharacterDataModified.xml", 
@@ -17335,1022 +17443,6 @@
         "path": "battery-status/prime.js"
       }, 
       {
-        "url": "/conformance-checkers/Makefile", 
-        "path": "conformance-checkers/Makefile"
-      }, 
-      {
-        "url": "/conformance-checkers/README.md", 
-        "path": "conformance-checkers/README.md"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/_functional/tree/css/img/expander.gif", 
-        "path": "conformance-checkers/html-aria/_functional/tree/css/img/expander.gif"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/_functional/tree/css/treebox.css", 
-        "path": "conformance-checkers/html-aria/_functional/tree/css/treebox.css"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/_functional/tree/css/treesimple.css", 
-        "path": "conformance-checkers/html-aria/_functional/tree/css/treesimple.css"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/_functional/tree/js/aria.js", 
-        "path": "conformance-checkers/html-aria/_functional/tree/js/aria.js"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/_functional/tree/js/init.js", 
-        "path": "conformance-checkers/html-aria/_functional/tree/js/init.js"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/_functional/tree/js/prototype.js", 
-        "path": "conformance-checkers/html-aria/_functional/tree/js/prototype.js"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/css-attr-sel/default.png", 
-        "path": "conformance-checkers/html-aria/css-attr-sel/default.png"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/css-attr-sel/state-1.png", 
-        "path": "conformance-checkers/html-aria/css-attr-sel/state-1.png"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/css-attr-sel/state-2.png", 
-        "path": "conformance-checkers/html-aria/css-attr-sel/state-2.png"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/css-attr-sel/state-3.png", 
-        "path": "conformance-checkers/html-aria/css-attr-sel/state-3.png"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/css-attr-sel/state-4.png", 
-        "path": "conformance-checkers/html-aria/css-attr-sel/state-4.png"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/name-computation-img/foo.jpg", 
-        "path": "conformance-checkers/html-aria/name-computation-img/foo.jpg"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/name-computation-img/test.png", 
-        "path": "conformance-checkers/html-aria/name-computation-img/test.png"
-      }, 
-      {
-        "url": "/conformance-checkers/html-aria/name-computation-input/foo.jpg", 
-        "path": "conformance-checkers/html-aria/name-computation-input/foo.jpg"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/html/allowedcharacters2htmlrules.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/html/allowedcharacters2htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/html/allowedcharacters3htmlrules.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/html/allowedcharacters3htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters1xml.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters2xml.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters3xml.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters3xmlrules.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters3xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters4xml.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters4xmlrules.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters4xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters5xml.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters6xml.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters7xml.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters7xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters7xmlrules.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters7xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters8xml.xml", 
-        "path": "conformance-checkers/html-its/allowedcharacters/xml/allowedcharacters8xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/directionality/html/dir3htmlrules.xml", 
-        "path": "conformance-checkers/html-its/directionality/html/dir3htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/directionality/xml/dir1xml.xml", 
-        "path": "conformance-checkers/html-its/directionality/xml/dir1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/directionality/xml/dir2xml.xml", 
-        "path": "conformance-checkers/html-its/directionality/xml/dir2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/directionality/xml/dir2xmlrules.xml", 
-        "path": "conformance-checkers/html-its/directionality/xml/dir2xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/directionality/xml/dir3xml.xml", 
-        "path": "conformance-checkers/html-its/directionality/xml/dir3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/directionality/xml/dir4xml.xml", 
-        "path": "conformance-checkers/html-its/directionality/xml/dir4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/directionality/xml/dir5xml.xml", 
-        "path": "conformance-checkers/html-its/directionality/xml/dir5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/directionality/xml/dir6xml.xml", 
-        "path": "conformance-checkers/html-its/directionality/xml/dir6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/directionality/xml/dir6xmlrules.xml", 
-        "path": "conformance-checkers/html-its/directionality/xml/dir6xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/domain/html/domain1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/domain/html/domain1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/domain/html/domain2htmlrules.xml", 
-        "path": "conformance-checkers/html-its/domain/html/domain2htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/domain/html/domain3htmlrules.xml", 
-        "path": "conformance-checkers/html-its/domain/html/domain3htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/domain/xml/domain1xml.xml", 
-        "path": "conformance-checkers/html-its/domain/xml/domain1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/domain/xml/domain2xml.xml", 
-        "path": "conformance-checkers/html-its/domain/xml/domain2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/domain/xml/domain4xml.xml", 
-        "path": "conformance-checkers/html-its/domain/xml/domain4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/domain/xml/domain4xmlrules.xml", 
-        "path": "conformance-checkers/html-its/domain/xml/domain4xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/domain/xml/domain5xml.xml", 
-        "path": "conformance-checkers/html-its/domain/xml/domain5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/domain/xml/domain5xmlrules.xml", 
-        "path": "conformance-checkers/html-its/domain/xml/domain5xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/domain/xml/domain6xml.xml", 
-        "path": "conformance-checkers/html-its/domain/xml/domain6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/domain/xml/domain7xml.xml", 
-        "path": "conformance-checkers/html-its/domain/xml/domain7xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/domain/xml/domain7xmlrules.xml", 
-        "path": "conformance-checkers/html-its/domain/xml/domain7xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/elementswithintext/html/withintext1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/elementswithintext/html/withintext1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/elementswithintext/html/withintext3htmlrules.xml", 
-        "path": "conformance-checkers/html-its/elementswithintext/html/withintext3htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/elementswithintext/xml/withintext1xml.xml", 
-        "path": "conformance-checkers/html-its/elementswithintext/xml/withintext1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/elementswithintext/xml/withintext2xml.xml", 
-        "path": "conformance-checkers/html-its/elementswithintext/xml/withintext2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/elementswithintext/xml/withintext2xmlrules.xml", 
-        "path": "conformance-checkers/html-its/elementswithintext/xml/withintext2xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/elementswithintext/xml/withintext3xml.xml", 
-        "path": "conformance-checkers/html-its/elementswithintext/xml/withintext3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/elementswithintext/xml/withintext4xml.xml", 
-        "path": "conformance-checkers/html-its/elementswithintext/xml/withintext4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/elementswithintext/xml/withintext5xml.xml", 
-        "path": "conformance-checkers/html-its/elementswithintext/xml/withintext5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/elementswithintext/xml/withintext6xml.xml", 
-        "path": "conformance-checkers/html-its/elementswithintext/xml/withintext6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/elementswithintext/xml/withintext6xmlrules.xml", 
-        "path": "conformance-checkers/html-its/elementswithintext/xml/withintext6xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/externalresource/html/externalresource1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/externalresource/html/externalresource1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/externalresource/html/externalresource2htmlrules.xml", 
-        "path": "conformance-checkers/html-its/externalresource/html/externalresource2htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/externalresource/xml/externalresource1xml.xml", 
-        "path": "conformance-checkers/html-its/externalresource/xml/externalresource1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/externalresource/xml/externalresource2xml.xml", 
-        "path": "conformance-checkers/html-its/externalresource/xml/externalresource2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/externalresource/xml/externalresource2xmlrules.xml", 
-        "path": "conformance-checkers/html-its/externalresource/xml/externalresource2xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/externalresource/xml/externalresource3xml.xml", 
-        "path": "conformance-checkers/html-its/externalresource/xml/externalresource3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/externalresource/xml/externalresource3xmlrules.xml", 
-        "path": "conformance-checkers/html-its/externalresource/xml/externalresource3xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/externalresource/xml/externalresource4xml.xml", 
-        "path": "conformance-checkers/html-its/externalresource/xml/externalresource4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/externalresource/xml/externalresource5xml.xml", 
-        "path": "conformance-checkers/html-its/externalresource/xml/externalresource5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/externalresource/xml/externalresource5xmlrules.xml", 
-        "path": "conformance-checkers/html-its/externalresource/xml/externalresource5xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/idvalue/html/idvalue1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/idvalue/html/idvalue1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/idvalue/html/idvalue2htmlrules.xml", 
-        "path": "conformance-checkers/html-its/idvalue/html/idvalue2htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/idvalue/xml/idvalue1xml.xml", 
-        "path": "conformance-checkers/html-its/idvalue/xml/idvalue1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/idvalue/xml/idvalue2xml.xml", 
-        "path": "conformance-checkers/html-its/idvalue/xml/idvalue2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/idvalue/xml/idvalue3xml.xml", 
-        "path": "conformance-checkers/html-its/idvalue/xml/idvalue3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/idvalue/xml/idvalue3xmlrules.xml", 
-        "path": "conformance-checkers/html-its/idvalue/xml/idvalue3xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/idvalue/xml/idvalue4xml.xml", 
-        "path": "conformance-checkers/html-its/idvalue/xml/idvalue4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/idvalue/xml/idvalue4xmlrules.xml", 
-        "path": "conformance-checkers/html-its/idvalue/xml/idvalue4xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/idvalue/xml/idvalue5xml.xml", 
-        "path": "conformance-checkers/html-its/idvalue/xml/idvalue5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/languageinformation/html/languageinfo1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/languageinformation/html/languageinfo1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/languageinformation/html/languageinfo2htmlrules.xml", 
-        "path": "conformance-checkers/html-its/languageinformation/html/languageinfo2htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/languageinformation/xml/languageinfo1xml.xml", 
-        "path": "conformance-checkers/html-its/languageinformation/xml/languageinfo1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/languageinformation/xml/languageinfo2xml.xml", 
-        "path": "conformance-checkers/html-its/languageinformation/xml/languageinfo2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/languageinformation/xml/languageinfo2xmlrules.xml", 
-        "path": "conformance-checkers/html-its/languageinformation/xml/languageinfo2xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/languageinformation/xml/languageinfo3xml.xml", 
-        "path": "conformance-checkers/html-its/languageinformation/xml/languageinfo3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/languageinformation/xml/languageinfo4xml.xml", 
-        "path": "conformance-checkers/html-its/languageinformation/xml/languageinfo4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/languageinformation/xml/languageinfo4xmlrules.xml", 
-        "path": "conformance-checkers/html-its/languageinformation/xml/languageinfo4xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/html/locale1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/localefilter/html/locale1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/html/locale3htmlrules.xml", 
-        "path": "conformance-checkers/html-its/localefilter/html/locale3htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/xml/locale1xml.xml", 
-        "path": "conformance-checkers/html-its/localefilter/xml/locale1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/xml/locale2xml.xml", 
-        "path": "conformance-checkers/html-its/localefilter/xml/locale2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/xml/locale3xml.xml", 
-        "path": "conformance-checkers/html-its/localefilter/xml/locale3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/xml/locale3xmlrules.xml", 
-        "path": "conformance-checkers/html-its/localefilter/xml/locale3xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/xml/locale4xml.xml", 
-        "path": "conformance-checkers/html-its/localefilter/xml/locale4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/xml/locale4xmlrules.xml", 
-        "path": "conformance-checkers/html-its/localefilter/xml/locale4xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/xml/locale5xml.xml", 
-        "path": "conformance-checkers/html-its/localefilter/xml/locale5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/xml/locale6xml.xml", 
-        "path": "conformance-checkers/html-its/localefilter/xml/locale6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/xml/locale7xml.xml", 
-        "path": "conformance-checkers/html-its/localefilter/xml/locale7xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/xml/locale7xmlrules.xml", 
-        "path": "conformance-checkers/html-its/localefilter/xml/locale7xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localefilter/xml/locale8xml.xml", 
-        "path": "conformance-checkers/html-its/localefilter/xml/locale8xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/html/locnote1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/html/locnote1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/html/locnote2htmlrules.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/html/locnote2htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/html/locnote3htmlrules.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/html/locnote3htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/html/locnote4htmlrules.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/html/locnote4htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/html/locnote5htmlrules.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/html/locnote5htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/html/locnote6htmlrules.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/html/locnote6htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/html/locnote8htmlrules.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/html/locnote8htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote10xml.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote10xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote11xml.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote11xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote11xmlrules.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote11xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote1xml.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote2xml.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote3xml.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote4xml.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote5xml.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote5xmlrules.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote5xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote6xml.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote7xml.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote7xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote8xml.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote8xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/localizationnote/xml/locnote9xml.xml", 
-        "path": "conformance-checkers/html-its/localizationnote/xml/locnote9xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/html/locqualityissue1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/html/locqualityissue1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/html/locqualityissue2htmlrules.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/html/locqualityissue2htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/html/locqualityissue3htmlrules.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/html/locqualityissue3htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/html/locqualityissue8htmlrules.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/html/locqualityissue8htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/html/locqualityissue9htmlstandoff.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/html/locqualityissue9htmlstandoff.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue10xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue10xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue11xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue11xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue12xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue12xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue12xmlrules.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue12xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue13xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue13xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue1xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue2xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue3xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue4xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue5xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue5xmlrules.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue5xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue6xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue7xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue7xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue8xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue8xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityissue/xml/locqualityissue9xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityissue/xml/locqualityissue9xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityrating/xml/locqualityrating1xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityrating/xml/locqualityrating1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityrating/xml/locqualityrating2xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityrating/xml/locqualityrating2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityrating/xml/locqualityrating3xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityrating/xml/locqualityrating3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/locqualityrating/xml/locqualityrating4xml.xml", 
-        "path": "conformance-checkers/html-its/locqualityrating/xml/locqualityrating4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/mtconfidence/html/mtconfidence2htmlrules.xml", 
-        "path": "conformance-checkers/html-its/mtconfidence/html/mtconfidence2htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/mtconfidence/html/mtconfidence3htmlrules.xml", 
-        "path": "conformance-checkers/html-its/mtconfidence/html/mtconfidence3htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/mtconfidence/html/mtconfidence4htmlrules.xml", 
-        "path": "conformance-checkers/html-its/mtconfidence/html/mtconfidence4htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/mtconfidence/xml/mtconfidence1xml.xml", 
-        "path": "conformance-checkers/html-its/mtconfidence/xml/mtconfidence1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/mtconfidence/xml/mtconfidence2xml.xml", 
-        "path": "conformance-checkers/html-its/mtconfidence/xml/mtconfidence2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/mtconfidence/xml/mtconfidence2xmlrules.xml", 
-        "path": "conformance-checkers/html-its/mtconfidence/xml/mtconfidence2xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/mtconfidence/xml/mtconfidence3xml.xml", 
-        "path": "conformance-checkers/html-its/mtconfidence/xml/mtconfidence3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/mtconfidence/xml/mtconfidence4xml.xml", 
-        "path": "conformance-checkers/html-its/mtconfidence/xml/mtconfidence4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/mtconfidence/xml/mtconfidence5xml.xml", 
-        "path": "conformance-checkers/html-its/mtconfidence/xml/mtconfidence5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/mtconfidence/xml/mtconfidence5xmlrules.xml", 
-        "path": "conformance-checkers/html-its/mtconfidence/xml/mtconfidence5xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/mtconfidence/xml/mtconfidence6xml.xml", 
-        "path": "conformance-checkers/html-its/mtconfidence/xml/mtconfidence6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/mtconfidence/xml/mtconfidence7xml.xml", 
-        "path": "conformance-checkers/html-its/mtconfidence/xml/mtconfidence7xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/preservespace/xml/preservespace1xml.xml", 
-        "path": "conformance-checkers/html-its/preservespace/xml/preservespace1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/preservespace/xml/preservespace2xml.xml", 
-        "path": "conformance-checkers/html-its/preservespace/xml/preservespace2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/preservespace/xml/preservespace3xml.xml", 
-        "path": "conformance-checkers/html-its/preservespace/xml/preservespace3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/preservespace/xml/preservespace3xmlrules.xml", 
-        "path": "conformance-checkers/html-its/preservespace/xml/preservespace3xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/preservespace/xml/preservespace4xml.xml", 
-        "path": "conformance-checkers/html-its/preservespace/xml/preservespace4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/preservespace/xml/preservespace5xml.xml", 
-        "path": "conformance-checkers/html-its/preservespace/xml/preservespace5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/preservespace/xml/preservespace6xml.xml", 
-        "path": "conformance-checkers/html-its/preservespace/xml/preservespace6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/preservespace/xml/preservespace6xmlrules.xml", 
-        "path": "conformance-checkers/html-its/preservespace/xml/preservespace6xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/html/provenance1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/provenance/html/provenance1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/html/provenance5htmlrules.xml", 
-        "path": "conformance-checkers/html-its/provenance/html/provenance5htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/html/provenance6htmlstandoff.xml", 
-        "path": "conformance-checkers/html-its/provenance/html/provenance6htmlstandoff.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/xml/provenance1xml.xml", 
-        "path": "conformance-checkers/html-its/provenance/xml/provenance1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/xml/provenance2xml.xml", 
-        "path": "conformance-checkers/html-its/provenance/xml/provenance2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/xml/provenance3xml.xml", 
-        "path": "conformance-checkers/html-its/provenance/xml/provenance3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/xml/provenance3xmlrules.xml", 
-        "path": "conformance-checkers/html-its/provenance/xml/provenance3xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/xml/provenance4xml.xml", 
-        "path": "conformance-checkers/html-its/provenance/xml/provenance4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/xml/provenance4xmlrules.xml", 
-        "path": "conformance-checkers/html-its/provenance/xml/provenance4xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/xml/provenance5xml.xml", 
-        "path": "conformance-checkers/html-its/provenance/xml/provenance5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/xml/provenance6xml.xml", 
-        "path": "conformance-checkers/html-its/provenance/xml/provenance6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/xml/provenance6xmlrules.xml", 
-        "path": "conformance-checkers/html-its/provenance/xml/provenance6xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/xml/provenance7xml.xml", 
-        "path": "conformance-checkers/html-its/provenance/xml/provenance7xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/provenance/xml/provenance8xml.xml", 
-        "path": "conformance-checkers/html-its/provenance/xml/provenance8xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/html/storagesize2htmlrules.xml", 
-        "path": "conformance-checkers/html-its/storagesize/html/storagesize2htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/html/storagesize3htmlrules.xml", 
-        "path": "conformance-checkers/html-its/storagesize/html/storagesize3htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/xml/storagesize1xml.xml", 
-        "path": "conformance-checkers/html-its/storagesize/xml/storagesize1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/xml/storagesize2xml.xml", 
-        "path": "conformance-checkers/html-its/storagesize/xml/storagesize2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/xml/storagesize3xml.xml", 
-        "path": "conformance-checkers/html-its/storagesize/xml/storagesize3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/xml/storagesize3xmlrules.xml", 
-        "path": "conformance-checkers/html-its/storagesize/xml/storagesize3xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/xml/storagesize4xml.xml", 
-        "path": "conformance-checkers/html-its/storagesize/xml/storagesize4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/xml/storagesize4xmlrules.xml", 
-        "path": "conformance-checkers/html-its/storagesize/xml/storagesize4xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/xml/storagesize5xml.xml", 
-        "path": "conformance-checkers/html-its/storagesize/xml/storagesize5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/xml/storagesize6xml.xml", 
-        "path": "conformance-checkers/html-its/storagesize/xml/storagesize6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/xml/storagesize7xml.xml", 
-        "path": "conformance-checkers/html-its/storagesize/xml/storagesize7xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/xml/storagesize7xmlrules.xml", 
-        "path": "conformance-checkers/html-its/storagesize/xml/storagesize7xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/xml/storagesize8xml.xml", 
-        "path": "conformance-checkers/html-its/storagesize/xml/storagesize8xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/storagesize/xml/storagesize9xml.xml", 
-        "path": "conformance-checkers/html-its/storagesize/xml/storagesize9xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/targetpointer/html/targetpointer1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/targetpointer/html/targetpointer1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/targetpointer/html/targetpointer2htmlrules.xml", 
-        "path": "conformance-checkers/html-its/targetpointer/html/targetpointer2htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/targetpointer/xml/targetpointer1xml.xml", 
-        "path": "conformance-checkers/html-its/targetpointer/xml/targetpointer1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/targetpointer/xml/targetpointer2xml.xml", 
-        "path": "conformance-checkers/html-its/targetpointer/xml/targetpointer2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/targetpointer/xml/targetpointer2xmlrules.xml", 
-        "path": "conformance-checkers/html-its/targetpointer/xml/targetpointer2xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/targetpointer/xml/targetpointer3xml.xml", 
-        "path": "conformance-checkers/html-its/targetpointer/xml/targetpointer3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/targetpointer/xml/targetpointer4xml.xml", 
-        "path": "conformance-checkers/html-its/targetpointer/xml/targetpointer4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/targetpointer/xml/targetpointer4xmlrules.xml", 
-        "path": "conformance-checkers/html-its/targetpointer/xml/targetpointer4xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/html/terminology1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/terminology/html/terminology1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/html/terminology2htmlrules.xml", 
-        "path": "conformance-checkers/html-its/terminology/html/terminology2htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/html/terminology4htmlrules.xml", 
-        "path": "conformance-checkers/html-its/terminology/html/terminology4htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/xml/terminology1xml.xml", 
-        "path": "conformance-checkers/html-its/terminology/xml/terminology1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/xml/terminology2xml.xml", 
-        "path": "conformance-checkers/html-its/terminology/xml/terminology2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/xml/terminology3xml.xml", 
-        "path": "conformance-checkers/html-its/terminology/xml/terminology3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/xml/terminology4xml.xml", 
-        "path": "conformance-checkers/html-its/terminology/xml/terminology4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/xml/terminology4xmlrules.xml", 
-        "path": "conformance-checkers/html-its/terminology/xml/terminology4xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/xml/terminology5xml.xml", 
-        "path": "conformance-checkers/html-its/terminology/xml/terminology5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/xml/terminology6xml.xml", 
-        "path": "conformance-checkers/html-its/terminology/xml/terminology6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/xml/terminology7xml.xml", 
-        "path": "conformance-checkers/html-its/terminology/xml/terminology7xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/xml/terminology8xml.xml", 
-        "path": "conformance-checkers/html-its/terminology/xml/terminology8xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/xml/terminology8xmlrules.xml", 
-        "path": "conformance-checkers/html-its/terminology/xml/terminology8xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/terminology/xml/terminology9xml.xml", 
-        "path": "conformance-checkers/html-its/terminology/xml/terminology9xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/html/textanalysis1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/html/textanalysis1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/html/textanalysis2htmlrules.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/html/textanalysis2htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/html/textanalysis3htmlrules.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/html/textanalysis3htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/xml/textanalysis1xml.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/xml/textanalysis1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/xml/textanalysis2xml.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/xml/textanalysis2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/xml/textanalysis2xmlrules.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/xml/textanalysis2xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/xml/textanalysis3xml.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/xml/textanalysis3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/xml/textanalysis4xml.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/xml/textanalysis4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/xml/textanalysis4xmlrules.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/xml/textanalysis4xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/xml/textanalysis5xml.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/xml/textanalysis5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/xml/textanalysis6xml.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/xml/textanalysis6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/xml/textanalysis7xml.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/xml/textanalysis7xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/xml/textanalysis8xml.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/xml/textanalysis8xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/textanalysis/xml/textanalysis8xmlrules.xml", 
-        "path": "conformance-checkers/html-its/textanalysis/xml/textanalysis8xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/html/translate1htmlrules.xml", 
-        "path": "conformance-checkers/html-its/translate/html/translate1htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/html/translate3htmlrules.xml", 
-        "path": "conformance-checkers/html-its/translate/html/translate3htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/html/translate4htmlrules.xml", 
-        "path": "conformance-checkers/html-its/translate/html/translate4htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/html/translate5htmlrules.xml", 
-        "path": "conformance-checkers/html-its/translate/html/translate5htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/html/translate6htmlrules.xml", 
-        "path": "conformance-checkers/html-its/translate/html/translate6htmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate10xml.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate10xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate10xmlrules.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate10xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate1xml.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate1xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate2xml.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate2xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate2xmlrules.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate2xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate3xml.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate3xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate3xmlrules.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate3xmlrules.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate4xml.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate4xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate5xml.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate5xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate6xml.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate6xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate7xml.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate7xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate8xml.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate8xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html-its/translate/xml/translate9xml.xml", 
-        "path": "conformance-checkers/html-its/translate/xml/translate9xml.xml"
-      }, 
-      {
-        "url": "/conformance-checkers/html/media-queries/generate.py", 
-        "path": "conformance-checkers/html/media-queries/generate.py"
-      }, 
-      {
-        "url": "/conformance-checkers/html/media-queries/source-isvalid.txt", 
-        "path": "conformance-checkers/html/media-queries/source-isvalid.txt"
-      }, 
-      {
-        "url": "/conformance-checkers/html/media-queries/source-novalid.txt", 
-        "path": "conformance-checkers/html/media-queries/source-novalid.txt"
-      }, 
-      {
-        "url": "/conformance-checkers/html/mime-types/generate.py", 
-        "path": "conformance-checkers/html/mime-types/generate.py"
-      }, 
-      {
-        "url": "/conformance-checkers/html/mime-types/source-isvalid.txt", 
-        "path": "conformance-checkers/html/mime-types/source-isvalid.txt"
-      }, 
-      {
-        "url": "/conformance-checkers/html/mime-types/source-novalid.txt", 
-        "path": "conformance-checkers/html/mime-types/source-novalid.txt"
-      }, 
-      {
-        "url": "/conformance-checkers/messages.json", 
-        "path": "conformance-checkers/messages.json"
-      }, 
-      {
-        "url": "/conformance-checkers/xhtml/elements/meter/012-novalid.xhtml", 
-        "path": "conformance-checkers/xhtml/elements/meter/012-novalid.xhtml"
-      }, 
-      {
         "url": "/cors/resources/checkandremove.py", 
         "path": "cors/resources/checkandremove.py"
       }, 
@@ -18377,6 +17469,10 @@
       {
         "url": "/cors/support.js", 
         "path": "cors/support.js"
+      }, 
+      {
+        "url": "/custom-elements/testcommon.js", 
+        "path": "custom-elements/testcommon.js"
       }, 
       {
         "url": "/dom/common.js", 
@@ -18647,6 +17743,10 @@
         "path": "html-longdesc/rebased/picture2.png"
       }, 
       {
+        "url": "html-templates/additions-to-the-css-user-agent-style-sheet/css-user-agent-style-sheet-test-001-ref.html", 
+        "path": "html-templates/additions-to-the-css-user-agent-style-sheet/css-user-agent-style-sheet-test-001-ref.html"
+      }, 
+      {
         "url": "/html-templates/testcommon.js", 
         "path": "html-templates/testcommon.js"
       }, 
@@ -18795,6 +17895,226 @@
         "path": "html/dom/elements/global-attributes/contains.json"
       }, 
       {
+        "url": "html/dom/elements/global-attributes/dir_auto-EN-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-EN-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-EN-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-EN-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-N-EN-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-N-EN-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-N-EN-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-N-EN-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-N-EN-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-N-EN-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-N-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-N-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-N-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-N-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-bdi-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-bdi-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-bdi-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-bdi-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-dir-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-dir-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-dir-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-dir-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-dir_auto-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-dir_auto-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-dir_auto-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-dir_auto-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-script-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-script-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-script-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-script-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-style-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-style-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-style-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-style-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-textarea-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-textarea-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-contained-textarea-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-contained-textarea-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-EN-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-EN-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-EN-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-EN-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-N-EN-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-N-EN-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-N-EN-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-N-EN-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-N-EN-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-N-EN-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-N-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-N-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-N-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-N-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-script-EN-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-script-EN-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-script-EN-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-script-EN-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-script-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-script-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-script-N-EN-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-script-N-EN-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-script-N-EN-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-script-N-EN-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-script-N-EN-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-script-N-EN-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-script-N-L-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-script-N-L-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-script-N-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-script-N-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-input-script-R-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-input-script-R-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-isolate-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-isolate-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-pre-N-EN-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-pre-N-EN-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-pre-N-between-Rs-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-pre-N-between-Rs-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-pre-mixed-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-pre-mixed-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-textarea-N-EN-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-textarea-N-EN-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-textarea-N-between-Rs-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-textarea-N-between-Rs-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-textarea-mixed-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-textarea-mixed-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-textarea-script-N-EN-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-textarea-script-N-EN-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-textarea-script-N-between-Rs-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-textarea-script-N-between-Rs-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/dir_auto-textarea-script-mixed-ref.html", 
+        "path": "html/dom/elements/global-attributes/dir_auto-textarea-script-mixed-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/lang-xmllang-01-ref.html", 
+        "path": "html/dom/elements/global-attributes/lang-xmllang-01-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/lang-xyzzy-ref.html", 
+        "path": "html/dom/elements/global-attributes/lang-xyzzy-ref.html"
+      }, 
+      {
+        "url": "html/dom/elements/global-attributes/style-01-ref.html", 
+        "path": "html/dom/elements/global-attributes/style-01-ref.html"
+      }, 
+      {
+        "url": "/html/dom/elements/wai-aria/README.md", 
+        "path": "html/dom/elements/wai-aria/README.md"
+      }, 
+      {
         "url": "/html/dom/elements/wai-aria/contains.json", 
         "path": "html/dom/elements/wai-aria/contains.json"
       }, 
@@ -18899,6 +18219,14 @@
         "path": "html/editing/editing-0/making-entire-documents-editable-the-designmode-idl-attribute/original-id.json"
       }, 
       {
+        "url": "html/editing/the-hidden-attribute/hidden-1-ref.html", 
+        "path": "html/editing/the-hidden-attribute/hidden-1-ref.html"
+      }, 
+      {
+        "url": "html/editing/the-hidden-attribute/hidden-2-ref.svg", 
+        "path": "html/editing/the-hidden-attribute/hidden-2-ref.svg"
+      }, 
+      {
         "url": "/html/iana/application-x-www-form-urlencoded/original-id.json", 
         "path": "html/iana/application-x-www-form-urlencoded/original-id.json"
       }, 
@@ -18975,6 +18303,34 @@
         "path": "html/rendering/interactive-media/links-forms-and-navigation/original-id.json"
       }, 
       {
+        "url": "html/rendering/non-replaced-elements/flow-content-0/figure-ref.html", 
+        "path": "html/rendering/non-replaced-elements/flow-content-0/figure-ref.html"
+      }, 
+      {
+        "url": "html/rendering/non-replaced-elements/tables/table-border-1-ref.html", 
+        "path": "html/rendering/non-replaced-elements/tables/table-border-1-ref.html"
+      }, 
+      {
+        "url": "html/rendering/non-replaced-elements/tables/table-border-2-ref.html", 
+        "path": "html/rendering/non-replaced-elements/tables/table-border-2-ref.html"
+      }, 
+      {
+        "url": "html/rendering/non-replaced-elements/tables/table-layout-ref.html", 
+        "path": "html/rendering/non-replaced-elements/tables/table-layout-ref.html"
+      }, 
+      {
+        "url": "html/rendering/non-replaced-elements/tables/table-width-150percent-ref.html", 
+        "path": "html/rendering/non-replaced-elements/tables/table-width-150percent-ref.html"
+      }, 
+      {
+        "url": "html/rendering/replaced-elements/attributes-for-embedded-content-and-images/img_border-ref.xhtml", 
+        "path": "html/rendering/replaced-elements/attributes-for-embedded-content-and-images/img_border-ref.xhtml"
+      }, 
+      {
+        "url": "html/rendering/replaced-elements/attributes-for-embedded-content-and-images/object_border-ref.xhtml", 
+        "path": "html/rendering/replaced-elements/attributes-for-embedded-content-and-images/object_border-ref.xhtml"
+      }, 
+      {
         "url": "/html/semantics/document-metadata/styling/support/alternate.css", 
         "path": "html/semantics/document-metadata/styling/support/alternate.css"
       }, 
@@ -19021,6 +18377,10 @@
       {
         "url": "/html/semantics/embedded-content/media-elements/track/track-element/resources/track.vtt", 
         "path": "html/semantics/embedded-content/media-elements/track/track-element/resources/track.vtt"
+      }, 
+      {
+        "url": "html/semantics/embedded-content/the-audio-element/audio_content-ref.htm", 
+        "path": "html/semantics/embedded-content/the-audio-element/audio_content-ref.htm"
       }, 
       {
         "url": "/html/semantics/embedded-content/the-canvas-element/contains.json", 
@@ -19195,6 +18555,10 @@
         "path": "html/semantics/embedded-content/the-canvas-element/toDataURL.png.primarycolours.png"
       }, 
       {
+        "url": "html/semantics/embedded-content/the-embed-element/embed-represent-nothing-ref.html", 
+        "path": "html/semantics/embedded-content/the-embed-element/embed-represent-nothing-ref.html"
+      }, 
+      {
         "url": "/html/semantics/embedded-content/the-img-element/3.jpg", 
         "path": "html/semantics/embedded-content/the-img-element/3.jpg"
       }, 
@@ -19209,6 +18573,18 @@
       {
         "url": "/html/semantics/embedded-content/the-img-element/image-1.jpg", 
         "path": "html/semantics/embedded-content/the-img-element/image-1.jpg"
+      }, 
+      {
+        "url": "html/semantics/embedded-content/the-video-element/video_content-ref.htm", 
+        "path": "html/semantics/embedded-content/the-video-element/video_content-ref.htm"
+      }, 
+      {
+        "url": "html/semantics/embedded-content/the-video-element/video_dynamic_poster-ref.htm", 
+        "path": "html/semantics/embedded-content/the-video-element/video_dynamic_poster-ref.htm"
+      }, 
+      {
+        "url": "html/semantics/embedded-content/the-video-element/video_initially_paused-ref.html", 
+        "path": "html/semantics/embedded-content/the-video-element/video_initially_paused-ref.html"
       }, 
       {
         "url": "/html/semantics/forms/attributes-common-to-form-controls/contains.json", 
@@ -19241,6 +18617,62 @@
       {
         "url": "/html/semantics/forms/the-input-element/contains.json", 
         "path": "html/semantics/forms/the-input-element/contains.json"
+      }, 
+      {
+        "url": "html/semantics/forms/the-textarea-element/textarea-newline-bidi-ref.html", 
+        "path": "html/semantics/forms/the-textarea-element/textarea-newline-bidi-ref.html"
+      }, 
+      {
+        "url": "html/semantics/forms/the-textarea-element/wrap-reflect-1-ref.html", 
+        "path": "html/semantics/forms/the-textarea-element/wrap-reflect-1-ref.html"
+      }, 
+      {
+        "url": "html/semantics/grouping-content/the-li-element/grouping-li-reftest-001-ref.html", 
+        "path": "html/semantics/grouping-content/the-li-element/grouping-li-reftest-001-ref.html"
+      }, 
+      {
+        "url": "html/semantics/grouping-content/the-li-element/grouping-li-reftest-002-ref.html", 
+        "path": "html/semantics/grouping-content/the-li-element/grouping-li-reftest-002-ref.html"
+      }, 
+      {
+        "url": "html/semantics/grouping-content/the-ol-element/grouping-ol-rev-reftest-001-ref.html", 
+        "path": "html/semantics/grouping-content/the-ol-element/grouping-ol-rev-reftest-001-ref.html"
+      }, 
+      {
+        "url": "html/semantics/grouping-content/the-ol-element/grouping-ol-start-reftest-001-ref.html", 
+        "path": "html/semantics/grouping-content/the-ol-element/grouping-ol-start-reftest-001-ref.html"
+      }, 
+      {
+        "url": "html/semantics/grouping-content/the-ol-element/grouping-ol-start-reftest-002-ref.html", 
+        "path": "html/semantics/grouping-content/the-ol-element/grouping-ol-start-reftest-002-ref.html"
+      }, 
+      {
+        "url": "html/semantics/grouping-content/the-ol-element/grouping-ol-type-reftest-001-ref.html", 
+        "path": "html/semantics/grouping-content/the-ol-element/grouping-ol-type-reftest-001-ref.html"
+      }, 
+      {
+        "url": "html/semantics/grouping-content/the-ol-element/grouping-ol-type-reftest-002-ref.html", 
+        "path": "html/semantics/grouping-content/the-ol-element/grouping-ol-type-reftest-002-ref.html"
+      }, 
+      {
+        "url": "html/semantics/grouping-content/the-ol-element/grouping-ol-type-reftest-003-ref.html", 
+        "path": "html/semantics/grouping-content/the-ol-element/grouping-ol-type-reftest-003-ref.html"
+      }, 
+      {
+        "url": "html/semantics/grouping-content/the-ol-element/reversed-1-ref.html", 
+        "path": "html/semantics/grouping-content/the-ol-element/reversed-1-ref.html"
+      }, 
+      {
+        "url": "html/semantics/grouping-content/the-ol-element/reversed-2-ref.html", 
+        "path": "html/semantics/grouping-content/the-ol-element/reversed-2-ref.html"
+      }, 
+      {
+        "url": "html/semantics/grouping-content/the-pre-element/grouping-pre-reftest-001-ref.html", 
+        "path": "html/semantics/grouping-content/the-pre-element/grouping-pre-reftest-001-ref.html"
+      }, 
+      {
+        "url": "html/semantics/grouping-content/the-pre-element/pre-newline-bidi-ref.html", 
+        "path": "html/semantics/grouping-content/the-pre-element/pre-newline-bidi-ref.html"
       }, 
       {
         "url": "/html/semantics/interactive-elements/commands/contains.json", 
@@ -19293,6 +18725,82 @@
       {
         "url": "/html/semantics/tabular-data/the-table-element/contains.json", 
         "path": "html/semantics/tabular-data/the-table-element/contains.json"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-auto-dir-default-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-auto-dir-default-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-missing-pdf-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-missing-pdf-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-nested-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-nested-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-number-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-number-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-separate-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-separate-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-another-bdi-1-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-another-bdi-1-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-another-bdi-2-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-another-bdi-2-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-following-1-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-following-1-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-following-2-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-following-2-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-preceding-1-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-preceding-1-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-preceding-2-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-preceding-2-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-number-following-1-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-number-following-1-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-number-following-2-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-number-following-2-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-surrounding-run-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-surrounding-run-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-wrapped-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-wrapped-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-paragraph-level-container-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-paragraph-level-container-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-bdo-element/bidi-001-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-bdo-element/bidi-001-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-br-element/br-bidi-in-inline-ancestors-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-br-element/br-bidi-in-inline-ancestors-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-br-element/br-bidi-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-br-element/br-bidi-ref.html"
       }, 
       {
         "url": "/html/syntax/parsing-html-fragments/support/encodingtests-1.css", 
@@ -19595,6 +19103,14 @@
         "path": "media/sound_5.oga"
       }, 
       {
+        "url": "/media/white.mp4", 
+        "path": "media/white.mp4"
+      }, 
+      {
+        "url": "/media/white.webm", 
+        "path": "media/white.webm"
+      }, 
+      {
         "url": "/mediacapture-streams/featuredetection.js", 
         "path": "mediacapture-streams/featuredetection.js"
       }, 
@@ -19871,6 +19387,10 @@
         "path": "old-tests/submission/Opera/preload/none/preload-none-to-metadata-event-order.tpl"
       }, 
       {
+        "url": "old-tests/submission/Opera/preload/reftest/preload-none-poster-ref.html", 
+        "path": "old-tests/submission/Opera/preload/reftest/preload-none-poster-ref.html"
+      }, 
+      {
         "url": "/old-tests/submission/Opera/preload/reftest/reftest.list", 
         "path": "old-tests/submission/Opera/preload/reftest/reftest.list"
       }, 
@@ -20027,6 +19547,62 @@
         "path": "shadow-dom/LICENSE"
       }, 
       {
+        "url": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-002-ref.html", 
+        "path": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-002-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-003-ref.html", 
+        "path": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-003-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-004-ref.html", 
+        "path": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-004-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-005-ref.html", 
+        "path": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-005-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-006-ref.html", 
+        "path": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-006-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/shadow-trees/lower-boundary-encapsulation/distribution-001-ref.html", 
+        "path": "shadow-dom/shadow-trees/lower-boundary-encapsulation/distribution-001-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/shadow-trees/lower-boundary-encapsulation/distribution-002-ref.html", 
+        "path": "shadow-dom/shadow-trees/lower-boundary-encapsulation/distribution-002-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/shadow-trees/nested-shadow-trees/nested_tree_reftest-ref.html", 
+        "path": "shadow-dom/shadow-trees/nested-shadow-trees/nested_tree_reftest-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/shadow-trees/reprojection/reprojection-001-ref.html", 
+        "path": "shadow-dom/shadow-trees/reprojection/reprojection-001-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/shadow-trees/reprojection/reprojection-002-ref.html", 
+        "path": "shadow-dom/shadow-trees/reprojection/reprojection-002-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/shadow-trees/shadow-root-001-ref.html", 
+        "path": "shadow-dom/shadow-trees/shadow-root-001-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/shadow-trees/shadow-root-002-ref.html", 
+        "path": "shadow-dom/shadow-trees/shadow-root-002-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/shadow-trees/text-decoration-001-ref.html", 
+        "path": "shadow-dom/shadow-trees/text-decoration-001-ref.html"
+      }, 
+      {
+        "url": "shadow-dom/styles/not-apply-in-shadow-root-001-ref.html", 
+        "path": "shadow-dom/styles/not-apply-in-shadow-root-001-ref.html"
+      }, 
+      {
         "url": "/shadow-dom/testcommon.js", 
         "path": "shadow-dom/testcommon.js"
       }, 
@@ -20131,6 +19707,10 @@
         "path": "webdriver/element_state/__init__.py"
       }, 
       {
+        "url": "/webdriver/element_state/method_test.py", 
+        "path": "webdriver/element_state/method_test.py"
+      }, 
+      {
         "url": "/webdriver/element_state/visibility_test.py", 
         "path": "webdriver/element_state/visibility_test.py"
       }, 
@@ -20175,8 +19755,12 @@
         "path": "webdriver/navigation/refresh-page.py"
       }, 
       {
-        "url": "/webdriver/navigation/self-signed.key", 
-        "path": "webdriver/navigation/self-signed.key"
+        "url": "/webdriver/navigation/res/self-signed.key", 
+        "path": "webdriver/navigation/res/self-signed.key"
+      }, 
+      {
+        "url": "/webdriver/network.py", 
+        "path": "webdriver/network.py"
       }, 
       {
         "url": "/webdriver/runtests.py", 
@@ -20313,1178 +19897,6 @@
       {
         "url": "/webstorage/storage_builtins.js", 
         "path": "webstorage/storage_builtins.js"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/evil/support/9_cues_overlapping_completely.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/evil/support/9_cues_overlapping_completely.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/evil/support/9_cues_overlapping_completely_all_cues_have_same_timestamp.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/evil/support/9_cues_overlapping_completely_all_cues_have_same_timestamp.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/evil/support/single_quote.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/evil/support/single_quote.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/evil/support/size_90.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/evil/support/size_90.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/evil/support/size_99.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/evil/support/size_99.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/evil/support/test.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/evil/support/test.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/media/background.gif", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/media/background.gif"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/media/white.mp4", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/media/white.mp4"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/media/white.webm", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/media/white.webm"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/2_cues_overlapping_completely_move_up.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/2_cues_overlapping_completely_move_up.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/2_cues_overlapping_partially_move_down.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/2_cues_overlapping_partially_move_down.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/2_cues_overlapping_partially_move_up.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/2_cues_overlapping_partially_move_up.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_end.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_end.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_end_long.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_end_long.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_middle.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_middle.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_middle_long.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_middle_long.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_50.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_50.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_gt_50.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_gt_50.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_lt_50.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_lt_50.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_lt_50_size_gt_maximum_size.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_lt_50_size_gt_maximum_size.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_start.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_start.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_start_long.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_start_long.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/bidi_ruby.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/bidi_ruby.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/bold_long.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/bold_long.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/bold_with_2_timestamps.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/bold_with_2_timestamps.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/bold_with_timestamp.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/bold_with_timestamp.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/class_long.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/class_long.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/class_with_2_timestamps.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/class_with_2_timestamps.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/class_with_timestamp.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/class_with_timestamp.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/cue_with_id.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/cue_with_id.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/decode_escaped_entities.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/decode_escaped_entities.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/foo.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/foo.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/foo_c_bar.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/foo_c_bar.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/foo_space_space_bar_LF_baz.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/foo_space_space_bar_LF_baz.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/italic_long.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/italic_long.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/italic_with_2_timestamps.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/italic_with_2_timestamps.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/italic_with_timestamp.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/italic_with_timestamp.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_-2_long.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_-2_long.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_0.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_0.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_1_long.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_1_long.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_50_percent.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_50_percent.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_integer_and_percent_overlap.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_integer_and_percent_overlap.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_integer_and_percent_overlap_move_up.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_integer_and_percent_overlap_move_up.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_percent_and_integer_overlap.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_percent_and_integer_overlap.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_percent_and_integer_overlap_move_up.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_percent_and_integer_overlap_move_up.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/one_line_cue_plus_wrapped_cue.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/one_line_cue_plus_wrapped_cue.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/refTestWait.js", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/refTestWait.js"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/size_50.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/size_50.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_bold.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_bold.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_bold_with_class.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_bold_with_class.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_class.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_class.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_class_with_class.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_class_with_class.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_italic.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_italic.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_italic_with_class.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_italic_with_class.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_long.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_long.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_two_voices.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_two_voices.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_underline.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_underline.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_underline_with_class.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_underline_with_class.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_voice.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_voice.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_voice_with_class.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_voice_with_class.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/too_many_cues.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/too_many_cues.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/too_many_cues_wrapped.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/too_many_cues_wrapped.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u002E_LF_u05D0.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/u002E_LF_u05D0.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u002E_u2028_u05D0.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/u002E_u2028_u05D0.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u002E_u2029_u05D0.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/u002E_u2029_u05D0.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u0041_first.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/u0041_first.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u05D0_first.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/u05D0_first.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u0628_first.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/u0628_first.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u06E9_no_strong_dir.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/u06E9_no_strong_dir.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/underline_long.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/underline_long.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/underline_with_2_timestamps.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/underline_with_2_timestamps.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/underline_with_timestamp.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/underline_with_timestamp.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/very_long_cue.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/very_long_cue.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/voice_long.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/voice_long.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/voice_with_2_timestamps.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/voice_with_2_timestamps.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/voice_with_timestamp.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/voice_with_timestamp.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/white-spaces.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/white-spaces.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/white-spaces_long.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/white-spaces_long.vtt"
-      }, 
-      {
-        "url": "/webvtt/rendering/cues-with-video/processing-model/support/white-spaces_long_size_20.vtt", 
-        "path": "webvtt/rendering/cues-with-video/processing-model/support/white-spaces_long_size_20.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/buildtests.py", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/buildtests.py"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/common.js", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/common.js"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/entities.dat", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/entities.dat"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/tags.dat", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/tags.dat"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/timestamps.dat", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/timestamps.dat"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/tree-building.dat", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/tree-building.dat"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/arrows.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/arrows.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/cue-counts.json", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/cue-counts.json"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-garbage.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-garbage.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-space.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-space.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-tab.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-tab.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-timings.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-timings.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/ids.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/ids.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/newlines.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/newlines.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/no-signature.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/no-signature.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/nulls.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/nulls.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/omitted-hours.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/omitted-hours.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-align.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-align.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-line.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-line.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-multiple.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-multiple.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-position.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-position.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-size.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-size.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-vertical.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-vertical.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-bom.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-bom.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-formfeed.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-formfeed.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-lowercase.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-lowercase.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-no-newline.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-no-newline.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-null.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-null.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-space-no-newline.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-space-no-newline.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-space.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-space.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-tab-no-newline.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-tab-no-newline.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-tab.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-tab.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-timings.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-timings.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-too-short.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-too-short.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-two-boms.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-two-boms.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-websrt.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-websrt.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/space-chars.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/space-chars.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-60.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-60.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-garbage.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-garbage.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-negative.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-negative.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-too-long.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-too-long.vtt"
-      }, 
-      {
-        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-too-short.vtt", 
-        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-too-short.vtt"
-      }, 
-      {
-        "url": "/workers/README.md", 
-        "path": "workers/README.md"
-      }, 
-      {
-        "url": "/workers/constructors/SharedWorker/1", 
-        "path": "workers/constructors/SharedWorker/1"
-      }, 
-      {
-        "url": "/workers/constructors/SharedWorker/null", 
-        "path": "workers/constructors/SharedWorker/null"
-      }, 
-      {
-        "url": "/workers/constructors/SharedWorker/undefined", 
-        "path": "workers/constructors/SharedWorker/undefined"
-      }, 
-      {
-        "url": "/workers/constructors/Worker/1", 
-        "path": "workers/constructors/Worker/1"
-      }, 
-      {
-        "url": "/workers/constructors/Worker/null", 
-        "path": "workers/constructors/Worker/null"
-      }, 
-      {
-        "url": "/workers/constructors/Worker/undefined", 
-        "path": "workers/constructors/Worker/undefined"
-      }, 
-      {
-        "url": "/workers/interfaces/WorkerGlobalScope/location/helper-redirect.py", 
-        "path": "workers/interfaces/WorkerGlobalScope/location/helper-redirect.py"
-      }, 
-      {
-        "url": "/workers/interfaces/WorkerGlobalScope/location/post-location-members.js", 
-        "path": "workers/interfaces/WorkerGlobalScope/location/post-location-members.js"
-      }, 
-      {
-        "url": "/workers/interfaces/WorkerUtils/importScripts/1", 
-        "path": "workers/interfaces/WorkerUtils/importScripts/1"
-      }, 
-      {
-        "url": "/workers/interfaces/WorkerUtils/importScripts/null", 
-        "path": "workers/interfaces/WorkerUtils/importScripts/null"
-      }, 
-      {
-        "url": "/workers/interfaces/WorkerUtils/importScripts/undefined", 
-        "path": "workers/interfaces/WorkerUtils/importScripts/undefined"
-      }, 
-      {
-        "url": "/workers/non-automated/application-cache-dedicated.js", 
-        "path": "workers/non-automated/application-cache-dedicated.js"
-      }, 
-      {
-        "url": "/workers/non-automated/cache.manifest", 
-        "path": "workers/non-automated/cache.manifest"
-      }, 
-      {
-        "url": "/workers/non-automated/infinite-nested.js", 
-        "path": "workers/non-automated/infinite-nested.js"
-      }, 
-      {
-        "url": "/workers/non-automated/infinite-sibling-and-nested.js", 
-        "path": "workers/non-automated/infinite-sibling-and-nested.js"
-      }, 
-      {
-        "url": "/workers/non-automated/infinite-sibling.js", 
-        "path": "workers/non-automated/infinite-sibling.js"
-      }, 
-      {
-        "url": "/workers/non-automated/post-a-1.js", 
-        "path": "workers/non-automated/post-a-1.js"
-      }, 
-      {
-        "url": "/workers/semantics/encodings/001.html.headers", 
-        "path": "workers/semantics/encodings/001.html.headers"
-      }, 
-      {
-        "url": "/workers/semantics/encodings/002.html.headers", 
-        "path": "workers/semantics/encodings/002.html.headers"
-      }, 
-      {
-        "url": "/workers/semantics/encodings/003-1.py", 
-        "path": "workers/semantics/encodings/003-1.py"
-      }, 
-      {
-        "url": "/workers/semantics/multiple-workers/004-2.js", 
-        "path": "workers/semantics/multiple-workers/004-2.js"
-      }, 
-      {
-        "url": "/workers/semantics/multiple-workers/006-1.js", 
-        "path": "workers/semantics/multiple-workers/006-1.js"
-      }, 
-      {
-        "url": "/workers/semantics/structured-clone/common.js", 
-        "path": "workers/semantics/structured-clone/common.js"
-      }, 
-      {
-        "url": "/workers/semantics/structured-clone/dedicated.js", 
-        "path": "workers/semantics/structured-clone/dedicated.js"
-      }, 
-      {
-        "url": "/workers/semantics/structured-clone/shared.js", 
-        "path": "workers/semantics/structured-clone/shared.js"
-      }, 
-      {
-        "url": "/workers/semantics/structured-clone/worker-common.js", 
-        "path": "workers/semantics/structured-clone/worker-common.js"
-      }, 
-      {
-        "url": "/workers/semantics/xhr/001-1.xml", 
-        "path": "workers/semantics/xhr/001-1.xml"
-      }, 
-      {
-        "url": "/workers/semantics/xhr/support/001-1.xml", 
-        "path": "workers/semantics/xhr/support/001-1.xml"
-      }, 
-      {
-        "url": "/workers/semantics/xhr/support/005-1.js", 
-        "path": "workers/semantics/xhr/support/005-1.js"
-      }, 
-      {
-        "url": "/workers/semantics/xhr/support/006-1.js", 
-        "path": "workers/semantics/xhr/support/006-1.js"
-      }, 
-      {
-        "url": "/workers/support/ErrorEvent.js", 
-        "path": "workers/support/ErrorEvent.js"
-      }, 
-      {
-        "url": "/workers/support/EventListener.js", 
-        "path": "workers/support/EventListener.js"
-      }, 
-      {
-        "url": "/workers/support/ImportScripts.js", 
-        "path": "workers/support/ImportScripts.js"
-      }, 
-      {
-        "url": "/workers/support/ImportScriptsNetworkErr.js", 
-        "path": "workers/support/ImportScriptsNetworkErr.js"
-      }, 
-      {
-        "url": "/workers/support/Timer.js", 
-        "path": "workers/support/Timer.js"
-      }, 
-      {
-        "url": "/workers/support/WorkerBasic.js", 
-        "path": "workers/support/WorkerBasic.js"
-      }, 
-      {
-        "url": "/workers/support/WorkerClose.js", 
-        "path": "workers/support/WorkerClose.js"
-      }, 
-      {
-        "url": "/workers/support/WorkerDataCloneErr.js", 
-        "path": "workers/support/WorkerDataCloneErr.js"
-      }, 
-      {
-        "url": "/workers/support/WorkerLocation.js", 
-        "path": "workers/support/WorkerLocation.js"
-      }, 
-      {
-        "url": "/workers/support/WorkerNavigator.js", 
-        "path": "workers/support/WorkerNavigator.js"
-      }, 
-      {
-        "url": "/workers/support/WorkerNested.js", 
-        "path": "workers/support/WorkerNested.js"
-      }, 
-      {
-        "url": "/workers/support/WorkerTerminate.js", 
-        "path": "workers/support/WorkerTerminate.js"
-      }, 
-      {
-        "url": "/workers/support/WorkerText.txt", 
-        "path": "workers/support/WorkerText.txt"
-      }, 
-      {
-        "url": "/workers/support/XMLHttpRequest.js", 
-        "path": "workers/support/XMLHttpRequest.js"
-      }, 
-      {
-        "url": "/workers/support/XMLHttpRequest.txt", 
-        "path": "workers/support/XMLHttpRequest.txt"
-      }, 
-      {
-        "url": "/workers/workers.js", 
-        "path": "workers/workers.js"
-      }, 
-      {
-        "url": "2dcontext/building-paths/canvas_complexshapes_arcto_001-ref.htm", 
-        "path": "2dcontext/building-paths/canvas_complexshapes_arcto_001-ref.htm"
-      }, 
-      {
-        "url": "2dcontext/building-paths/canvas_complexshapes_beziercurveto_001-ref.htm", 
-        "path": "2dcontext/building-paths/canvas_complexshapes_beziercurveto_001-ref.htm"
-      }, 
-      {
-        "url": "2dcontext/compositing/canvas_compositing_globalcompositeoperation_001-ref.htm", 
-        "path": "2dcontext/compositing/canvas_compositing_globalcompositeoperation_001-ref.htm"
-      }, 
-      {
-        "url": "2dcontext/line-styles/canvas_linestyles_linecap_001-ref.htm", 
-        "path": "2dcontext/line-styles/canvas_linestyles_linecap_001-ref.htm"
-      }, 
-      {
-        "url": "2dcontext/shadows/canvas_shadows_002-ref.htm", 
-        "path": "2dcontext/shadows/canvas_shadows_002-ref.htm"
-      }, 
-      {
-        "url": "2dcontext/the-canvas-state/canvas_state_restore_001-ref.htm", 
-        "path": "2dcontext/the-canvas-state/canvas_state_restore_001-ref.htm"
-      }, 
-      {
-        "url": "2dcontext/transformations/canvas_transformations_scale_001-ref.htm", 
-        "path": "2dcontext/transformations/canvas_transformations_scale_001-ref.htm"
-      }, 
-      {
-        "url": "html-templates/additions-to-the-css-user-agent-style-sheet/css-user-agent-style-sheet-test-001-ref.html", 
-        "path": "html-templates/additions-to-the-css-user-agent-style-sheet/css-user-agent-style-sheet-test-001-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-EN-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-EN-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-EN-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-EN-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-N-EN-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-N-EN-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-N-EN-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-N-EN-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-N-EN-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-N-EN-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-N-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-N-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-N-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-N-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-bdi-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-bdi-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-bdi-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-bdi-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-dir-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-dir-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-dir-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-dir-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-dir_auto-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-dir_auto-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-dir_auto-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-dir_auto-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-script-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-script-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-script-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-script-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-style-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-style-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-style-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-style-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-textarea-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-textarea-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-contained-textarea-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-contained-textarea-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-EN-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-EN-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-EN-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-EN-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-N-EN-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-N-EN-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-N-EN-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-N-EN-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-N-EN-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-N-EN-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-N-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-N-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-N-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-N-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-script-EN-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-script-EN-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-script-EN-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-script-EN-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-script-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-script-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-script-N-EN-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-script-N-EN-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-script-N-EN-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-script-N-EN-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-script-N-EN-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-script-N-EN-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-script-N-L-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-script-N-L-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-script-N-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-script-N-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-input-script-R-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-input-script-R-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-isolate-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-isolate-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-pre-N-EN-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-pre-N-EN-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-pre-N-between-Rs-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-pre-N-between-Rs-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-pre-mixed-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-pre-mixed-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-textarea-N-EN-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-textarea-N-EN-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-textarea-N-between-Rs-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-textarea-N-between-Rs-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-textarea-mixed-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-textarea-mixed-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-textarea-script-N-EN-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-textarea-script-N-EN-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-textarea-script-N-between-Rs-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-textarea-script-N-between-Rs-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/dir_auto-textarea-script-mixed-ref.html", 
-        "path": "html/dom/elements/global-attributes/dir_auto-textarea-script-mixed-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/lang-xmllang-01-ref.html", 
-        "path": "html/dom/elements/global-attributes/lang-xmllang-01-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/lang-xyzzy-ref.html", 
-        "path": "html/dom/elements/global-attributes/lang-xyzzy-ref.html"
-      }, 
-      {
-        "url": "html/dom/elements/global-attributes/style-01-ref.html", 
-        "path": "html/dom/elements/global-attributes/style-01-ref.html"
-      }, 
-      {
-        "url": "html/editing/the-hidden-attribute/hidden-1-ref.html", 
-        "path": "html/editing/the-hidden-attribute/hidden-1-ref.html"
-      }, 
-      {
-        "url": "html/editing/the-hidden-attribute/hidden-2-ref.svg", 
-        "path": "html/editing/the-hidden-attribute/hidden-2-ref.svg"
-      }, 
-      {
-        "url": "html/rendering/non-replaced-elements/flow-content-0/figure-ref.html", 
-        "path": "html/rendering/non-replaced-elements/flow-content-0/figure-ref.html"
-      }, 
-      {
-        "url": "html/rendering/non-replaced-elements/tables/table-border-1-ref.html", 
-        "path": "html/rendering/non-replaced-elements/tables/table-border-1-ref.html"
-      }, 
-      {
-        "url": "html/rendering/non-replaced-elements/tables/table-border-2-ref.html", 
-        "path": "html/rendering/non-replaced-elements/tables/table-border-2-ref.html"
-      }, 
-      {
-        "url": "html/rendering/non-replaced-elements/tables/table-layout-ref.html", 
-        "path": "html/rendering/non-replaced-elements/tables/table-layout-ref.html"
-      }, 
-      {
-        "url": "html/rendering/non-replaced-elements/tables/table-width-150percent-ref.html", 
-        "path": "html/rendering/non-replaced-elements/tables/table-width-150percent-ref.html"
-      }, 
-      {
-        "url": "html/rendering/replaced-elements/attributes-for-embedded-content-and-images/img_border-ref.xhtml", 
-        "path": "html/rendering/replaced-elements/attributes-for-embedded-content-and-images/img_border-ref.xhtml"
-      }, 
-      {
-        "url": "html/rendering/replaced-elements/attributes-for-embedded-content-and-images/object_border-ref.xhtml", 
-        "path": "html/rendering/replaced-elements/attributes-for-embedded-content-and-images/object_border-ref.xhtml"
-      }, 
-      {
-        "url": "html/semantics/embedded-content/the-audio-element/audio_content-ref.htm", 
-        "path": "html/semantics/embedded-content/the-audio-element/audio_content-ref.htm"
-      }, 
-      {
-        "url": "html/semantics/embedded-content/the-embed-element/embed-represent-nothing-ref.html", 
-        "path": "html/semantics/embedded-content/the-embed-element/embed-represent-nothing-ref.html"
-      }, 
-      {
-        "url": "html/semantics/embedded-content/the-video-element/video_content-ref.htm", 
-        "path": "html/semantics/embedded-content/the-video-element/video_content-ref.htm"
-      }, 
-      {
-        "url": "html/semantics/embedded-content/the-video-element/video_dynamic_poster-ref.htm", 
-        "path": "html/semantics/embedded-content/the-video-element/video_dynamic_poster-ref.htm"
-      }, 
-      {
-        "url": "html/semantics/embedded-content/the-video-element/video_initially_paused-ref.html", 
-        "path": "html/semantics/embedded-content/the-video-element/video_initially_paused-ref.html"
-      }, 
-      {
-        "url": "html/semantics/forms/the-textarea-element/textarea-newline-bidi-ref.html", 
-        "path": "html/semantics/forms/the-textarea-element/textarea-newline-bidi-ref.html"
-      }, 
-      {
-        "url": "html/semantics/forms/the-textarea-element/wrap-reflect-1-ref.html", 
-        "path": "html/semantics/forms/the-textarea-element/wrap-reflect-1-ref.html"
-      }, 
-      {
-        "url": "html/semantics/grouping-content/the-li-element/grouping-li-reftest-001-ref.html", 
-        "path": "html/semantics/grouping-content/the-li-element/grouping-li-reftest-001-ref.html"
-      }, 
-      {
-        "url": "html/semantics/grouping-content/the-li-element/grouping-li-reftest-002-ref.html", 
-        "path": "html/semantics/grouping-content/the-li-element/grouping-li-reftest-002-ref.html"
-      }, 
-      {
-        "url": "html/semantics/grouping-content/the-ol-element/grouping-ol-rev-reftest-001-ref.html", 
-        "path": "html/semantics/grouping-content/the-ol-element/grouping-ol-rev-reftest-001-ref.html"
-      }, 
-      {
-        "url": "html/semantics/grouping-content/the-ol-element/grouping-ol-start-reftest-001-ref.html", 
-        "path": "html/semantics/grouping-content/the-ol-element/grouping-ol-start-reftest-001-ref.html"
-      }, 
-      {
-        "url": "html/semantics/grouping-content/the-ol-element/grouping-ol-start-reftest-002-ref.html", 
-        "path": "html/semantics/grouping-content/the-ol-element/grouping-ol-start-reftest-002-ref.html"
-      }, 
-      {
-        "url": "html/semantics/grouping-content/the-ol-element/grouping-ol-type-reftest-001-ref.html", 
-        "path": "html/semantics/grouping-content/the-ol-element/grouping-ol-type-reftest-001-ref.html"
-      }, 
-      {
-        "url": "html/semantics/grouping-content/the-ol-element/grouping-ol-type-reftest-002-ref.html", 
-        "path": "html/semantics/grouping-content/the-ol-element/grouping-ol-type-reftest-002-ref.html"
-      }, 
-      {
-        "url": "html/semantics/grouping-content/the-ol-element/grouping-ol-type-reftest-003-ref.html", 
-        "path": "html/semantics/grouping-content/the-ol-element/grouping-ol-type-reftest-003-ref.html"
-      }, 
-      {
-        "url": "html/semantics/grouping-content/the-ol-element/reversed-1-ref.html", 
-        "path": "html/semantics/grouping-content/the-ol-element/reversed-1-ref.html"
-      }, 
-      {
-        "url": "html/semantics/grouping-content/the-ol-element/reversed-2-ref.html", 
-        "path": "html/semantics/grouping-content/the-ol-element/reversed-2-ref.html"
-      }, 
-      {
-        "url": "html/semantics/grouping-content/the-pre-element/grouping-pre-reftest-001-ref.html", 
-        "path": "html/semantics/grouping-content/the-pre-element/grouping-pre-reftest-001-ref.html"
-      }, 
-      {
-        "url": "html/semantics/grouping-content/the-pre-element/pre-newline-bidi-ref.html", 
-        "path": "html/semantics/grouping-content/the-pre-element/pre-newline-bidi-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-auto-dir-default-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-auto-dir-default-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-missing-pdf-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-missing-pdf-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-nested-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-nested-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-number-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-number-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-separate-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-separate-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-another-bdi-1-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-another-bdi-1-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-another-bdi-2-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-another-bdi-2-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-following-1-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-following-1-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-following-2-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-following-2-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-preceding-1-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-preceding-1-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-preceding-2-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-letter-preceding-2-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-number-following-1-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-number-following-1-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-number-following-2-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-number-following-2-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-surrounding-run-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-to-surrounding-run-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-wrapped-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-neutral-wrapped-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdi-element/bdi-paragraph-level-container-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdi-element/bdi-paragraph-level-container-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-bdo-element/bidi-001-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-bdo-element/bidi-001-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-br-element/br-bidi-in-inline-ancestors-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-br-element/br-bidi-in-inline-ancestors-ref.html"
-      }, 
-      {
-        "url": "html/semantics/text-level-semantics/the-br-element/br-bidi-ref.html", 
-        "path": "html/semantics/text-level-semantics/the-br-element/br-bidi-ref.html"
-      }, 
-      {
-        "url": "old-tests/submission/Opera/preload/reftest/preload-none-poster-ref.html", 
-        "path": "old-tests/submission/Opera/preload/reftest/preload-none-poster-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-002-ref.html", 
-        "path": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-002-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-003-ref.html", 
-        "path": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-003-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-004-ref.html", 
-        "path": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-004-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-005-ref.html", 
-        "path": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-005-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-006-ref.html", 
-        "path": "shadow-dom/shadow-trees/hosting-multiple-shadow-trees-006-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/lower-boundary-encapsulation/distribution-001-ref.html", 
-        "path": "shadow-dom/shadow-trees/lower-boundary-encapsulation/distribution-001-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/lower-boundary-encapsulation/distribution-002-ref.html", 
-        "path": "shadow-dom/shadow-trees/lower-boundary-encapsulation/distribution-002-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/nested-shadow-trees/nested_tree_reftest-ref.html", 
-        "path": "shadow-dom/shadow-trees/nested-shadow-trees/nested_tree_reftest-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/reprojection/reprojection-001-ref.html", 
-        "path": "shadow-dom/shadow-trees/reprojection/reprojection-001-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/reprojection/reprojection-002-ref.html", 
-        "path": "shadow-dom/shadow-trees/reprojection/reprojection-002-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/shadow-root-001-ref.html", 
-        "path": "shadow-dom/shadow-trees/shadow-root-001-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/shadow-root-002-ref.html", 
-        "path": "shadow-dom/shadow-trees/shadow-root-002-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/shadow-trees/text-decoration-001-ref.html", 
-        "path": "shadow-dom/shadow-trees/text-decoration-001-ref.html"
-      }, 
-      {
-        "url": "shadow-dom/styles/not-apply-in-shadow-root-001-ref.html", 
-        "path": "shadow-dom/styles/not-apply-in-shadow-root-001-ref.html"
       }, 
       {
         "url": "webvtt/rendering/cues-with-video/processing-model/2_cues_overlapping_completely_move_up-ref.html", 
@@ -21655,6 +20067,30 @@
         "path": "webvtt/rendering/cues-with-video/processing-model/evil/size_99-ref.html"
       }, 
       {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/evil/support/9_cues_overlapping_completely.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/evil/support/9_cues_overlapping_completely.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/evil/support/9_cues_overlapping_completely_all_cues_have_same_timestamp.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/evil/support/9_cues_overlapping_completely_all_cues_have_same_timestamp.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/evil/support/single_quote.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/evil/support/single_quote.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/evil/support/size_90.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/evil/support/size_90.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/evil/support/size_99.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/evil/support/size_99.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/evil/support/test.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/evil/support/test.vtt"
+      }, 
+      {
         "url": "webvtt/rendering/cues-with-video/processing-model/line_-2_wrapped_cue_grow_upwards-ref.html", 
         "path": "webvtt/rendering/cues-with-video/processing-model/line_-2_wrapped_cue_grow_upwards-ref.html"
       }, 
@@ -21685,6 +20121,10 @@
       {
         "url": "webvtt/rendering/cues-with-video/processing-model/line_percent_and_integer_mixed_overlap_move_up-ref.html", 
         "path": "webvtt/rendering/cues-with-video/processing-model/line_percent_and_integer_mixed_overlap_move_up-ref.html"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/media/background.gif", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/media/background.gif"
       }, 
       {
         "url": "webvtt/rendering/cues-with-video/processing-model/media_height400_with_controls-ref.html", 
@@ -22363,15 +20803,655 @@
         "path": "webvtt/rendering/cues-with-video/processing-model/size_50-ref.html"
       }, 
       {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/2_cues_overlapping_completely_move_up.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/2_cues_overlapping_completely_move_up.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/2_cues_overlapping_partially_move_down.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/2_cues_overlapping_partially_move_down.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/2_cues_overlapping_partially_move_up.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/2_cues_overlapping_partially_move_up.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_end.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_end.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_end_long.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_end_long.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_middle.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_middle.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_middle_long.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_middle_long.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_50.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_50.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_gt_50.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_gt_50.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_lt_50.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_lt_50.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_lt_50_size_gt_maximum_size.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_middle_position_lt_50_size_gt_maximum_size.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_start.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_start.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/align_start_long.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/align_start_long.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/bidi_ruby.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/bidi_ruby.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/bold_long.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/bold_long.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/bold_with_2_timestamps.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/bold_with_2_timestamps.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/bold_with_timestamp.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/bold_with_timestamp.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/class_long.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/class_long.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/class_with_2_timestamps.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/class_with_2_timestamps.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/class_with_timestamp.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/class_with_timestamp.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/cue_with_id.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/cue_with_id.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/decode_escaped_entities.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/decode_escaped_entities.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/foo.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/foo.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/foo_c_bar.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/foo_c_bar.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/foo_space_space_bar_LF_baz.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/foo_space_space_bar_LF_baz.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/italic_long.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/italic_long.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/italic_with_2_timestamps.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/italic_with_2_timestamps.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/italic_with_timestamp.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/italic_with_timestamp.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_-2_long.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_-2_long.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_0.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_0.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_1_long.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_1_long.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_50_percent.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_50_percent.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_integer_and_percent_overlap.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_integer_and_percent_overlap.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_integer_and_percent_overlap_move_up.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_integer_and_percent_overlap_move_up.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_percent_and_integer_overlap.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_percent_and_integer_overlap.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/line_percent_and_integer_overlap_move_up.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/line_percent_and_integer_overlap_move_up.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/one_line_cue_plus_wrapped_cue.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/one_line_cue_plus_wrapped_cue.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/refTestWait.js", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/refTestWait.js"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/size_50.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/size_50.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_bold.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_bold.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_bold_with_class.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_bold_with_class.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_class.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_class.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_class_with_class.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_class_with_class.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_italic.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_italic.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_italic_with_class.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_italic_with_class.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_long.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_long.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_two_voices.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_two_voices.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_underline.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_underline.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_underline_with_class.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_underline_with_class.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_voice.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_voice.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/test_voice_with_class.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/test_voice_with_class.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/too_many_cues.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/too_many_cues.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/too_many_cues_wrapped.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/too_many_cues_wrapped.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u002E_LF_u05D0.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/u002E_LF_u05D0.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u002E_u2028_u05D0.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/u002E_u2028_u05D0.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u002E_u2029_u05D0.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/u002E_u2029_u05D0.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u0041_first.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/u0041_first.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u05D0_first.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/u05D0_first.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u0628_first.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/u0628_first.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/u06E9_no_strong_dir.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/u06E9_no_strong_dir.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/underline_long.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/underline_long.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/underline_with_2_timestamps.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/underline_with_2_timestamps.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/underline_with_timestamp.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/underline_with_timestamp.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/very_long_cue.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/very_long_cue.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/voice_long.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/voice_long.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/voice_with_2_timestamps.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/voice_with_2_timestamps.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/voice_with_timestamp.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/voice_with_timestamp.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/white-spaces.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/white-spaces.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/white-spaces_long.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/white-spaces_long.vtt"
+      }, 
+      {
+        "url": "/webvtt/rendering/cues-with-video/processing-model/support/white-spaces_long_size_20.vtt", 
+        "path": "webvtt/rendering/cues-with-video/processing-model/support/white-spaces_long_size_20.vtt"
+      }, 
+      {
         "url": "webvtt/rendering/cues-with-video/processing-model/too_many_cues-ref.html", 
         "path": "webvtt/rendering/cues-with-video/processing-model/too_many_cues-ref.html"
       }, 
       {
         "url": "webvtt/rendering/cues-with-video/processing-model/too_many_cues_wrapped-ref.html", 
         "path": "webvtt/rendering/cues-with-video/processing-model/too_many_cues_wrapped-ref.html"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/buildtests.py", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/buildtests.py"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/common.js", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/common.js"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/entities.dat", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/entities.dat"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/tags.dat", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/tags.dat"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/timestamps.dat", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/timestamps.dat"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/tree-building.dat", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-cue-text-parsing-rules/dat/tree-building.dat"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/arrows.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/arrows.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/cue-counts.json", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/cue-counts.json"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-garbage.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-garbage.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-space.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-space.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-tab.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-tab.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-timings.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/header-timings.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/ids.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/ids.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/newlines.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/newlines.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/no-signature.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/no-signature.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/nulls.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/nulls.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/omitted-hours.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/omitted-hours.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-align.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-align.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-line.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-line.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-multiple.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-multiple.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-position.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-position.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-size.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-size.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-vertical.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/settings-vertical.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-bom.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-bom.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-formfeed.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-formfeed.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-lowercase.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-lowercase.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-no-newline.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-no-newline.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-null.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-null.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-space-no-newline.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-space-no-newline.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-space.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-space.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-tab-no-newline.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-tab-no-newline.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-tab.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-tab.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-timings.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-timings.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-too-short.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-too-short.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-two-boms.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-two-boms.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-websrt.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/signature-websrt.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/space-chars.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/space-chars.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-60.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-60.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-garbage.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-garbage.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-negative.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-negative.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-too-long.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-too-long.vtt"
+      }, 
+      {
+        "url": "/webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-too-short.vtt", 
+        "path": "webvtt/webvtt-file-format-parsing/webvtt-file-parsing/support/timings-too-short.vtt"
+      }, 
+      {
+        "url": "/workers/README.md", 
+        "path": "workers/README.md"
+      }, 
+      {
+        "url": "/workers/constructors/SharedWorker/1", 
+        "path": "workers/constructors/SharedWorker/1"
+      }, 
+      {
+        "url": "/workers/constructors/SharedWorker/null", 
+        "path": "workers/constructors/SharedWorker/null"
+      }, 
+      {
+        "url": "/workers/constructors/SharedWorker/undefined", 
+        "path": "workers/constructors/SharedWorker/undefined"
+      }, 
+      {
+        "url": "/workers/constructors/Worker/1", 
+        "path": "workers/constructors/Worker/1"
+      }, 
+      {
+        "url": "/workers/constructors/Worker/null", 
+        "path": "workers/constructors/Worker/null"
+      }, 
+      {
+        "url": "/workers/constructors/Worker/undefined", 
+        "path": "workers/constructors/Worker/undefined"
+      }, 
+      {
+        "url": "/workers/interfaces/WorkerGlobalScope/location/helper-redirect.py", 
+        "path": "workers/interfaces/WorkerGlobalScope/location/helper-redirect.py"
+      }, 
+      {
+        "url": "/workers/interfaces/WorkerGlobalScope/location/post-location-members.js", 
+        "path": "workers/interfaces/WorkerGlobalScope/location/post-location-members.js"
+      }, 
+      {
+        "url": "/workers/interfaces/WorkerUtils/importScripts/1", 
+        "path": "workers/interfaces/WorkerUtils/importScripts/1"
+      }, 
+      {
+        "url": "/workers/interfaces/WorkerUtils/importScripts/null", 
+        "path": "workers/interfaces/WorkerUtils/importScripts/null"
+      }, 
+      {
+        "url": "/workers/interfaces/WorkerUtils/importScripts/undefined", 
+        "path": "workers/interfaces/WorkerUtils/importScripts/undefined"
+      }, 
+      {
+        "url": "/workers/non-automated/application-cache-dedicated.js", 
+        "path": "workers/non-automated/application-cache-dedicated.js"
+      }, 
+      {
+        "url": "/workers/non-automated/cache.manifest", 
+        "path": "workers/non-automated/cache.manifest"
+      }, 
+      {
+        "url": "/workers/non-automated/infinite-nested.js", 
+        "path": "workers/non-automated/infinite-nested.js"
+      }, 
+      {
+        "url": "/workers/non-automated/infinite-sibling-and-nested.js", 
+        "path": "workers/non-automated/infinite-sibling-and-nested.js"
+      }, 
+      {
+        "url": "/workers/non-automated/infinite-sibling.js", 
+        "path": "workers/non-automated/infinite-sibling.js"
+      }, 
+      {
+        "url": "/workers/non-automated/post-a-1.js", 
+        "path": "workers/non-automated/post-a-1.js"
+      }, 
+      {
+        "url": "/workers/semantics/encodings/001.html.headers", 
+        "path": "workers/semantics/encodings/001.html.headers"
+      }, 
+      {
+        "url": "/workers/semantics/encodings/002.html.headers", 
+        "path": "workers/semantics/encodings/002.html.headers"
+      }, 
+      {
+        "url": "/workers/semantics/encodings/003-1.py", 
+        "path": "workers/semantics/encodings/003-1.py"
+      }, 
+      {
+        "url": "/workers/semantics/multiple-workers/004-2.js", 
+        "path": "workers/semantics/multiple-workers/004-2.js"
+      }, 
+      {
+        "url": "/workers/semantics/multiple-workers/006-1.js", 
+        "path": "workers/semantics/multiple-workers/006-1.js"
+      }, 
+      {
+        "url": "/workers/semantics/structured-clone/common.js", 
+        "path": "workers/semantics/structured-clone/common.js"
+      }, 
+      {
+        "url": "/workers/semantics/structured-clone/dedicated.js", 
+        "path": "workers/semantics/structured-clone/dedicated.js"
+      }, 
+      {
+        "url": "/workers/semantics/structured-clone/shared.js", 
+        "path": "workers/semantics/structured-clone/shared.js"
+      }, 
+      {
+        "url": "/workers/semantics/structured-clone/worker-common.js", 
+        "path": "workers/semantics/structured-clone/worker-common.js"
+      }, 
+      {
+        "url": "/workers/semantics/xhr/001-1.xml", 
+        "path": "workers/semantics/xhr/001-1.xml"
+      }, 
+      {
+        "url": "/workers/semantics/xhr/support/001-1.xml", 
+        "path": "workers/semantics/xhr/support/001-1.xml"
+      }, 
+      {
+        "url": "/workers/semantics/xhr/support/005-1.js", 
+        "path": "workers/semantics/xhr/support/005-1.js"
+      }, 
+      {
+        "url": "/workers/semantics/xhr/support/006-1.js", 
+        "path": "workers/semantics/xhr/support/006-1.js"
+      }, 
+      {
+        "url": "/workers/support/ErrorEvent.js", 
+        "path": "workers/support/ErrorEvent.js"
+      }, 
+      {
+        "url": "/workers/support/EventListener.js", 
+        "path": "workers/support/EventListener.js"
+      }, 
+      {
+        "url": "/workers/support/ImportScripts.js", 
+        "path": "workers/support/ImportScripts.js"
+      }, 
+      {
+        "url": "/workers/support/ImportScriptsNetworkErr.js", 
+        "path": "workers/support/ImportScriptsNetworkErr.js"
+      }, 
+      {
+        "url": "/workers/support/Timer.js", 
+        "path": "workers/support/Timer.js"
+      }, 
+      {
+        "url": "/workers/support/WorkerBasic.js", 
+        "path": "workers/support/WorkerBasic.js"
+      }, 
+      {
+        "url": "/workers/support/WorkerClose.js", 
+        "path": "workers/support/WorkerClose.js"
+      }, 
+      {
+        "url": "/workers/support/WorkerDataCloneErr.js", 
+        "path": "workers/support/WorkerDataCloneErr.js"
+      }, 
+      {
+        "url": "/workers/support/WorkerLocation.js", 
+        "path": "workers/support/WorkerLocation.js"
+      }, 
+      {
+        "url": "/workers/support/WorkerNavigator.js", 
+        "path": "workers/support/WorkerNavigator.js"
+      }, 
+      {
+        "url": "/workers/support/WorkerNested.js", 
+        "path": "workers/support/WorkerNested.js"
+      }, 
+      {
+        "url": "/workers/support/WorkerTerminate.js", 
+        "path": "workers/support/WorkerTerminate.js"
+      }, 
+      {
+        "url": "/workers/support/WorkerText.txt", 
+        "path": "workers/support/WorkerText.txt"
+      }, 
+      {
+        "url": "/workers/support/XMLHttpRequest.js", 
+        "path": "workers/support/XMLHttpRequest.js"
+      }, 
+      {
+        "url": "/workers/support/XMLHttpRequest.txt", 
+        "path": "workers/support/XMLHttpRequest.txt"
+      }, 
+      {
+        "url": "/workers/workers.js", 
+        "path": "workers/workers.js"
       }
     ]
   }, 
   "local_changes": [], 
-  "rev": "2c6f2a8fef9b53350ccc78f9f2bc3de159bebfbc"
+  "rev": "776e4c141cb35bdd922dd8a975db3fcdbe353ddf"
 }
