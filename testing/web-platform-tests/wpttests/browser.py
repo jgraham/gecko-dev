@@ -3,13 +3,32 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import os
+import socket
+import sys
 
 import mozprocess
 from mozprofile.profile import FirefoxProfile
 from mozprofile.permissions import ServerLocations
 from mozrunner import FirefoxRunner
+import mozdevice
 
 here = os.path.split(__file__)[0]
+
+def get_free_port(start_port, exclude=None):
+    port = start_port
+    while True:
+        if exclude and port in exclude:
+            port += 1
+            continue
+        s = socket.socket()
+        try:
+            s.bind(("127.0.0.1", port))
+        except socket.error:
+            port += 1
+        else:
+            return port
+        finally:
+            s.close()
 
 class ProcessHandler(mozprocess.ProcessHandlerMixin):
     pass
@@ -17,11 +36,8 @@ class ProcessHandler(mozprocess.ProcessHandlerMixin):
 class Browser(object):
     process_cls = None
 
-    def __init__(self, binary, logger, marionette_port):
-        self.binary = binary
+    def __init__(self, logger):
         self.logger = logger
-        self.marionette_port = marionette_port
-        self.runner = None
 
     def start(self):
         raise NotImplementedError
@@ -49,6 +65,14 @@ class NullBrowser(Browser):
         return True
 
 class FirefoxBrowser(Browser):
+    used_ports = set()
+
+    def __init__(self, logger, binary):
+        Browser.__init__(self, logger)
+        self.binary = binary
+        self.marionette_port = get_free_port(2828, exclude=self.used_ports)
+        self.used_ports.add(self.marionette_port)
+
     def start(self):
         env = os.environ.copy()
         env['MOZ_CRASHREPORTER_NO_REPORT'] = '1'
@@ -95,3 +119,28 @@ class FirefoxBrowser(Browser):
 
     def is_alive(self):
         return self.runner.is_running()
+
+class B2GBrowser(Browser):
+    used_ports = set()
+
+    def __init__(self, logger):
+        Browser.__init__(self, logger)
+        self.device = mozdevice.DeviceManagerADB()
+        self.marionette_port = get_free_port(2828, exclude=self.used_ports)
+        self.used_ports.add(self.marionette_port)
+        print self.device.getInfo()
+        print self.device.getIP()
+        sys.exit(1)
+        self.device.forward("tcp:%s" % self.marionette_port, "tcp:2828")
+
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def pid(self):
+        return "Remote"
+
+    def is_alive(self):
+        return True

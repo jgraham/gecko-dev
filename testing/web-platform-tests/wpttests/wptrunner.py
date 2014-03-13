@@ -11,7 +11,7 @@ import json
 import threading
 from multiprocessing import Queue
 import hashlib
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import logging
 import traceback
 from StringIO import StringIO
@@ -22,6 +22,7 @@ from mozlog.structured.formatters import JSONFormatter
 from mozprocess import ProcessHandler
 
 from testrunner import TestRunner, ManagerGroup
+from executor import MarionetteTestharnessExecutor, MarionetteReftestExecutor, ServoTestharnessExecutor
 import browser
 import metadata
 import manifestexpected
@@ -29,6 +30,9 @@ import wpttest
 import wptcommandline
 
 here = os.path.split(__file__)[0]
+
+import stacktracer
+stacktracer.trace_start("trace.html",interval=5,auto=True) # Set auto flag to always update file!
 
 # TODO
 # Multiplatform expectations
@@ -101,142 +105,13 @@ class TestEnvironment(object):
             for port, server in servers:
                 server.kill()
 
-
-class TestharnessTestRunner(TestRunner):
-    harness_codes = {0: "OK",
-                     1: "ERROR",
-                     2: "TIMEOUT"}
-
-    test_codes = {0: "PASS",
-                  1: "FAIL",
-                  2: "TIMEOUT",
-                  3: "NOTRUN"}
-
-    def __init__(self, *args, **kwargs):
-        TestRunner.__init__(self, *args, **kwargs)
-        self.script = open(os.path.join(here, "testharness.js")).read()
-
-    def do_test(self, test):
-        assert len(self.browser.window_handles) == 1
-        return self.browser.execute_async_script(
-            self.script % {"abs_url": urlparse.urljoin(self.http_server_url, test.url),
-                           "url": test.url,
-                           "window_id": self.window_id,
-                           "timeout_multiplier": self.timeout_multiplier,
-                           "timeout": test.timeout * 1000}, new_sandbox=False)
-
-    def convert_result(self, test, result):
-        """Convert a JSON result into a (TestResult, [SubtestResult]) tuple"""
-        assert result["test"] == test.url, ("Got results from %s, expected %s" %
-                                            (result["test"], test.url))
-        harness_result = test.result_cls(self.harness_codes[result["status"]], result["message"])
-        return (harness_result,
-                [test.subtest_result_cls(subtest["name"], self.test_codes[subtest["status"]],
-                                         subtest["message"]) for subtest in result["tests"]])
-
-
-class ReftestTestRunner(TestRunner):
-    def __init__(self, *args, **kwargs):
-        TestRunner.__init__(self, *args, **kwargs)
-        with open(os.path.join(here, "reftest.js")) as f:
-            self.script = f.read()
-        self.ref_hashes = {}
-        self.ref_urls_by_hash = defaultdict(set)
-
-    def do_test(self, test):
-        url, ref_type, ref_url = test.url, test.ref_type, test.ref_url
-        hashes = {"test": None,
-                  "ref": self.ref_hashes.get(ref_url)}
-        self.browser.execute_script(self.script)
-        self.browser.switch_to_window(self.browser.window_handles[-1])
-        for url_type, url in [("test", url), ("ref", ref_url)]:
-            if hashes[url_type] is None:
-                #Would like to do this in a new tab each time, but that isn't
-                #easy with the current state of marionette
-                self.browser.navigate(urlparse.urljoin(self.http_server_url, url))
-                screenshot = self.browser.screenshot()
-                #strip off the data:img/png, part of the url
-                if screenshot.startswith("data:image/png;base64,"):
-                    screenshot = screenshot.split(",", 1)[1]
-                hashes[url_type] = hashlib.sha1(screenshot).hexdigest()
-
-        self.ref_urls_by_hash[hashes["ref"]].add(ref_url)
-        self.ref_hashes[ref_url] = hashes["ref"]
-
-        if ref_type == "==":
-            passed = hashes["test"] == hashes["ref"]
-        elif ref_type == "!=":
-            passed = hashes["test"] != hashes["ref"]
-        else:
-            raise ValueError
-
-        return "PASS" if passed else "FAIL"
-
-    def teardown(self):
-        count = 0
-        for hash_val, urls in self.ref_urls_by_hash.iteritems():
-            if len(urls) > 1:
-                self.send_message("log", "info",
-                                  "The following %i reference urls appear to be equivalent:\n %s" %
-                                  (len(urls), "\n  ".join(urls)))
-                count += len(urls) - 1
-        TestRunner.teardown(self)
-
-    def convert_result(self, test, result):
-        """Reftests only have a single result, so collapse everything down into the harness result."""
-        return (test.result_cls(result, None), [])
-
-
-class ServoTestRunner(TestharnessTestRunner):
-    def __init__(self, *args, **kwargs):
-        TestharnessTestRunner.__init__(self, *args, **kwargs)
-        self.result_data = None
-        self.result_flag = None
-
-    def setup(self):
-        self.send_message("init_succeeded")
-        return True
-
-    def run_test(self, test):
-        self.result_data = None
-        self.result_flag = threading.Event()
-        proc = ProcessHandler([self.binary, urlparse.urljoin(self.http_server_url, test.url)],
-                              processOutputLine=[self.on_output])
-        proc.run()
-        #Now wait to get the output we expect, or until we reach the timeout
-        self.result_flag.wait(test.timeout + 5)
-
-        if self.result_flag.is_set():
-            assert self.result_data is not None
-            result = self.convert_result(test, self.result_data)
-            proc.kill()
-        else:
-            if proc.pid is None:
-                result = (test.result_cls("CRASH", None), [])
-            else:
-                proc.kill()
-                result = (test.result_cls("TIMEOUT", None), [])
-        self.send_message("test_ended", test, result)
-
-    def on_output(self, line):
-        prefix = "ALERT: RESULT: "
-        line = line.decode("utf8")
-        if line.startswith(prefix):
-            self.result_data = json.loads(line[len(prefix):])
-            self.result_flag.set()
-
-    def convert_result(self, test, result):
-        result["test"] = test.url
-        return TestharnessTestRunner.convert_result(self, test, result)
-
 class TestChunker(object):
-    def __init__(self, manifest, total_chunks, chunk_number):
+    def __init__(self, total_chunks, chunk_number):
         self.total_chunks = total_chunks
-        self.manifest = manifest
         self.chunk_number = chunk_number
         assert self.chunk_number <= self.total_chunks
 
-    def __iter__(self):
+    def __call__(self, manifest):
         raise NotImplementedError
 
 class Unchunked(TestChunker):
@@ -244,79 +119,131 @@ class Unchunked(TestChunker):
         TestChunker.__init__(self, *args, **kwargs)
         assert self.total_chunks == 1
 
-    def __iter__(self):
-        for item in self.manifest:
+    def __call__(self, manifest):
+        for item in manifest:
             yield item
 
 class HashChunker(TestChunker):
-    def __iter__(self):
+    def __call__(self):
         chunk_index = self.chunk_number - 1
-        for test_path, tests in self.manifest:
+        for test_path, tests in manifest:
             if hash(test_path) % self.total_chunks == chunk_index:
                 yield test_path, tests
 
 class EqualTimeChunker(TestChunker):
     """Chunker that uses the test timeout as a proxy for the running time of the test"""
-    def __init__(self, *args, **kwargs):
-        TestChunker.__init__(self, *args, **kwargs)
-        self.indicies = self._make_chunks()
 
-    def _make_chunks(self):
+    def _get_chunk(self, manifest_items):
         # For each directory containing tests, calculate the mzximum execution time after running all
         # the tests in that directory. Then work out the index into the manifest corresponding to the
         # directories at fractions of m/N of the running time where m=1..N-1 and N is the total number
         # of chunks. Return an array of these indicies
 
         total_time = 0
-        path_times = []
-        manifest_len = 0
+        by_dir = OrderedDict()
 
-        for i, (test_path, tests) in enumerate(self.manifest):
-            if list(tests)[0].item_type in ("manual", "helper"):
-                continue
+        class PathData(object):
+            def __init__(self):
+                self.time = 0
+                self.tests = []
 
+        for i, (test_path, tests) in enumerate(manifest_items):
             test_dir = tuple(os.path.split(test_path)[0].split(os.path.sep)[:3])
 
-            # Path times is an array of (path, index at start, time at end)
-            if not path_times:
-                assert i == 0
-                path_times.append([test_dir, 0, 0])
-            elif path_times[-1][0] != test_dir:
-                path_times.append([test_dir, i, path_times[-1][-1]])
+            if not test_dir in by_dir:
+                by_dir[test_dir] = PathData()
 
-            for test in tests:
-                timeout = wpttest.LONG_TIMEOUT if test.timeout == "long" else wpttest.DEFAULT_TIMEOUT
-                path_times[-1][-1] += timeout
-                total_time += timeout
+            data = by_dir[test_dir]
+            time = sum(test.timeout for test in tests)
+            data.time += time
+            data.tests.append((test_path, tests))
 
-            manifest_len += 1
+            total_time += time
 
-        time_per_chunk = float(total_time) / self.total_chunks
+        if len(by_dir) < self.total_chunks:
+            raise ValueError("Tried to split into %i chunks, but only %i subdirectories included" % (self.total_chunks, len(by_dir)))
 
-        indicies = [0]
-        next_time = time_per_chunk
-        for i, path_time in enumerate(path_times):
-            if (path_times[i+1][2] > next_time and
-                path_times[i][2] <= next_time):
-                index = path_times[i+1][1] if (abs(path_times[i+1][2] - next_time) <
-                                               abs(path_times[i][2] - next_time)) else path_time[1]
-                indicies.append(index)
-                next_time += time_per_chunk
-                if len(indicies) == self.total_chunks:
-                    break
-        indicies.append(manifest_len)
+        n_chunks = self.total_chunks
+        time_per_chunk = float(total_time) / n_chunks
 
-        assert len(indicies) == self.total_chunks + 1
+        chunks = []
 
-        return indicies
+        # Put any individual dirs with a time greater than the timeout into their own
+        # chunk
+        while True:
+            to_remove = []
+            for path, data in by_dir.iteritems():
+                if data.time > time_per_chunk:
+                    to_remove.append((path, data))
+            if to_remove:
+                for path, data in to_remove:
+                    chunks.append(([path], data.tests))
+                    del by_dir[path]
 
-    def __iter__(self):
-        low, high = self.indicies[self.chunk_number - 1], self.indicies[self.chunk_number]
-        for i, item in enumerate(self.manifest):
-            if i == high:
+                n_chunks -= len(to_remove)
+                total_time -= sum(item[1].time for item in to_remove)
+                time_per_chunk = total_time / n_chunks
+            else:
                 break
-            if i >= low:
-                yield item
+
+        chunk_time = 0
+        for i, (path, data) in enumerate(by_dir.iteritems()):
+            if i == 0:
+                # Always start a new chunk the first time
+                chunks.append(([path], data.tests))
+                chunk_time = data.time
+            elif chunk_time + data.time > time_per_chunk:
+                if (abs(time_per_chunk - chunk_time) <=
+                    abs(time_per_chunk - (chunk_time + data.time))):
+                    # Add a new chunk
+                    chunks.append(([path], data.tests))
+                    chunk_time = data.time
+                else:
+                    # Add this to the end of the previous chunk but
+                    # start a new chunk next time
+                    chunks[-1][0].append(path)
+                    chunks[-1][1].extend(data.tests)
+                    chunk_time += data.time
+            else:
+                # Append this to the previous chunk
+                chunks[-1][0].append(path)
+                chunks[-1][1].extend(data.tests)
+                chunk_time += data.time
+
+        assert len(chunks) == self.total_chunks, len(chunks)
+        chunks = sorted(chunks)
+
+        return chunks[self.chunk_number - 1][1]
+
+
+    def __call__(self, manifest_iter):
+        manifest = list(manifest_iter)
+        tests = self._get_chunk(manifest)
+        for item in tests:
+            yield item
+
+class ManifestFilter(object):
+    def __init__(self, include=None, exclude=None):
+        self.include = include if include is not None else []
+        self.exclude = exclude if exclude is not None else []
+
+    def __call__(self, manifest_iter):
+        for test_path, tests in manifest_iter:
+            include_tests = set()
+            for test in tests:
+                if self.include:
+                    include = any(test.url.startswith(inc) for inc in self.include)
+                else:
+                    include = True
+                if self.exclude:
+                    exclude = any(test.url.startswith(exc) for exc in self.exclude)
+                else:
+                    exclude = False
+                if include and not exclude:
+                    include_tests.add(test)
+
+            if include_tests:
+                yield test_path, include_tests
 
 def queue_tests(test_root, metadata_root, test_types, run_info, include_filters,
                 chunk_type, total_chunks, chunk_number):
@@ -327,36 +254,29 @@ def queue_tests(test_root, metadata_root, test_types, run_info, include_filters,
     metadata.do_test_relative_imports(test_root)
     manifest = metadata.manifest.load(os.path.join(metadata_root, "MANIFEST.json"))
 
-    chunked_manifest = {"none": Unchunked,
-                        "hash": HashChunker,
-                        "equal_time": EqualTimeChunker}[chunk_type](manifest,
-                                                                    total_chunks,
-                                                                    chunk_number)
+    manifest_filter = ManifestFilter(include=include_filters)
+    manifest_items = manifest_filter(manifest.itertypes(*test_types))
 
-    for test_path, tests in chunked_manifest:
-        # This is a very silly way to exclude types
-        # but the API in manifest.py should be updated
-        test_type = list(tests)[0].item_type
-        if test_type not in test_types:
-            continue
+    chunker = {"none": Unchunked,
+               "hash": HashChunker,
+               "equal_time": EqualTimeChunker}[chunk_type](total_chunks,
+                                                           chunk_number)
+
+    #TODO need to do the filtering of types before the chunker runs
+    for test_path, tests in chunker(manifest_items):
         expected_file = manifestexpected.get_manifest(metadata_root, test_path, run_info)
         for manifest_test in tests:
-            queue_test = False
-            if include_filters:
-                for filter_str in include_filters:
-                    if manifest_test.url.startswith(filter_str):
-                        queue_test = True
+            test_type = manifest_test.item_type
+            tests_by_type[test_type].name = "Test Queue %s" % test_type
+            if expected_file is not None:
+                expected = expected_file.get_test(manifest_test.id)
             else:
-                queue_test = True
-            if queue_test:
-                if expected_file is not None:
-                    expected = expected_file.get_test(manifest_test.id)
-                else:
-                    expected = None
-                test = wpttest.from_manifest(manifest_test, expected)
-                if not test.disabled():
-                    tests_by_type[test_type].put(test)
-                    test_ids.append(test.id)
+                expected = None
+            test = wpttest.from_manifest(manifest_test, expected)
+            if not test.disabled():
+                tests_by_type[test_type].put(test)
+                test_ids.append(test.id)
+
 
     return test_ids, tests_by_type
 
@@ -365,16 +285,16 @@ class LogThread(threading.Thread):
     def __init__(self, queue, logger, level):
         self.queue = queue
         self.log_func = getattr(logger, level)
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self, name="Log Thread")
 
     def run(self):
         while True:
             msg = self.queue.get()
             if msg is None:
+                print "Got exit signal in log thread"
                 break
             else:
                 self.log_func(msg)
-        self.queue.close()
 
 
 class LoggingWrapper(StringIO):
@@ -389,6 +309,8 @@ class LoggingWrapper(StringIO):
             data = data[:-1]
         if data.endswith("\r"):
             data = data[:-1]
+        if not data:
+            return
         if self.prefix is not None:
             data = "%s: %s" % (self.prefix, data)
         self.queue.put(data)
@@ -396,25 +318,42 @@ class LoggingWrapper(StringIO):
     def flush(self):
         pass
 
-browser_classes = {"firefox": browser.FirefoxBrowser,
-                   "servo": browser.NullBrowser}
 
-test_runner_classes = {"firefox": {"reftest": ReftestTestRunner,
-                                   "testharness": TestharnessTestRunner},
-                       "servo": {"testharness": ServoTestRunner}}
+def get_browser(product, binary):
+    browser_classes = {"firefox": browser.FirefoxBrowser,
+                       "servo": browser.NullBrowser,
+                       "b2g": browser.B2GBrowser}
 
-def run_tests(binary, tests_root, metadata_root, test_types,
-              processes=1, include=None, capture_stdio=True, product="firefox",
-              chunk_type="none", total_chunks=1, this_chunk=1):
+    browser_cls = browser_classes[product]
+
+    browser_kwargs = {"binary": binary} if product == "firefox" else {}
+
+    return browser_cls, browser_kwargs
+
+def get_executor(product, test_type, http_server_url, timeout_multiplier):
+    executor_classes = {"firefox": {"reftest": MarionetteReftestExecutor,
+                                    "testharness": MarionetteTestharnessExecutor},
+                        "servo": {"testharness": ServoTestharnessExecutor},
+                        "b2g": {"testharness": MarionetteTestharnessExecutor}}
+
+    executor_cls = executor_classes[product].get(test_type)
+    if not executor_cls:
+        return None, None
+
+    executor_kwargs = {"http_server_url": http_server_url,
+                       "timeout_multiplier":timeout_multiplier}
+
+    return executor_cls, executor_kwargs
+
+def run_tests(tests_root, metadata_root, test_types, binary=None, processes=1,
+              include=None, capture_stdio=True, product="firefox",
+              chunk_type="none", total_chunks=1, this_chunk=1, timeout_multiplier=1):
     logging_queue = None
     original_stdio = (sys.stdout, sys.stderr)
 
-    #XXX remove this
-    processes = min(4, processes)
-
     try:
         if capture_stdio:
-            logging_queue = Queue()
+            logging_queue = Queue(name="logging_queue")
             logging_thread = LogThread(logging_queue, logger, "info")
             sys.stdout = LoggingWrapper(logging_queue, prefix="STDOUT")
             sys.stderr = LoggingWrapper(logging_queue, prefix="STDERR")
@@ -426,7 +365,7 @@ def run_tests(binary, tests_root, metadata_root, test_types,
 
         logger.info("Using %i client processes" % processes)
 
-        browser_cls = browser_classes[product]
+        browser_cls, browser_kwargs = get_browser(product, binary)
 
         unexpected_count = 0
 
@@ -441,24 +380,26 @@ def run_tests(binary, tests_root, metadata_root, test_types,
             logger.suite_start(test_ids, run_info)
             for test_type in test_types:
                 tests_queue = test_queues[test_type]
-                runner_cls = test_runner_classes[product].get(test_type)
 
-                if runner_cls is None:
+                executor_cls, executor_kwargs = get_executor(product, test_type, base_server,
+                                                             timeout_multiplier)
+
+                if executor_cls is None:
                     logger.error("Unsupported test type %s for product %s" % (test_type, product))
                     continue
 
                 with ManagerGroup("web-platform-tests",
-                                  runner_cls,
-                                  run_info,
                                   processes,
-                                  base_server,
-                                  binary,
-                                  browser_cls=browser_cls) as manager_group:
+                                  browser_cls,
+                                  browser_kwargs,
+                                  executor_cls,
+                                  executor_kwargs) as manager_group:
                     try:
                         manager_group.start(tests_queue)
                     except KeyboardInterrupt:
-                        logger.debug("Main thread got signal")
+                        logger.critical("Main thread got signal")
                         manager_group.stop()
+                        raise
                     manager_group.wait()
                 unexpected_count += manager_group.unexpected_count()
 
@@ -466,14 +407,18 @@ def run_tests(binary, tests_root, metadata_root, test_types,
     except KeyboardInterrupt:
         if test_queues is not None:
             for queue in test_queues.itervalues():
-                queue.close()
                 queue.cancel_join_thread()
-        sys.exit(1)
     finally:
-        if capture_stdio and logging_queue is not None:
-            logging_queue.put(None)
-
+        if test_queues is not None:
+            for queue in test_queues.itervalues():
+                queue.close()
+        print "Shutting down"
         sys.stdout, sys.stderr = original_stdio
+        if capture_stdio and logging_queue is not None:
+            logger.info("Closing logging queue")
+            logging_queue.put(None)
+            logging_thread.join(10)
+            logging_queue.close()
 
     logger.info("Got %i unexpected results" % unexpected_count)
 
