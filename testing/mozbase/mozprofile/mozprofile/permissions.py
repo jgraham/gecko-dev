@@ -342,6 +342,7 @@ function FindProxyForURL(url, host)
   if (isWebSocketSSL) return 'PROXY %(remote)s:%(wss)s';
   return 'DIRECT';
 }""" % proxy
+        print pacURL
         pacURL = "".join(pacURL.splitlines())
 
         prefs = []

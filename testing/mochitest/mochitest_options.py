@@ -727,7 +727,7 @@ class B2GOptions(MochitestOptions):
         if options.logcat_dir and not options.emulator:
             self.error("You must specify --emulator if you specify --logcat-dir")
 
-        if not os.path.isdir(options.xrePath):
+        if options.xrePath is None or not os.path.isdir(options.xrePath):
             self.error("--xre-path '%s' is not a directory" % options.xrePath)
         xpcshell = os.path.join(options.xrePath, 'xpcshell')
         if not os.access(xpcshell, os.F_OK):

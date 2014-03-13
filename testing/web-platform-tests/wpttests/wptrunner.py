@@ -20,9 +20,10 @@ from mozlog.structured import structuredlog, commandline
 from mozlog.structured.handlers import StreamHandler
 from mozlog.structured.formatters import JSONFormatter
 from mozprocess import ProcessHandler
+import moznetwork
 
 from testrunner import TestRunner, ManagerGroup
-from executor import MarionetteTestharnessExecutor, MarionetteReftestExecutor, ServoTestharnessExecutor
+from executor import MarionetteTestharnessExecutor, MarionetteReftestExecutor, ServoTestharnessExecutor, B2GMarionetteTestharnessExecutor
 import browser
 import metadata
 import manifestexpected
@@ -86,16 +87,30 @@ def do_test_relative_imports(test_root):
 
 
 class TestEnvironment(object):
-    def __init__(self, test_path):
+    def __init__(self, test_path, options):
         """Context manager that owns the test environment i.e. the http and
         websockets servers"""
         self.test_path = test_path
         self.server = None
         self.config = None
+        self.options = options if options is not None else {}
 
     def __enter__(self):
-        config = serve.load_config(os.path.join(self.test_path, "config.default.json"),
-                                   os.path.join(here, "config.json"))
+        default_config_path = os.path.join(self.test_path, "config.default.json")
+        local_config_path = os.path.join(here, "config.json")
+
+        # TODO Move this into serve.py
+
+        with open(default_config_path) as f:
+            default_config = json.load(f)
+
+        with open(local_config_path) as f:
+            data = f.read()
+            local_config = json.loads(data % self.options)
+
+        config = serve.merge_json(default_config, local_config)
+        serve.set_computed_defaults(config)
+
         serve.logger = serve.default_logger("info")
         self.config, self.servers = serve.start(config)
         return self
@@ -290,7 +305,6 @@ class LogThread(threading.Thread):
         while True:
             msg = self.queue.get()
             if msg is None:
-                print "Got exit signal in log thread"
                 break
             else:
                 self.log_func(msg)
@@ -329,11 +343,16 @@ def get_browser(product, binary):
 
     return browser_cls, browser_kwargs
 
+def get_options(product):
+    return {"firefox": {"host": "localhost"},
+            "servo": {"host": "localhost"},
+            "b2g": {"host": moznetwork.get_ip()}}[product]
+
 def get_executor(product, test_type, http_server_url, timeout_multiplier):
     executor_classes = {"firefox": {"reftest": MarionetteReftestExecutor,
                                     "testharness": MarionetteTestharnessExecutor},
                         "servo": {"testharness": ServoTestharnessExecutor},
-                        "b2g": {"testharness": MarionetteTestharnessExecutor}}
+                        "b2g": {"testharness": B2GMarionetteTestharnessExecutor}}
 
     executor_cls = executor_classes[product].get(test_type)
     if not executor_cls:
@@ -365,12 +384,15 @@ def run_tests(tests_root, metadata_root, test_types, binary=None, processes=1,
         logger.info("Using %i client processes" % processes)
 
         browser_cls, browser_kwargs = get_browser(product, binary)
+        env_options = get_options(product)
+
+        print env_options
 
         unexpected_count = 0
 
         test_queues = None
 
-        with TestEnvironment(tests_root) as test_environment:
+        with TestEnvironment(tests_root, env_options) as test_environment:
             base_server = "http://%s:%i" % (test_environment.config["host"],
                                             test_environment.config["ports"]["http"][0])
             test_ids, test_queues = queue_tests(tests_root, metadata_root,
@@ -411,7 +433,6 @@ def run_tests(tests_root, metadata_root, test_types, binary=None, processes=1,
         if test_queues is not None:
             for queue in test_queues.itervalues():
                 queue.close()
-        print "Shutting down"
         sys.stdout, sys.stderr = original_stdio
         if capture_stdio and logging_queue is not None:
             logger.info("Closing logging queue")

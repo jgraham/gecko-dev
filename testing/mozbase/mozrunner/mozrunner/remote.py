@@ -100,8 +100,9 @@ class RemoteRunner(Runner):
 
 class B2GRunner(RemoteRunner):
 
-    def __init__(self, profile, devicemanager, marionette, context_chrome=True,
-                 test_script=None, test_script_args=None, **kwargs):
+    def __init__(self, profile, devicemanager, marionette=None, context_chrome=True,
+                 test_script=None, test_script_args=None,
+                 marionette_port=None, emulator=None, **kwargs):
 
         RemoteRunner.__init__(self, profile, devicemanager, **kwargs)
         self.log = mozlog.getLogger('B2GRunner')
@@ -120,7 +121,20 @@ class B2GRunner(RemoteRunner):
                      'NO_EM_RESTART': '1', }
         self.env.update(tmp_env)
         self.last_test = "automation"
+
         self.marionette = marionette
+        if marionette_port is None and self.marionette is not None:
+            marionette_port = self.marionette.port
+        elif marionette_port is not None and self.marionette is not None:
+            if self.marionette.port != marionette_port:
+                raise ValueError("Got a marionette object and a port but they don't match")
+        self.marionette_port = marionette_port
+
+        if marionette and emulator is not None:
+            if marionette.emulator != emulator:
+                raise ValueError("Got a marionette object and an emulator argument but they don't match")
+        self.emulator = emulator
+
         self.context_chrome = context_chrome
         self.test_script = test_script
         self.test_script_args = test_script_args
@@ -144,12 +158,16 @@ class B2GRunner(RemoteRunner):
         self.outputTimeout = outputTimeout
         self._setup_remote_profile()
         # reboot device so it starts up with the proper profile
-        if not self.marionette.emulator:
-            self._reboot_device()
+        if not self.emulator:
+            t0 = time.time()
+            #self._reboot_device()
+            self.dm.reboot(wait=True)
+            print "Rebooted in %f" % (time.time() - t0)
             #wait for wlan to come up
             if not self._wait_for_net():
                 raise Exception("network did not come up, please configure the network" +
                                 " prior to running before running the automation framework")
+            print "Got net after %f" % (time.time() - t0)
 
         self.dm.shellCheckOutput(['stop', 'b2g'])
 
@@ -161,13 +179,22 @@ class B2GRunner(RemoteRunner):
 
         # Set up port forwarding again for Marionette, since any that
         # existed previously got wiped out by the reboot.
-        if not self.marionette.emulator:
+        if not self.emulator:
             subprocess.Popen([self.dm._adbPath,
                               'forward',
-                              'tcp:%s' % self.marionette.port,
-                              'tcp:%s' % self.marionette.port]).communicate()
+                              'tcp:%s' % self.marionette_port,
+                              'tcp:2828']).communicate()
         self.marionette.wait_for_port()
 
+        print "Set up port forwarding for marionette from local port %s to remote port 2828" % (self.marionette_port)
+
+        if self.marionette:
+            self.start_marionette()
+
+        if self.test_script:
+            self.start_tests()
+
+    def start_marionette():
         # start a marionette session
         session = self.marionette.start_session()
         if 'b2g' not in session:
@@ -189,18 +216,15 @@ class B2GRunner(RemoteRunner):
         else:
             self.marionette.set_context(self.marionette.CONTEXT_CONTENT)
 
-        # run the script that starts the tests
 
-        if self.test_script:
-            if os.path.isfile(self.test_script):
-                script = open(self.test_script, 'r')
-                self.marionette.execute_script(script.read(), script_args=self.test_script_args)
-                script.close()
-            elif isinstance(self.test_script, basestring):
-                self.marionette.execute_script(self.test_script, script_args=self.test_script_args)
-        else:
-            # assumes the tests are started on startup automatically
-            pass
+    def start_tests(self):
+        # run the script that starts the tests
+        if os.path.isfile(self.test_script):
+            script = open(self.test_script, 'r')
+            self.marionette.execute_script(script.read(), script_args=self.test_script_args)
+            script.close()
+        elif isinstance(self.test_script, basestring):
+            self.marionette.execute_script(self.test_script, script_args=self.test_script_args)
 
     def on_output(self, line):
         match = re.findall(r"TEST-START \| ([^\s]*)", line)

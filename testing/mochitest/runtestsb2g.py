@@ -81,6 +81,7 @@ class B2GMochitest(MochitestUtilsMixin):
         interpolation = { "server": "%s:%s" % (options.webServer, options.httpPort),
                           "OOP": "true" if self.out_of_process else "false" }
         prefs = json.loads(json.dumps(prefs) % interpolation)
+        print prefs
         for pref in prefs:
             prefs[pref] = Preferences.cast(prefs[pref])
 
@@ -91,6 +92,9 @@ class B2GMochitest(MochitestUtilsMixin):
             'preferences': prefs,
             'proxy': {"remote": options.webServer}
         }
+
+        print self.locations
+        sys.exit(1)
 
         if options.profile:
             self.profile = Profile.clone(options.profile, **kwargs)
