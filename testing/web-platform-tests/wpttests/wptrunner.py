@@ -32,8 +32,6 @@ import wptcommandline
 
 here = os.path.split(__file__)[0]
 
-import stacktracer
-stacktracer.trace_start("trace.html",interval=5,auto=True) # Set auto flag to always update file!
 
 # TODO
 # Multiplatform expectations
@@ -368,6 +366,7 @@ def run_tests(tests_root, metadata_root, test_types, binary=None, processes=1,
               chunk_type="none", total_chunks=1, this_chunk=1, timeout_multiplier=1):
     logging_queue = None
     original_stdio = (sys.stdout, sys.stderr)
+    test_queues = None
 
     try:
         if capture_stdio:
@@ -379,18 +378,14 @@ def run_tests(tests_root, metadata_root, test_types, binary=None, processes=1,
 
         do_test_relative_imports(tests_root)
 
-        run_info = wpttest.RunInfo(False)
+        run_info = wpttest.get_run_info(product, debug=False)
 
         logger.info("Using %i client processes" % processes)
 
         browser_cls, browser_kwargs = get_browser(product, binary)
         env_options = get_options(product)
 
-        print env_options
-
         unexpected_count = 0
-
-        test_queues = None
 
         with TestEnvironment(tests_root, env_options) as test_environment:
             base_server = "http://%s:%i" % (test_environment.config["host"],

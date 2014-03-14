@@ -41,10 +41,22 @@ class TestharnessSubtestResult(SubtestResult):
     default_expected = "PASS"
     statuses = set(["PASS", "FAIL", "TIMEOUT", "NOTRUN"])
 
+def get_run_info(product, **kwargs):
+    if product == "b2g":
+        return B2GRunInfo(product, **kwargs)
+    else:
+        return RunInfo(product, **kwargs)
+
 class RunInfo(dict):
-    def __init__(self, debug):
+    def __init__(self, product, debug):
         self.update(mozinfo.info)
+        self["product"] = product
         self["debug"] = debug
+
+class B2GRunInfo(dict):
+    def __init__(self, product, **kwargs):
+        self["product"] = product
+        self["os"] = "b2g"
 
 class Test(object):
     result_cls = None

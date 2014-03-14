@@ -189,8 +189,6 @@ class B2GRunner(RemoteRunner):
                               'forward',
                               'tcp:%s' % self.marionette_port,
                               'tcp:2828']).communicate()
-        self.marionette.wait_for_port()
-
         print "Set up port forwarding for marionette from local port %s to remote port 2828" % (self.marionette_port)
 
         if self.marionette:
@@ -200,6 +198,8 @@ class B2GRunner(RemoteRunner):
             self.start_tests()
 
     def start_marionette():
+        self.marionette.wait_for_port()
+
         # start a marionette session
         session = self.marionette.start_session()
         if 'b2g' not in session:

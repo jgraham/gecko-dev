@@ -211,7 +211,11 @@ class MarionetteTestharnessExecutor(MarionetteTestExecutor):
 
 class B2GMarionetteTestharnessExecutor(MarionetteTestharnessExecutor):
     def after_connect(self):
-        self.browser.after_connect(self)
+        try:
+            self.browser.after_connect(self)
+        except Exception as e:
+            print e
+            sys.exit(1)
         MarionetteTestharnessExecutor.after_connect(self)
 
 

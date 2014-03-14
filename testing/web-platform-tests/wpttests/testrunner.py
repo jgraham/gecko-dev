@@ -93,7 +93,7 @@ class TestRunner(object):
         try:
             return self.executor.run_test(test)
         except Exception as e:
-            self.send_message("log", "critical", e)
+            self.send_message("log", "critical", traceback.format_exc())
             raise
 
     def send_message(self, command, *args):
