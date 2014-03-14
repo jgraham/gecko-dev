@@ -59,8 +59,7 @@ class B2GMochitest(MochitestUtilsMixin):
         else:
             self.SERVER_STARTUP_TIMEOUT = 90
 
-    def setup_common_options(self, options):
-        test_url = self.buildTestPath(options)
+    def setup_common_options(self, test_url, options):
         if len(self.urlOpts) > 0:
             test_url += "?" + "&".join(self.urlOpts)
         self.test_script_args.append(test_url)
@@ -220,9 +219,10 @@ class B2GDeviceMochitest(B2GMochitest):
         self.local_log = options.logFile
         options.logFile = self.remote_log
         options.profilePath = self.profile.profile
-        retVal = super(B2GDeviceMochitest, self).buildURLOptions(options, env)
 
-        self.setup_common_options(options)
+        test_url = self.buildTestPath(options)
+        retVal = super(B2GDeviceMochitest, self).buildURLOptions(options, env)
+        self.setup_common_options(test_url, options)
 
         options.profilePath = self.remote_profile
         options.logFile = self.local_log
@@ -258,9 +258,10 @@ class B2GDesktopMochitest(B2GMochitest, Mochitest):
         thread.start()
 
     def buildURLOptions(self, options, env):
+        test_url = self.buildTestPath(options)
         retVal = super(B2GDesktopMochitest, self).buildURLOptions(options, env)
 
-        self.setup_common_options(options)
+        self.setup_common_options(test_url, options)
 
         # Copy the extensions to the B2G bundles dir.
         extensionDir = os.path.join(options.profilePath, 'extensions', 'staged')

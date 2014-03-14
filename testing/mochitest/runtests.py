@@ -404,6 +404,19 @@ class MochitestUtilsMixin(object):
       testURL = ("/").join([testHost, self.TEST_PATH, "dom/plugins/test"])
     return testURL
 
+  def getTestRoot(self, options):
+    if (options.browserChrome):
+      if (options.immersiveMode):
+        return 'metro'
+      return 'browser'
+    elif (options.a11y):
+      return 'a11y'
+    elif (options.webapprtChrome):
+      return 'webapprtChrome'
+    elif (options.chrome):
+      return 'chrome'
+    return self.TEST_PATH
+
   def startWebSocketServer(self, options, debuggerInfo):
     """ Launch the websocket server """
     if options.webServer != '127.0.0.1':
@@ -1297,19 +1310,6 @@ class Mochitest(MochitestUtilsMixin):
 
     with open(os.path.join(options.profilePath, "testConfig.js"), "w") as config:
       config.write(content)
-
-  def getTestRoot(self, options):
-    if (options.browserChrome):
-      if (options.immersiveMode):
-        return 'metro'
-      return 'browser'
-    elif (options.a11y):
-      return 'a11y'
-    elif (options.webapprtChrome):
-      return 'webapprtChrome'
-    elif (options.chrome):
-      return 'chrome'
-    return self.TEST_PATH
 
   def installExtensionFromPath(self, options, path, extensionID = None):
     """install an extension to options.profilePath"""

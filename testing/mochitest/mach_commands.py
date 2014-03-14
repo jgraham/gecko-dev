@@ -99,9 +99,9 @@ class MochitestRunner(MozbuildObject):
         self.mochitest_dir = os.path.join(self.tests_dir, 'testing', 'mochitest')
         self.bin_dir = os.path.join(self.topobjdir, 'dist', 'bin')
 
-    def run_b2g_test(self, test_file=None, b2g_home=None, xre_path=None,
-                     total_chunks=None, this_chunk=None, no_window=None,
-                     **kwargs):
+    def run_b2g_test(self, test_file=None, b2g_home=None, device_name=None,
+                     xre_path=None, total_chunks=None, this_chunk=None,
+                     no_window=None, **kwargs):
         """Runs a b2g mochitest.
 
         test_file is a path to a test file. It can be a relative path from the
@@ -147,6 +147,8 @@ class MochitestRunner(MozbuildObject):
         if not test_path or test_path_dir:
             if conditions.is_b2g_desktop(self):
                 options.testManifest = 'b2g-desktop.json'
+            elif device_name == 'emulator-jb':
+                options.manifestFile = 'manifests/emulator-jb.ini'
             else:
                 options.testManifest = 'b2g.json'
 
@@ -675,7 +677,8 @@ class B2GCommands(MachCommandBase):
 
         mochitest = self._spawn(MochitestRunner)
         return mochitest.run_b2g_test(b2g_home=self.b2g_home,
-                xre_path=self.xre_path, test_file=test_file, **kwargs)
+                device_name=self.device_name, xre_path=self.xre_path,
+                test_file=test_file, **kwargs)
 
     @Command('mochitest-b2g-desktop', category='testing',
         conditions=[conditions.is_b2g_desktop],
