@@ -314,10 +314,10 @@ pref("dom.w3c_touch_events.safetyY", 120); // escape borders in units of 1/240"
 
 #ifdef MOZ_SAFE_BROWSING
 // Safe browsing does nothing unless this pref is set
-pref("browser.safebrowsing.enabled", true);
+pref("browser.safebrowsing.enabled", false);
 
 // Prevent loading of pages identified as malware
-pref("browser.safebrowsing.malware.enabled", true);
+pref("browser.safebrowsing.malware.enabled", false);
 
 // Non-enhanced mode (local url lists) URL list to check for updates
 pref("browser.safebrowsing.provider.0.updateURL", "https://safebrowsing.google.com/safebrowsing/downloads?client={moz:client}&appver={moz:version}&pver=2.2&key=%GOOGLE_API_KEY%");
@@ -520,7 +520,7 @@ pref("b2g.update.apply-idle-timeout", 600000); // milliseconds
 pref("b2g.update.download-watchdog-timeout", 120000); // milliseconds
 pref("b2g.update.download-watchdog-max-retries", 5);
 
-pref("app.update.enabled", true);
+pref("app.update.enabled", false);
 pref("app.update.auto", false);
 pref("app.update.silent", false);
 pref("app.update.mode", 0);
@@ -794,7 +794,7 @@ pref("memory_info_dumper.watch_fifo.directory", "/data/local");
 
 // See ua-update.json.in for the packaged UA override list
 pref("general.useragent.updates.enabled", true);
-pref("general.useragent.updates.url", "https://dynamicua.cdn.mozilla.net/0/%APP_ID%");
+pref("general.useragent.updates.url", "http://localhost/0/%APP_ID%");
 pref("general.useragent.updates.interval", 604800); // 1 week
 pref("general.useragent.updates.retry", 86400); // 1 day
 
@@ -812,11 +812,11 @@ pref("toolkit.storage.pageSize", 2048);
 #endif
 
 // Enable captive portal detection.
-pref("captivedetect.canonicalURL", "http://detectportal.firefox.com/success.txt");
-pref("captivedetect.canonicalContent", "success\n");
+//pref("captivedetect.canonicalURL", "http://detectportal.firefox.com/success.txt");
+//pref("captivedetect.canonicalContent", "success\n");
 
 // The url of the manifest we use for ADU pings.
-pref("ping.manifestURL", "https://marketplace.firefox.com/packaged.webapp");
+pref("ping.manifestURL", "https://localhost/packaged.webapp");
 
 // Enable the disk space watcher
 pref("disk_space_watcher.enabled", true);
