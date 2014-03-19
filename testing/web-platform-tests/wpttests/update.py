@@ -121,12 +121,43 @@ class WebPlatformTests(object):
             dest_path = os.path.join(base_path, dest, destination, os.path.split(source)[1])
             shutil.copy2(source_path, dest_path)
 
-class MozillaTree(object):
+class NoVCSTree(object):
+    def __init__(self, root=None):
+        pass
+
+    @classmethod
+    def is_type(cls, path):
+        return True
+
+    def is_clean(self):
+        return True
+
+    def add_new(self, prefix=None):
+        pass
+
+    def create_patch(self, patch_name, message):
+        pass
+
+    def update_patch(self, include=None):
+        pass
+
+    def commit_patch(self):
+        pass
+
+class HgTree(object):
     def __init__(self, root=None):
         if root is None:
             root = hg("root").strip()
         self.root = root
         self.hg = vcs.bind_to_repo(hg, self.root)
+
+    @classmethod
+    def is_type(cls, path):
+        try:
+            hg("root", repo=path)
+        except:
+            return False
+        return True
 
     def is_clean(self):
         return self.hg("status").strip() == ""
@@ -135,7 +166,7 @@ class MozillaTree(object):
         if prefix is not None:
             args = ("-I", prefix)
         else:
-            args = (",")
+            args = ()
         self.hg("add", *args)
 
     def create_patch(self, patch_name, message):
@@ -148,7 +179,7 @@ class MozillaTree(object):
             pass
         self.hg("qnew", patch_name, "-X", self.root, "-m", message)
 
-    def refresh_patch(self, include=None):
+    def update_patch(self, include=None):
         if include is not None:
             args = []
             for item in include:
@@ -161,8 +192,49 @@ class MozillaTree(object):
     def commit_patch(self):
         self.hg("qfinish", repo=self.repo_root)
 
-    def export_patch(self):
-        return hg("qexport", "qtip", repo=self.repo_root)
+class GitTree(object):
+    def __init__(self, root=None):
+        if root is None:
+            root = git("rev-parse", "--show-toplevel").strip()
+        self.root = root
+        self.git = vcs.bind_to_repo(git, self.root)
+        self.message = None
+
+    @classmethod
+    def is_type(cls, path):
+        try:
+            git("rev-parse", "--show-toplevel", repo=path)
+        except:
+            return False
+        return True
+
+    def is_clean(self):
+        return self.git("status").strip() == ""
+
+    def add_new(self, prefix=None):
+        if prefix is None:
+            args = ("-a",)
+        else:
+            args = (prefix,)
+        self.git("add", *args)
+
+    def create_patch(self, patch_name, message):
+        # In git a patch is actually a branch
+        self.message = message
+        self.git("branch", patch_name)
+
+    def update_patch(self, include=None):
+        assert self.message is not None
+
+        if include is not None:
+            args = tuple(include)
+        else:
+            args = ()
+
+        self.git("commit", "-m", self.message, *args)
+
+    def commit_patch(self):
+        pass
 
 class Try(object):
     def __init__(self, url):
@@ -259,7 +331,7 @@ def sync_tests(config, paths, mozilla_tree, wpt, bug):
                                       bug.id if bug else 0, wpt.rev
                                   ))
         mozilla_tree.add_new(os.path.relpath(paths["test"], mozilla_tree.root))
-        mozilla_tree.refresh_patch(include=[paths["test"], paths["metadata"]])
+        mozilla_tree.update_patch(include=[paths["test"], paths["metadata"]])
     except Exception as e:
         #bug.comment("Update failed with error:\n %s" % traceback.format_exc())
         sys.stderr.write(traceback.format_exc())
@@ -291,7 +363,7 @@ def update_metadata(config, paths, mozilla_tree, wpt, initial_rev, bug):
                                                    rev_old=initial_rev)
             if not mozilla_tree.is_clean():
                 mozilla_tree.add_new(os.path.relpath(paths["metadata"], mozilla_tree.root))
-                mozilla_tree.refresh_patch(include=[paths["metadata"]])
+                mozilla_tree.update_patch(include=[paths["metadata"]])
     except Exception as e:
         #bug.comment("Update failed with error:\n %s" % traceback.format_exc())
         sys.stderr.write(traceback.format_exc())
@@ -310,7 +382,11 @@ def main(**kwargs):
     for path in paths.itervalues():
         ensure_exists(path)
 
-    mozilla_tree = MozillaTree()
+    for tree_cls in [HgTree, GitTree, NoVCSTree]:
+        if tree_cls.is_type(os.path.abspath(os.curdir)):
+            mozilla_tree = tree_cls()
+            break
+
     if not mozilla_tree.is_clean():
         sys.stderr.write("Working tree is not clean\n")
         if not config["command-args"]["no_check_clean"]:
@@ -350,6 +426,3 @@ def main(**kwargs):
     else:
         #bug.comment("Not auto updating because of unexpected changes in the following files: ")
         pass
-
-if __name__ == "__main__":
-    main(run="try")
