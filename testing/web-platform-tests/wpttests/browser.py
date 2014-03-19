@@ -217,8 +217,6 @@ class B2GBrowser(Browser):
 
         # TODO: replace this with pkg_resources if we know that we'll be installing this as a package
         marionette.import_script(os.path.join(here, "device_setup", "app_management.js"))
-        print marionette.get_url()
-        print marionette.execute_script('return window.wrappedJSObject.Applications == undefined;')
         script = "GaiaApps.launchWithName('CertTest App');"
 
         # NOTE: if the app is already launched, this doesn't launch a new app, it will return

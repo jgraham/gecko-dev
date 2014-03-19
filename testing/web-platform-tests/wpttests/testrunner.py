@@ -240,7 +240,7 @@ class TestRunnerManager(threading.Thread):
                                 # runner process to repeatedly die
                                 self.logger.info("Last test did not complete, requeueing")
                                 self.requeue_test(self.test)
-                            self.logger.info("More tests found, but runner process died, restarting")
+                            self.logger.warning("More tests found, but runner process died, restarting")
                             self.restart_count += 1
                             if self.restart_runner() is Stop:
                                 break
@@ -334,12 +334,10 @@ class TestRunnerManager(threading.Thread):
                 break
 
     def teardown(self):
-        self.logger.info("teardown in testrunnermanager")
+        self.logger.debug("teardown in testrunnermanager")
         self.test_runner_proc = None
         # self.command_queue.cancel_join_thread()
         # self.remote_queue.cancel_join_thread()
-        self.logger.info("Queues empty %s %s" % (self.command_queue.empty(),
-                                                 self.remote_queue.empty()))
         self.command_queue.close()
         self.remote_queue.close()
         self.command_queue = None
@@ -356,7 +354,7 @@ class TestRunnerManager(threading.Thread):
             self.test_runner_proc.terminate()
             self.test_runner_proc.join(10)
         else:
-            self.logger.info("Testrunner exited with code %i" % self.test_runner_proc.exitcode)
+            self.logger.debug("Testrunner exited with code %i" % self.test_runner_proc.exitcode)
 
     def runner_teardown(self):
         self.ensure_runner_stopped()
@@ -364,7 +362,7 @@ class TestRunnerManager(threading.Thread):
 
     def stop_runner(self):
         """Stop the TestRunner and the Firefox binary."""
-        self.logger.info("Stopping runner")
+        self.logger.debug("Stopping runner")
         if self.test_runner_proc is None:
             return
         try:
@@ -384,7 +382,6 @@ class TestRunnerManager(threading.Thread):
 
     def test_start(self, test):
         self.test = test
-        self.logger.debug("Starting test %r" % (test.id,))
         self.logger.test_start(test.id)
 
     def test_ended(self, test, results):

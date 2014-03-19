@@ -154,7 +154,6 @@ class MarionetteTestExecutor(TestExecutor):
             return Stop
 
         try:
-            self.runner.send_message("log", "debug", "Starting test")
             result = self.convert_result(test, self.do_test(test))
         except marionette.errors.ScriptTimeoutException:
             with result_lock:
@@ -201,7 +200,6 @@ class MarionetteTestharnessExecutor(MarionetteTestExecutor):
 
     def do_test(self, test):
         assert len(self.marionette.window_handles) == 1
-        self.runner.send_message("log", "debug", "Sending test script")
         return self.marionette.execute_async_script(
             self.script % {"abs_url": urlparse.urljoin(self.http_server_url, test.url),
                            "url": test.url,
