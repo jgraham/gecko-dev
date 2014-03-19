@@ -316,6 +316,9 @@ class LoggingWrapper(StringIO):
         self.prefix = prefix
 
     def write(self, data):
+        if isinstance(data, str):
+            data = data.decode("utf8")
+
         if data.endswith("\n"):
             data = data[:-1]
         if data.endswith("\r"):
