@@ -50,6 +50,8 @@ public:
   already_AddRefed<TextTrack> AddTextTrack(TextTrackKind aKind,
                                            const nsAString& aLabel,
                                            const nsAString& aLanguage,
+                                           TextTrackMode aMode,
+                                           TextTrackReadyState aReadyState,
                                            TextTrackSource aTextTrackSource,
                                            const CompareTextTracks& aCompareTT);
   TextTrack* GetTrackById(const nsAString& aId);

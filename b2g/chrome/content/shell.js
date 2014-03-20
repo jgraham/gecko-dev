@@ -23,7 +23,10 @@ Cu.import('resource://gre/modules/NetworkStatsService.jsm');
 // Identity
 Cu.import('resource://gre/modules/SignInToWebsite.jsm');
 SignInToWebsiteController.init();
+
+#ifdef MOZ_SERVICES_FXACCOUNTS
 Cu.import('resource://gre/modules/FxAccountsMgmtService.jsm');
+#endif
 
 Cu.import('resource://gre/modules/DownloadsAPI.jsm');
 
@@ -300,7 +303,11 @@ var shell = {
     systemAppFrame.setAttribute('src', "data:text/html;charset=utf-8,%3C!DOCTYPE html>%3Cbody style='background:black;");
     let container = document.getElementById('container');
 #ifdef MOZ_WIDGET_COCOA
-    container.removeChild(document.getElementById('placeholder'));
+    // See shell.html
+    let hotfix = document.getElementById('placeholder');
+    if (hotfix) {
+      container.removeChild(hotfix);
+    }
 #endif
     container.appendChild(systemAppFrame);
 

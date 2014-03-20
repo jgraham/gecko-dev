@@ -460,6 +460,8 @@ pref("accessibility.tabfocus_applies_to_xul", true);
 pref("canvas.focusring.enabled", false);
 pref("canvas.customfocusring.enabled", false);
 pref("canvas.hitregions.enabled", false);
+// Add support for canvas path objects
+pref("canvas.path.enabled", false);
 
 // We want the ability to forcibly disable platform a11y, because
 // some non-a11y-related components attempt to bring it up.  See bug
@@ -769,7 +771,6 @@ pref("javascript.options.ion",              true);
 pref("javascript.options.asmjs",            true);
 pref("javascript.options.parallel_parsing", true);
 pref("javascript.options.ion.parallel_compilation", true);
-pref("javascript.options.typeinference",    true);
 // This preference limits the memory usage of javascript.
 // If you want to change these values for your device,
 // please find Bug 417052 comment 17 and Bug 456721
@@ -1511,6 +1512,14 @@ pref("font.mathfont-family", "MathJax_Main, STIXNonUnicode, STIXSizeOneSym, STIX
 // These fonts are ignored the underline offset, instead of it, the underline is lowered to bottom of its em descent.
 pref("font.blacklist.underline_offset", "FangSong,Gulim,GulimChe,MingLiU,MingLiU-ExtB,MingLiU_HKSCS,MingLiU-HKSCS-ExtB,MS Gothic,MS Mincho,MS PGothic,MS PMincho,MS UI Gothic,PMingLiU,PMingLiU-ExtB,SimHei,SimSun,SimSun-ExtB,Hei,Kai,Apple LiGothic,Apple LiSung,Osaka");
 
+#ifdef MOZ_WIDGET_GONK
+// Whitelist of fonts that ship with B2G that do not include space lookups in
+// default features. This allows us to skip analyzing the GSUB/GPOS tables
+// unless features are explicitly enabled.
+// Use NSPR_LOG_MODULES=fontinit:5 to dump out details of space lookups
+pref("font.whitelist.skip_default_features_space_check", "Fira Sans OT,Fira Mono OT");
+#endif
+
 pref("images.dither", "auto");
 pref("security.directory",              "");
 
@@ -1870,6 +1879,9 @@ pref("layout.css.overflow-clip-box.enabled", false);
 // 2 = right
 // 3 = left
 pref("layout.scrollbar.side", 0);
+
+// pref to stop overlay scrollbars from fading out, for testing purposes
+pref("layout.testing.overlay-scrollbars.always-visible", false);
 
 // pref to control browser frame rate, in Hz. A value <= 0 means choose
 // automatically based on knowledge of the platform (or 60Hz if no platform-

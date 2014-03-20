@@ -143,14 +143,9 @@ class MochitestRunner(MozbuildObject):
                 test_path_dir = True;
             options.testPath = test_path
 
-        # filter test directiories or all tests according to the manifest
         if not test_path or test_path_dir:
-            if conditions.is_b2g_desktop(self):
-                options.testManifest = 'b2g-desktop.json'
-            elif device_name == 'emulator-jb':
+            if device_name == 'emulator-jb':
                 options.manifestFile = 'manifests/emulator-jb.ini'
-            else:
-                options.testManifest = 'b2g.json'
 
         for k, v in kwargs.iteritems():
             setattr(options, k, v)
@@ -677,8 +672,7 @@ class B2GCommands(MachCommandBase):
 
         mochitest = self._spawn(MochitestRunner)
         return mochitest.run_b2g_test(b2g_home=self.b2g_home,
-                device_name=self.device_name, xre_path=self.xre_path,
-                test_file=test_file, **kwargs)
+                xre_path=self.xre_path, test_file=test_file, **kwargs)
 
     @Command('mochitest-b2g-desktop', category='testing',
         conditions=[conditions.is_b2g_desktop],

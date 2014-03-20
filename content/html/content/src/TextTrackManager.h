@@ -46,6 +46,8 @@ public:
   already_AddRefed<TextTrack> AddTextTrack(TextTrackKind aKind,
                                            const nsAString& aLabel,
                                            const nsAString& aLanguage,
+                                           TextTrackMode aMode,
+                                           TextTrackReadyState aReadyState,
                                            TextTrackSource aTextTrackSource);
   void AddTextTrack(TextTrack* aTextTrack);
   void RemoveTextTrack(TextTrack* aTextTrack, bool aPendingListOnly);

@@ -32,7 +32,7 @@
 #include "nsIAtom.h"
 #include "nsContentUtils.h"
 #include "nsCxPusher.h"
-#include "nsEventDispatcher.h"
+#include "mozilla/EventDispatcher.h"
 #include "nsIContent.h"
 #include "nsCycleCollector.h"
 #include "nsNetUtil.h"
@@ -336,8 +336,8 @@ NS_HandleScriptError(nsIScriptGlobalObject *aScriptGlobal,
                                 aErrorEventInit);
       event->SetTrusted(true);
 
-      nsEventDispatcher::DispatchDOMEvent(win, nullptr, event, presContext,
-                                          aStatus);
+      EventDispatcher::DispatchDOMEvent(win, nullptr, event, presContext,
+                                        aStatus);
       called = true;
     }
     --errorDepth;
@@ -491,8 +491,8 @@ public:
                                   NS_LITERAL_STRING("error"), init);
         event->SetTrusted(true);
 
-        nsEventDispatcher::DispatchDOMEvent(win, nullptr, event, presContext,
-                                            &status);
+        EventDispatcher::DispatchDOMEvent(win, nullptr, event, presContext,
+                                          &status);
       }
     }
 
@@ -1436,22 +1436,26 @@ CheckUniversalXPConnectForTraceMalloc(JSContext *cx)
 static bool
 TraceMallocDisable(JSContext *cx, unsigned argc, JS::Value *vp)
 {
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+
     if (!CheckUniversalXPConnectForTraceMalloc(cx))
         return false;
 
     NS_TraceMallocDisable();
-    JS_SET_RVAL(cx, vp, JSVAL_VOID);
+    args.rval().setUndefined();
     return true;
 }
 
 static bool
 TraceMallocEnable(JSContext *cx, unsigned argc, JS::Value *vp)
 {
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+
     if (!CheckUniversalXPConnectForTraceMalloc(cx))
         return false;
 
     NS_TraceMallocEnable();
-    JS_SET_RVAL(cx, vp, JSVAL_VOID);
+    args.rval().setUndefined();
     return true;
 }
 

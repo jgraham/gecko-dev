@@ -2389,7 +2389,8 @@ nsLayoutUtils::PaintFrame(nsRenderingContext* aRenderingContext, nsIFrame* aFram
   }
 #endif
 
-  list.ComputeVisibilityForRoot(&builder, &visibleRegion);
+  list.ComputeVisibilityForRoot(&builder, &visibleRegion,
+                                usingDisplayPort ? rootScrollFrame : nullptr);
 
   uint32_t flags = nsDisplayList::PAINT_DEFAULT;
   if (aFlags & PAINT_WIDGET_LAYERS) {
@@ -2493,20 +2494,6 @@ nsLayoutUtils::PaintFrame(nsRenderingContext* aRenderingContext, nsIFrame* aFram
   // Flush the list so we don't trigger the IsEmpty-on-destruction assertion
   list.DeleteAll();
   return NS_OK;
-}
-
-int32_t
-nsLayoutUtils::GetZIndex(nsIFrame* aFrame) {
-  if (!aFrame->IsPositioned() && !aFrame->IsFlexItem())
-    return 0;
-
-  const nsStylePosition* position =
-    aFrame->StylePosition();
-  if (position->mZIndex.GetUnit() == eStyleUnit_Integer)
-    return position->mZIndex.GetIntValue();
-
-  // sort the auto and 0 elements together
-  return 0;
 }
 
 /**
