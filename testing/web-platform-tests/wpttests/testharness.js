@@ -19,16 +19,8 @@ function listener(e) {
 }
 addEventListener("message", listener, false);
 
-// Using an iframe is a hack for the moment
-iframe = document.createElement("iframe");
-document.body.appendChild(iframe);
-iframe.src = "%(abs_url)s";
-
-iframe.onload = function() {
-window.wrappedJSObject.win = iframe.contentWindow;
-}
-
-//window.open("%(abs_url)s", "%(window_id)s");
+window.wrappedJSObject.win = window.open("%(abs_url)s", "%(window_id)s");
+log("WINDOW OBJECT: " + window.wrappedJSObject.win);
 
 var timer = setTimeout(function() {
     window.wrappedJSObject.win.timeout();

@@ -5,6 +5,7 @@
 import os
 import socket
 import sys
+import time
 
 import mozprocess
 from mozprofile.profile import FirefoxProfile
@@ -150,24 +151,20 @@ class B2GBrowser(Browser):
         locations = ServerLocations(filename=os.path.join(here, "server-locations.txt"))
         profile = FirefoxProfile(locations=locations, proxy={"remote": moznetwork.get_ip()})
 
-        # profile.set_preferences({# "marionette.defaultPrefs.enabled": True,
-        #                          # "marionette.defaultPrefs.port": self.marionette_port,
-        #                          # "dom.disable_open_during_load": False,
-        #                          # "dom.max_script_run_time": 0,
-        #                          # "browser.shell.checkDefaultBrowser": False,
-        #                          # "browser.dom.window.dump.enabled": True,
+        profile.set_preferences({"dom.disable_open_during_load": False,
+                                 # "dom.max_script_run_time": 0,
+                                 # "browser.dom.window.dump.enabled": True,
 
-        #                          # # These ones are blindly copied from Mochitest
-        #                          # "dom.mozBrowserFramesEnabled": True,
-        #                          # "dom.ipc.tabs.disabled": False,
-        #                          # "dom.ipc.browser_frames.oop_by_default": False,
-        #                          # "marionette.force-local": True,
-        #                          # "dom.testing.datastore_enabled_for_hosted_apps": True
-        #                      })
+                                 # # These ones are blindly copied from Mochitest
+                                 "dom.mozBrowserFramesEnabled": True,
+                                 # "dom.ipc.tabs.disabled": False,
+                                 # "dom.ipc.browser_frames.oop_by_default": False,
+                                 # "marionette.force-local": True,
+                                 # "dom.testing.datastore_enabled_for_hosted_apps": True
+                             })
 
         self.runner = B2GRunner(profile, self.device, marionette_port=self.marionette_port, emulator=False)
         self.runner.start()
-        sys.exit(1)
 
     def stop(self):
         pass
@@ -211,10 +208,13 @@ class B2GBrowser(Browser):
     def use_cert_app(self, executor):
         marionette = executor.marionette
 
+        self.wait_for_homescreen(marionette)
+
         marionette.set_context("content")
 
         # app management is done in the system app
         marionette.switch_to_frame()
+
         # TODO: replace this with pkg_resources if we know that we'll be installing this as a package
         marionette.import_script(os.path.join(here, "device_setup", "app_management.js"))
         print marionette.get_url()
@@ -228,3 +228,14 @@ class B2GBrowser(Browser):
             raise Exception("Launching CertTest App failed")
         marionette.switch_to_frame(self.cert_test_app["frame"])
 
+    def wait_for_homescreen(self, marionette):
+        marionette.set_context(marionette.CONTEXT_CONTENT)
+        marionette.execute_async_script("""
+log('waiting for mozbrowserloadend');
+window.addEventListener('mozbrowserloadend', function loaded(aEvent) {
+  log('received mozbrowserloadend for ' + aEvent.target.src);
+  if (aEvent.target.src.indexOf('ftu') != -1 || aEvent.target.src.indexOf('homescreen') != -1) {
+    window.removeEventListener('mozbrowserloadend', loaded);
+    marionetteScriptFinished();
+  }
+});""", script_timeout=30000)

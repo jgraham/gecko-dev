@@ -120,6 +120,7 @@ class DeviceManagerADB(DeviceManager):
 
         procOut = tempfile.SpooledTemporaryFile()
         procErr = tempfile.SpooledTemporaryFile()
+        print args
         proc = subprocess.Popen(args, stdout=procOut, stderr=procErr)
 
         if not timeout:
@@ -576,6 +577,8 @@ class DeviceManagerADB(DeviceManager):
         if not timeout:
             # We are asserting that all commands will complete in this time unless otherwise specified
             timeout = self.default_timeout
+
+        print finalArgs
 
         timeout = int(timeout)
         retries = 0
