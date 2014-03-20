@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-window.wrappedJSObject.timeout_multiplier = 1;
+window.wrappedJSObject.timeout_multiplier = %(timeout_multiplier)d;
 
 function listener(e) {
     if(e.data.type == "complete") {

@@ -136,6 +136,8 @@ class MarionetteTestExecutor(TestExecutor):
         result_flag = threading.Event()
         result_lock = threading.Lock()
 
+        timeout = test.timeout * self.timeout_multiplier
+
         def timeout_func():
             with result_lock:
                 if not result_flag.is_set():
@@ -143,18 +145,18 @@ class MarionetteTestExecutor(TestExecutor):
                     result = (test.result_cls("EXTERNAL-TIMEOUT", None), [])
                     self.runner.send_message("test_ended", test, result)
 
-        self.timer = threading.Timer(test.timeout + 10, timeout_func)
+        self.timer = threading.Timer(timeout + 10, timeout_func)
         self.timer.start()
 
         try:
-            self.marionette.set_script_timeout((test.timeout + 5) * 1000)
+            self.marionette.set_script_timeout((timeout + 5) * 1000)
         except marionette.errors.InvalidResponseException:
             self.runner.send_message("log", "error", "Lost marionette connection")
             self.runner.send_message("restart_test", test)
             return Stop
 
         try:
-            result = self.convert_result(test, self.do_test(test))
+            result = self.convert_result(test, self.do_test(test, timeout))
         except marionette.errors.ScriptTimeoutException:
             with result_lock:
                 if not result_flag.is_set():
@@ -198,14 +200,14 @@ class MarionetteTestharnessExecutor(MarionetteTestExecutor):
         MarionetteTestExecutor.__init__(self, *args, **kwargs)
         self.script = open(os.path.join(here, "testharness.js")).read()
 
-    def do_test(self, test):
+    def do_test(self, test, timeout):
         assert len(self.marionette.window_handles) == 1
         return self.marionette.execute_async_script(
             self.script % {"abs_url": urlparse.urljoin(self.http_server_url, test.url),
                            "url": test.url,
                            "window_id": self.window_id,
                            "timeout_multiplier": self.timeout_multiplier,
-                           "timeout": test.timeout * 1000}, new_sandbox=False)
+                           "timeout": timeout * 1000}, new_sandbox=False)
 
 class B2GMarionetteTestharnessExecutor(MarionetteTestharnessExecutor):
     def after_connect(self):
@@ -227,7 +229,7 @@ class MarionetteReftestExecutor(MarionetteTestExecutor):
         self.ref_hashes = {}
         self.ref_urls_by_hash = defaultdict(set)
 
-    def do_test(self, test):
+    def do_test(self, test, timeout):
         url, ref_type, ref_url = test.url, test.ref_type, test.ref_url
         hashes = {"test": None,
                   "ref": self.ref_hashes.get(ref_url)}
@@ -268,8 +270,8 @@ class MarionetteReftestExecutor(MarionetteTestExecutor):
 
 
 class ProcessTestExecutor(TestExecutor):
-    def __init__(self, browser, http_server_url, result_converter, timeout_multiplier):
-        TestExecutor.__init__(self, runner, result_converter)
+    def __init__(self, browser, http_server_url, result_converter, timeout_multiplier=1):
+        TestExecutor.__init__(self, runner, result_converter, timeout_multiplier)
         self.binary = browser.binary
 
     def setup(self, runner):
@@ -301,8 +303,10 @@ class ServoTestharnessExecutor(ProcessTestExecutor):
                               processOutputLine=[self.on_output])
         proc.run()
 
+        timeout = test.timeout * self.timeout_multiplier
+
         #Now wait to get the output we expect, or until we reach the timeout
-        self.result_flag.wait(test.timeout + 5)
+        self.result_flag.wait(timeout + 5)
 
         if self.result_flag.is_set():
             assert self.result_data is not None
