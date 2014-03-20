@@ -107,7 +107,7 @@ class MarionetteTestExecutor(TestExecutor):
             pass
         del self.marionette
 
-    def connection_alive(self):
+    def is_alive(self):
         try:
             #Get a simple property over the connection
             self.marionette.current_window_handle
@@ -121,11 +121,6 @@ class MarionetteTestExecutor(TestExecutor):
         This method is independent of the test type, and calls
         do_test to implement the type-sepcific testing functionality.
         """
-        if not self.connection_alive():
-            self.runner.send_message("log", "error", "Lost marionette connection")
-            self.runner.send_message("restart_test", test)
-            return Stop
-
         #Lock to prevent races between timeouts and other results
         #This might not be strictly necessary if we need to deal
         #with the result changing post-hoc anyway (e.g. due to detecting
@@ -264,6 +259,9 @@ class ProcessTestExecutor(TestExecutor):
     def setup(self, runner):
         self.runner = runner
         self.runner.send_message("init_succeeded")
+        return True
+
+    def is_alive(self):
         return True
 
     def run_test(self, test):
