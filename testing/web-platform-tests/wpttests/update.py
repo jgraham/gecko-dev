@@ -122,6 +122,8 @@ class WebPlatformTests(object):
             shutil.copy2(source_path, dest_path)
 
 class NoVCSTree(object):
+    name = "non-vcs"
+
     def __init__(self, root=None):
         pass
 
@@ -145,6 +147,8 @@ class NoVCSTree(object):
         pass
 
 class HgTree(object):
+    name = "mercurial"
+
     def __init__(self, root=None):
         if root is None:
             root = hg("root").strip()
@@ -193,6 +197,8 @@ class HgTree(object):
         self.hg("qfinish", repo=self.repo_root)
 
 class GitTree(object):
+    name = "git"
+
     def __init__(self, root=None):
         if root is None:
             root = git("rev-parse", "--show-toplevel").strip()
@@ -221,7 +227,7 @@ class GitTree(object):
     def create_patch(self, patch_name, message):
         # In git a patch is actually a branch
         self.message = message
-        self.git("branch", patch_name)
+        self.git("checkout", "-b", patch_name)
 
     def update_patch(self, include=None):
         assert self.message is not None
@@ -385,6 +391,7 @@ def main(**kwargs):
     for tree_cls in [HgTree, GitTree, NoVCSTree]:
         if tree_cls.is_type(os.path.abspath(os.curdir)):
             mozilla_tree = tree_cls()
+            print "Updating into a %s tree" % mozilla_tree.name
             break
 
     if not mozilla_tree.is_clean():
