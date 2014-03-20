@@ -103,7 +103,7 @@ class WebTestServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
     allow_reuse_address = True
     acceptable_errors = (errno.EPIPE, errno.ECONNABORTED)
 
-    def __init__(self, server_address, RequestHandlerClass, router, rewriter, config=None,
+    def __init__(self, server_address, RequestHandlerClass, router, rewriter, bind_hostname, config=None,
                  use_ssl=False, certificate=None, **kwargs):
         """Server for HTTP(s) Requests
 
@@ -162,6 +162,8 @@ class WebTestServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
 
 class WebTestRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """RequestHandler for WebTestHttpd"""
+
+    protocol_version = "HTTP/1.1"
 
     def handle_one_request(self):
         response = None
@@ -246,6 +248,7 @@ class WebTestHttpd(object):
     :param rewrites: List of rewrites with which to initialize the rewriter_cls
     :param config: Dictionary holding environment configuration settings for
                    handlers to read, or None to use the default values.
+    :param bind_hostname Boolean indicating whether to bind server to hostname.
 
     HTTP server designed for testing scenarios.
 
@@ -256,7 +259,7 @@ class WebTestHttpd(object):
                  server_cls=None, handler_cls=WebTestRequestHandler,
                  use_ssl=False, certificate=None, router_cls=Router,
                  doc_root=os.curdir, routes=routes.routes,
-                 rewriter_cls=RequestRewriter, rewrites=None,
+                 rewriter_cls=RequestRewriter, bind_hostname=True, rewrites=None,
                  config=None):
 
         self.host = host
@@ -277,6 +280,7 @@ class WebTestHttpd(object):
                                 self.router,
                                 self.rewriter,
                                 config=config,
+                                bind_hostname=bind_hostname,
                                 use_ssl=use_ssl,
                                 certificate=certificate)
         self.started = False
