@@ -20,7 +20,7 @@ def create_parser(allow_mandatory=True):
         prefix = ""
     parser = argparse.ArgumentParser("web-platform-tests",
                                      description="Runner for web-platform-tests tests.")
-    parser.add_argument(prefix + "binary", action="store",
+    parser.add_argument("--binary", action="store",
                         type=abs_path,
                         help="Binary to run tests against")
     parser.add_argument(prefix + "tests_root", action="store", type=abs_path,
@@ -34,7 +34,7 @@ def create_parser(allow_mandatory=True):
                         nargs="*", default=["testharness", "reftest"],
                     choices=["testharness", "reftest"],
                         help="Test types to run")
-    parser.add_argument("--processes", action="store", type=int, default=int(1.5 * cpu_count()),
+    parser.add_argument("--processes", action="store", type=int, default=1,
                         help="Number of simultaneous processes to use")
     parser.add_argument("--include", action="append", help="URL prefix to include")
 
@@ -44,6 +44,8 @@ def create_parser(allow_mandatory=True):
                         help="Chunk number to run")
     parser.add_argument("--chunk-type", action="store", choices=["none", "equal_time", "hash"],
                         default="none", help="Chunking type to use")
+    parser.add_argument("--timeout-multiplier", action="store", type=float, default=1,
+                        help="Multiplier relative to standard test timeout to use")
 
 
     #Legacy options until mozharness is updated
@@ -51,7 +53,7 @@ def create_parser(allow_mandatory=True):
     parser.add_argument("--log-stdout", action="store_true")
 
     if allow_mandatory:
-        parser.add_argument("--product", action="store", choices=["firefox", "servo"],
+        parser.add_argument("--product", action="store", choices=["firefox", "servo", "b2g"],
                             default="firefox")
     commandline.add_logging_group(parser)
     return parser

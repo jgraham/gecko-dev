@@ -4,102 +4,56 @@
 
 from __future__ import unicode_literals
 
+import sys
+
 import urlparse
 from Queue import Empty
 import multiprocessing
 from multiprocessing import Process, current_process, Queue
 import threading
-import socket
 import uuid
+import socket
 import traceback
 
-import marionette
 from mozlog.structured import structuredlog
-
-from browser import FirefoxBrowser
 
 # Special value used as a sentinal in various commands
 Stop = object()
 
-def get_free_port(start_port, exclude=None):
-    port = start_port
-    while True:
-        if exclude and port in exclude:
-            port += 1
-            continue
-        s = socket.socket()
-        try:
-            s.bind(("127.0.0.1", port))
-        except socket.error:
-            port += 1
-        else:
-            return port
-        finally:
-            s.close()
-
-
 class TestRunner(object):
-    def __init__(self, http_server_url, command_queue, result_queue,
-                 marionette_port=None, binary=None):
-        """Base class for actually running tests.
+    def __init__(self, command_queue, result_queue, executor):
+        """Class implementing the main loop for running tests.
 
-        Each test type will have a derived class overriding the do_test
-        and convert_result methods.
+        This class delegates the job of actually running a test to the executor
+        that is passed in.
 
-        Each instance of this class is expected to run in its own process
-        and each operates its own event loop with two basic commands, one
-        to run a test and one to shut down the instance.
-
-        :param http_server_url: url to the main http server over which tests
-                                will be loaded
         :param command_queue: subprocess.Queue used to send commands to the
                               process
         :param result_queue: subprocess.Queue used to send results to the
                              parent TestManager process
-        :param marionette_port: port number to use for marionette, or None
-                                to use a free port
+        :param executor: TestExecutor object that will actually run a test.
         """
-        self.http_server_url = http_server_url
-
         self.command_queue = command_queue
         self.result_queue = result_queue
 
-        if marionette_port is None:
-            marionette_port = get_free_port(2828)
-        self.marionette_port = marionette_port
-        self.binary = binary
-        self.timer = None
-        self.window_id = str(uuid.uuid4())
-        self.timeout_multiplier = 1  # TODO: Adjust this depending on tests and hardware
+        self.executor = executor
+        self.name = current_process().name
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.teardown()
 
     def setup(self):
-        """Connect to browser via marionette"""
-        self.send_message("log", "debug", "Connecting to marionette on port %i" % self.marionette_port)
-        self.browser = marionette.Marionette(host='localhost', port=self.marionette_port)
-        #XXX Move this timeout somewhere
-        success = self.browser.wait_for_port(20)
-        if success:
-            self.send_message("log", "debug", "Starting marionette session")
-            self.browser.start_session()
-            self.send_message("init_succeeded")
-        else:
-            self.send_message("log", "warning", "Failed to connect to marionette")
-            self.send_message("init_failed")
-
-        if success:
-            try:
-                self.browser.navigate(urlparse.urljoin(self.http_server_url, "/gecko_runner.html"))
-                self.browser.execute_script("document.title = '%s'" % threading.current_thread().name)
-            except:
-                self.send_message("log", "warning", "Failed to connect to navigate initial page")
-                self.send_message("init_failed")
+        self.executor.setup(self)
 
     def teardown(self):
+        print self.name + " TestRunner teardown"
+        self.executor.teardown()
         self.result_queue = None
         self.command_queue = None
-        del self.browser
         self.browser = None
-        #Close the marionette session
 
     def run(self):
         """Main loop accepting commands over the pipe and triggering
@@ -107,129 +61,53 @@ class TestRunner(object):
         self.setup()
         commands = {"run_test": self.run_test,
                     "stop": self.stop}
-        try:
-            while True:
-                command, args = self.command_queue.get()
-                try:
-                    rv = commands[command](*args)
-                except Exception:
-                    self.send_message("error",
-                                      "Error running command %s with arguments %r:\n%s" %
-                                      (command, args, traceback.format_exc()))
-                else:
-                    if rv is Stop:
-                        break
-        finally:
-            self.teardown()
-
-    def connection_alive(self):
-        try:
-            #Get a simple property over the connection
-            self.browser.current_window_handle
-        except (socket.timeout, marionette.errors.InvalidResponseException):
-            return False
-        return True
-
-    def run_test(self, test):
-        """Run a single test.
-
-        This method is independent of the test type, and calls
-        do_test to implement the type-sepcific testing functionality.
-        """
-        if not self.connection_alive():
-            self.send_message("log", "error", "Lost marionette connection")
-            self.send_message("restart_test", test)
-            return Stop
-
-        #Lock to prevent races between timeouts and other results
-        #This might not be strictly necessary if we need to deal
-        #with the result changing post-hoc anyway (e.g. due to detecting
-        #a crash after we get the data back from marionette)
-        result = None
-        result_flag = threading.Event()
-        result_lock = threading.Lock()
-
-        def timeout_func():
-            with result_lock:
-                if not result_flag.is_set():
-                    result_flag.set()
-                    result = (test.result_cls("EXTERNAL-TIMEOUT", None), [])
-                    self.send_message("test_ended", test, result)
-
-        self.timer = threading.Timer(test.timeout + 10, timeout_func)
-        self.timer.start()
-
-        self.browser.set_script_timeout((test.timeout + 5) * 1000)
-
-        try:
-            result = self.convert_result(test, self.do_test(test))
-        except marionette.errors.ScriptTimeoutException:
-            with result_lock:
-                if not result_flag.is_set():
-                    result_flag.set()
-                    result = (test.result_cls("EXTERNAL-TIMEOUT", None), [])
-            # Clean up any unclosed windows
-            # This doesn't account for the possibility the browser window
-            # is totally hung. That seems less likely since we are still
-            # getting data from marionette, but it might be just as well
-            # to do a full restart in this case
-            # XXX - this doesn't work at the moment because window_handles
-            # only returns OS-level windows (see bug 907197)
-            # while True:
-            #     handles = self.browser.window_handles
-            #     self.browser.switch_to_window(handles[-1])
-            #     if len(handles) > 1:
-            #         self.browser.close()
-            #     else:
-            #         break
-            # Now need to check if the browser is still responsive and restart it if not
-        except (socket.timeout, marionette.errors.InvalidResponseException) as e:
-            # This can happen on a crash
-            # Also, should check after the test if the firefox process is still running
-            # and otherwise ignore any other result and set it to crash
-            with result_lock:
-                if not result_flag.is_set():
-                    result_flag.set()
-                    result = (test.result_cls("CRASH", None), [])
-        finally:
-            self.timer.cancel()
-
-        with result_lock:
-            if result:
-                self.send_message("test_ended", test, result)
-
-    def do_test(self, test):
-        raise NotImplementedError
-
-    def convert_result(self, test, result):
-        raise NotImplementedError
+        while True:
+            command, args = self.command_queue.get()
+            print self.name + " " + command
+            try:
+                rv = commands[command](*args)
+            except Exception:
+                self.send_message("error",
+                                  "Error running command %s with arguments %r:\n%s" %
+                                  (command, args, traceback.format_exc()))
+            else:
+                if rv is Stop:
+                    break
+        print self.name + " Exiting"
 
     def stop(self):
         return Stop
+
+    def run_test(self, test):
+        return self.executor.run_test(test)
 
     def send_message(self, command, *args):
         self.result_queue.put((command, args))
 
 
-def start_runner(runner_cls, http_server_url, marionette_port, browser_binary,
-                 runner_command_queue, runner_result_queue,
-                 stop_flag):
+def start_runner(runner_command_queue, runner_result_queue, browser,
+                 executor_cls, executor_kwargs, stop_flag):
     try:
-        runner = runner_cls(http_server_url, runner_command_queue, runner_result_queue,
-                            marionette_port=marionette_port, binary=browser_binary)
-        runner.run()
-    except KeyboardInterrupt:
-        stop_flag.set()
+        executor = executor_cls(browser, **executor_kwargs)
+        with TestRunner(runner_command_queue, runner_result_queue, executor) as runner:
+            try:
+                runner.run()
+            except KeyboardInterrupt:
+                stop_flag.set()
+            except Exception as e:
+                print e
     finally:
         runner_command_queue = None
         runner_result_queue = None
 
+count_lock = threading.Lock()
+thread_count = 0
 
 class TestRunnerManager(threading.Thread):
     init_lock = threading.Lock()
 
-    def __init__(self, suite_name, server_url, browser_binary, run_info, tests_queue,
-                 stop_flag, runner_cls, marionette_port=None, browser_cls=FirefoxBrowser):
+    def __init__(self, suite_name, tests_queue, browser_cls, browser_kwargs,
+                 executor_cls, executor_kwargs, stop_flag):
         """Thread that owns a single TestRunner process and any processes required
         by the TestRunner (e.g. the Firefox binary).
 
@@ -246,24 +124,29 @@ class TestRunnerManager(threading.Thread):
             processes
         """
         self.suite_name = suite_name
-        self.http_server_url = server_url
-        self.browser_binary = browser_binary
         self.tests_queue = tests_queue
-        self.run_info = run_info
+
+        self.browser_cls = browser_cls
+        self.browser_kwargs = browser_kwargs
+
+        self.executor_cls = executor_cls
+        self.executor_kwargs = executor_kwargs
 
         # Flags used to shut down this thread if we get a sigint
         self.parent_stop_flag = stop_flag
         self.child_stop_flag = multiprocessing.Event()
 
-        self.command_queue = Queue()
-        self.remote_queue = Queue()
+        global thread_count
+        with count_lock:
+            self.manager_number = thread_count
+            thread_count += 1
 
-        self.browser = None
+        self.command_queue = Queue(name="Command Queue %s" % self.manager_number)
+        self.remote_queue = Queue(name="Remote Queue %s" % self.manager_number)
+
         self.test_runner_proc = None
-        self.runner_cls = runner_cls
-        self.marionette_port = marionette_port
-        self.browser_cls = browser_cls
-        threading.Thread.__init__(self)
+
+        threading.Thread.__init__(self, name="TestrunnerManager %i" % self.manager_number)
         # This is started in the actual new thread
         self.logger = None
 
@@ -288,7 +171,7 @@ class TestRunnerManager(threading.Thread):
         that the manager should shut down the next time the event loop
         spins."""
         self.logger = structuredlog.StructuredLogger(self.suite_name)
-        self.browser = self.browser_cls(self.browser_binary, self.logger, self.marionette_port)
+        self.browser = self.browser_cls(self.logger, **self.browser_kwargs)
         try:
             self.init()
             while True:
@@ -323,6 +206,7 @@ class TestRunnerManager(threading.Thread):
                             # An alternate implementation strategy would be to have the
                             # runner signal that it is done just before it terminates
                             self.browser.stop()
+                            self.logger.debug("No more tests")
                             break
                         elif self.test is not None:
                             # This could happen if the test runner crashed for some other
@@ -375,9 +259,9 @@ class TestRunnerManager(threading.Thread):
         self.init_timer.cancel()
         self.init_fail_count = 0
         if self.test is not None:
-            self.start_test(self.test)
+            return self.start_test(self.test)
         else:
-            self.start_next_test()
+            return self.start_next_test()
 
     def init_failed(self):
         """Callback when we can't connect to the browser via
@@ -395,13 +279,13 @@ class TestRunnerManager(threading.Thread):
         assert self.command_queue is not None
         assert self.remote_queue is not None
         self.test_runner_proc = Process(target=start_runner,
-                                        args=(self.runner_cls,
-                                              self.http_server_url,
-                                              self.marionette_port,
-                                              self.browser_binary,
-                                              self.remote_queue,
+                                        args=(self.remote_queue,
                                               self.command_queue,
-                                              self.child_stop_flag))
+                                              self.browser,
+                                              self.executor_cls,
+                                              self.executor_kwargs,
+                                              self.child_stop_flag),
+                                        name="TestRunner %i" % self.manager_number)
         self.test_runner_proc.start()
         self.logger.debug("Test runner started")
 
@@ -412,29 +296,32 @@ class TestRunnerManager(threading.Thread):
         self.logger.debug("TestManager cleanup")
         while True:
             try:
-                self.command_queue.get_nowait()
+                self.logger.warning(self.command_queue.get_nowait())
             except Empty:
                 break
 
         while True:
             try:
-                self.remote_queue.get_nowait()
+                self.logger.warning(self.remote_queue.get_nowait())
             except Empty:
                 break
 
     def teardown(self):
+        self.logger.info("teardown in testrunnermanager")
+        self.logger.info(self.test_runner_proc.is_alive())
         self.test_runner_proc = None
-        self.command_queue.cancel_join_thread()
-        self.remote_queue.cancel_join_thread()
-        self.remote_queue.close()
+        # self.command_queue.cancel_join_thread()
+        # self.remote_queue.cancel_join_thread()
+        self.logger.info("Queues empty %s %s" % (self.command_queue.empty(),
+                                                 self.remote_queue.empty()))
         self.command_queue.close()
-        self.command_queue = None
         self.remote_queue.close()
+        self.command_queue = None
         self.remote_queue = None
 
     def stop_runner(self):
         """Stop the TestRunner and the Firefox binary."""
-        self.logger.debug("Stopping runner")
+        self.logger.info("Stopping runner")
 
         try:
             self.browser.stop()
@@ -442,9 +329,12 @@ class TestRunnerManager(threading.Thread):
                 self.send_message("stop")
                 self.test_runner_proc.join(10)
                 if self.test_runner_proc.is_alive():
-                    #This might leak a file handle from the queue
+                    # This might leak a file handle from the queue
                     self.logger.warning("Forcibly terminating runner process")
                     self.test_runner_proc.terminate()
+                else:
+                    self.logger.info("Testrunner exited with code %i" % self.test_runner_proc.exitcode)
+                self.test_runner_proc.join(10)
         finally:
             self.cleanup()
 
@@ -456,7 +346,7 @@ class TestRunnerManager(threading.Thread):
             test = self.tests_queue.get(False)
         except Empty:
             self.logger.debug("No more tests")
-            self.send_message("stop")
+            return Stop
         else:
             self.logger.test_start(test.id)
             self.start_test(test)
@@ -483,7 +373,7 @@ class TestRunnerManager(threading.Thread):
         harness to the logs.
         """
         assert test == self.test
-        #Write the result of each subtest
+        # Write the result of each subtest
         file_result, test_results = results
         for result in test_results:
             if test.disabled(result.name):
@@ -505,7 +395,7 @@ class TestRunnerManager(threading.Thread):
 #            logger.debug("Changing status of test %r to crash" % (test.id,))
 #            file_result.status = "CRASH"
 
-        #Write the result of the test harness
+        # Write the result of the test harness
         expected = test.expected()
         status = file_result.status if file_result.status != "EXTERNAL-TIMEOUT" else "TIMEOUT"
         is_unexpected = expected != status
@@ -521,9 +411,9 @@ class TestRunnerManager(threading.Thread):
 
         #Handle starting the next test, with a runner restart if required
         if file_result.status in ("CRASH", "EXTERNAL-TIMEOUT"):
-            self.restart_runner()
+            return self.restart_runner()
         else:
-            self.start_next_test()
+            return self.start_next_test()
 
     def restart_runner(self):
         """Stop and restart the TestRunner"""
@@ -539,20 +429,19 @@ class TestRunnerManager(threading.Thread):
         self.restart_runner()
 
 class ManagerGroup(object):
-    def __init__(self, suite_name, runner_cls, run_info, size, server_url, binary_path,
-                 browser_cls=FirefoxBrowser):
+    def __init__(self, suite_name, size, browser_cls, browser_kwargs,
+                 executor_cls, executor_kwargs):
         """Main thread object that owns all the TestManager threads."""
         self.suite_name = suite_name
-        self.server_url = server_url
-        self.binary_path = binary_path
         self.size = size
-        self.runner_cls = runner_cls
         self.browser_cls = browser_cls
+        self.browser_kwargs = browser_kwargs
+        self.executor_cls = executor_cls
+        self.executor_kwargs = executor_kwargs
         self.pool = set()
         #Event that is polled by threads so that they can gracefully exit in the face
         #of sigint
         self.stop_flag = threading.Event()
-        self.run_info = run_info
         self.logger = structuredlog.StructuredLogger(suite_name)
 
     def __enter__(self):
@@ -563,20 +452,16 @@ class ManagerGroup(object):
 
     def start(self, tests_queue):
         """Start all managers in the group"""
-        used_ports = set()
         self.logger.debug("Using %i processes" % self.size)
+        self.tests_queue = tests_queue
         for i in range(self.size):
-            marionette_port = get_free_port(2828, exclude=used_ports)
-            used_ports.add(marionette_port)
             manager = TestRunnerManager(self.suite_name,
-                                        self.server_url,
-                                        self.binary_path,
-                                        self.run_info,
                                         tests_queue,
-                                        self.stop_flag,
-                                        runner_cls=self.runner_cls,
-                                        marionette_port=marionette_port,
-                                        browser_cls=self.browser_cls)
+                                        self.browser_cls,
+                                        self.browser_kwargs,
+                                        self.executor_cls,
+                                        self.executor_kwargs,
+                                        self.stop_flag)
             manager.start()
             self.pool.add(manager)
 
@@ -596,8 +481,7 @@ class ManagerGroup(object):
         """Set the stop flag so that all managers in the group stop as soon
         as possible"""
         self.stop_flag.set()
-        self.logger.debug("Stop flag set")
-        self.wait()
+        self.logger.debug("Stop flag set in ManagerGroup")
 
     def unexpected_count(self):
         count = 0
