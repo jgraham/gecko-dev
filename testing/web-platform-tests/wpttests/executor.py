@@ -61,6 +61,7 @@ class MarionetteTestExecutor(TestExecutor):
         TestExecutor.__init__(self, browser, http_server_url, timeout_multiplier)
         self.marionette_port = browser.marionette_port
 
+        self.browser = browser
         self.timer = None
         self.window_id = str(uuid.uuid4())
 
@@ -71,34 +72,35 @@ class MarionetteTestExecutor(TestExecutor):
         self.runner.send_message("log", "debug", "Connecting to marionette on port %i" % self.marionette_port)
         self.marionette = marionette.Marionette(host='localhost', port=self.marionette_port)
         #XXX Move this timeout somewhere
-        success = self.marionette.wait_for_port(20)
+        self.runner.send_message("log", "debug", "Waiting for marionette connection")
+        success = self.marionette.wait_for_port(60)
         session_started = False
         if success:
-            self.runner.send_message("log", "debug", "Starting marionette session")
             for i in xrange(5):
                 try:
+                    self.runner.send_message("log", "debug", "Starting marionette session attempt %i" % i)
                     self.marionette.start_session()
                 except:
                     self.runner.send_message("log", "warning", "Starting marionette session failed")
                     time.sleep(1)
+                    break
                 else:
+                    self.runner.send_message("log", "debug", "Marionette session started")
                     session_started = True
                     break
-            if session_started:
-                self.runner.send_message("init_succeeded")
 
         if not success or not session_started:
             self.runner.send_message("log", "warning", "Failed to connect to marionette")
             self.runner.send_message("init_failed")
-
-        if success:
+        else:
             try:
-                self.marionette.navigate(urlparse.urljoin(self.http_server_url, "/gecko_runner.html"))
-                self.marionette.execute_script("document.title = '%s'" % threading.current_thread().name)
+                self.after_connect()
             except Exception as e:
                 print >> sys.stderr, e
                 self.runner.send_message("log", "warning", "Failed to connect to navigate initial page")
                 self.runner.send_message("init_failed")
+            else:
+                self.runner.send_message("init_succeeded")
 
     def teardown(self):
         try:
@@ -114,6 +116,11 @@ class MarionetteTestExecutor(TestExecutor):
         except (socket.timeout, marionette.errors.InvalidResponseException):
             return False
         return True
+
+    def after_connect(self):
+        self.runner.send_message("log", "debug", urlparse.urljoin(self.http_server_url, "/gecko_runner.html"))
+        self.marionette.navigate(urlparse.urljoin(self.http_server_url, "/gecko_runner.html"))
+        self.marionette.execute_script("document.title = '%s'" % threading.current_thread().name)
 
     def run_test(self, test):
         """Run a single test.
@@ -147,6 +154,7 @@ class MarionetteTestExecutor(TestExecutor):
             return Stop
 
         try:
+            self.runner.send_message("log", "debug", "Starting test")
             result = self.convert_result(test, self.do_test(test))
         except marionette.errors.ScriptTimeoutException:
             with result_lock:
@@ -193,12 +201,18 @@ class MarionetteTestharnessExecutor(MarionetteTestExecutor):
 
     def do_test(self, test):
         assert len(self.marionette.window_handles) == 1
+        self.runner.send_message("log", "debug", "Sending test script")
         return self.marionette.execute_async_script(
             self.script % {"abs_url": urlparse.urljoin(self.http_server_url, test.url),
                            "url": test.url,
                            "window_id": self.window_id,
                            "timeout_multiplier": self.timeout_multiplier,
                            "timeout": test.timeout * 1000}, new_sandbox=False)
+
+class B2GMarionetteTestharnessExecutor(MarionetteTestharnessExecutor):
+    def after_connect(self):
+        self.browser.after_connect(self)
+        MarionetteTestharnessExecutor.after_connect(self)
 
 
 class MarionetteReftestExecutor(MarionetteTestExecutor):

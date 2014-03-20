@@ -131,7 +131,7 @@ class WebTestServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
         self.scheme = "https" if use_ssl else "http"
 
         #super doesn't work here because BaseHTTPServer.HTTPServer is old-style
-        BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandlerClass, **kwargs)
+        BaseHTTPServer.HTTPServer.__init__(self, ("", server_address[1]), RequestHandlerClass, **kwargs)
 
         if config is not None:
             Server.config = config

@@ -9,8 +9,9 @@ import sys
 import mozprocess
 from mozprofile.profile import FirefoxProfile
 from mozprofile.permissions import ServerLocations
-from mozrunner import FirefoxRunner
+from mozrunner import FirefoxRunner, B2GRunner
 import mozdevice
+import moznetwork
 
 here = os.path.split(__file__)[0]
 
@@ -35,9 +36,16 @@ class ProcessHandler(mozprocess.ProcessHandlerMixin):
 
 class Browser(object):
     process_cls = None
+    init_timeout = 30
 
     def __init__(self, logger):
         self.logger = logger
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.cleanup()
 
     def start(self):
         raise NotImplementedError
@@ -50,6 +58,9 @@ class Browser(object):
 
     def is_alive(self):
         raise NotImplementedError
+
+    def cleanup(self):
+        pass
 
 class NullBrowser(Browser):
     """No-op browser to use in scenarios where the TestManager shouldn't
@@ -120,27 +131,100 @@ class FirefoxBrowser(Browser):
     def is_alive(self):
         return self.runner.is_running()
 
+    def cleanup(self):
+        self.stop()
+
 class B2GBrowser(Browser):
     used_ports = set()
+    init_timeout = 180
 
     def __init__(self, logger):
         Browser.__init__(self, logger)
         self.device = mozdevice.DeviceManagerADB()
         self.marionette_port = get_free_port(2828, exclude=self.used_ports)
         self.used_ports.add(self.marionette_port)
-        print self.device.getInfo()
-        print self.device.getIP()
-        sys.exit(1)
-        self.device.forward("tcp:%s" % self.marionette_port, "tcp:2828")
+        self.cert_test_app = None
+        self.runner = None
 
     def start(self):
-        pass
+        locations = ServerLocations(filename=os.path.join(here, "server-locations.txt"))
+        profile = FirefoxProfile(locations=locations, proxy={"remote": moznetwork.get_ip()})
+
+        # profile.set_preferences({# "marionette.defaultPrefs.enabled": True,
+        #                          # "marionette.defaultPrefs.port": self.marionette_port,
+        #                          # "dom.disable_open_during_load": False,
+        #                          # "dom.max_script_run_time": 0,
+        #                          # "browser.shell.checkDefaultBrowser": False,
+        #                          # "browser.dom.window.dump.enabled": True,
+
+        #                          # # These ones are blindly copied from Mochitest
+        #                          # "dom.mozBrowserFramesEnabled": True,
+        #                          # "dom.ipc.tabs.disabled": False,
+        #                          # "dom.ipc.browser_frames.oop_by_default": False,
+        #                          # "marionette.force-local": True,
+        #                          # "dom.testing.datastore_enabled_for_hosted_apps": True
+        #                      })
+
+        self.runner = B2GRunner(profile, self.device, marionette_port=self.marionette_port, emulator=False)
+        self.runner.start()
+        sys.exit(1)
 
     def stop(self):
         pass
+
+    def cleanup(self):
+        # Might want to move this to a cleanup method
+        self.logger.debug("Running browser cleanup steps")
+        if self.runner is not None:
+            self.runner.cleanup()
 
     def pid(self):
         return "Remote"
 
     def is_alive(self):
         return True
+
+    # The following methods are called from a different process
+
+    def after_connect(self, executor):
+        executor.runner.send_message("log", "debug", "Running browser.after_connect steps")
+        self.install_cert_app(executor)
+        self.use_cert_app(executor)
+
+    def install_cert_app(self, executor):
+        marionette = executor.marionette
+        if self.device.dirExists("/data/local/webapps/certtest-app"):
+            executor.runner.send_message("log", "info", "certtest_app is already installed")
+            return
+        executor.runner.send_message("log", "info", "Copying certtest_app")
+        self.device.pushFile(os.path.join(here, "device_setup", "certtest_app.zip"),
+                             "/data/local/certtest_app.zip")
+
+        executor.runner.send_message("log", "info", "Installing certtest_app")
+        with open(os.path.join(here, "device_setup", "app_install.js"), "r") as f:
+            script = f.read()
+
+        marionette.set_context("chrome")
+        marionette.set_script_timeout(5000)
+        marionette.execute_async_script(script)
+
+    def use_cert_app(self, executor):
+        marionette = executor.marionette
+
+        marionette.set_context("content")
+
+        # app management is done in the system app
+        marionette.switch_to_frame()
+        # TODO: replace this with pkg_resources if we know that we'll be installing this as a package
+        marionette.import_script(os.path.join(here, "device_setup", "app_management.js"))
+        print marionette.get_url()
+        print marionette.execute_script('return window.wrappedJSObject.Applications == undefined;')
+        script = "GaiaApps.launchWithName('CertTest App');"
+
+        # NOTE: if the app is already launched, this doesn't launch a new app, it will return
+        # a reference to the existing app
+        self.cert_test_app = marionette.execute_async_script(script, script_timeout=5000)
+        if not self.cert_test_app:
+            raise Exception("Launching CertTest App failed")
+        marionette.switch_to_frame(self.cert_test_app["frame"])
+
