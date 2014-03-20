@@ -49,7 +49,7 @@ WebappsUpdateTimer.prototype = {
 
     // This will trigger app updates in b2g/components/WebappsUpdater.jsm
     // that also takes care of notifying gaia.
-    //WebappsUpdater.updateApps();
+    WebappsUpdater.updateApps();
   },
 
   observe: function(aSubject, aTopic, aData) {
@@ -60,7 +60,7 @@ WebappsUpdateTimer.prototype = {
 
     debug("Network is online. Checking updates.");
     Services.obs.removeObserver(this, "network:offline-status-changed");
-    //WebappsUpdater.updateApps();
+    WebappsUpdater.updateApps();
   }
 };
 
