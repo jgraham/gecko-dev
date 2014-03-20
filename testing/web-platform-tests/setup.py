@@ -24,7 +24,7 @@ setup(name=PACKAGE_NAME,
       classifiers=['Development Status :: 4 - Beta',
                    'Environment :: Console',
                    'Intended Audience :: Developers',
-                   'License :: OSI Approved :: Mozilla Public License 1.1 (MPL 1.1)',
+                   'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
                    'Operating System :: OS Independent',
                   ],
       install_requires=deps
