@@ -22,7 +22,6 @@ function allow_blocked(installInfo) {
 function finish_test(count) {
   is(count, 0, "No add-ons should have been installed");
 
-  Services.perms.remove("example.org", "install");
   Services.prefs.clearUserPref("xpinstall.whitelist.directRequest");
 
   gBrowser.removeCurrentTab();
