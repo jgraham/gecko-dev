@@ -7,7 +7,7 @@ testsuite, which is stored on `github`_.
 Running the Tests
 -----------------
 
-Tests are typically run using `mach`::
+If you are using a Gecko checkout, tests are typically run using `mach`::
 
   mach web-platform-tests
 
@@ -20,19 +20,22 @@ output will go and other settings of the test runner. See
 
 for more details.
 
-Alternatively the tests may be run using the `runtests.py` file.
+In other scenarios tests are run using the `runtests.py` file. Again
+this has documentation obtained from
+
+::
+
+  python runtests.py --help
 
 Implementation Details
 ----------------------
 
-Directory Structure
-~~~~~~~~~~~~~~~~~~~
+The implementation code lives under `wpttests`. In addition, two
+further directories are required, one containing the tests to be
+run and the other containing the metadata describing the tests and the
+expected result of each test.
 
-The harness and associated data is divided into three parts:
-
-`wpttests/`
-  This is the harness directory. It contains the python code for
-  actually running the tests.
+When running in a gecko tree, those directories are::
 
 `tests/`
   These are the imported test files. Everthing in this
@@ -49,59 +52,132 @@ The harness and associated data is divided into three parts:
   stored in ini files, described below, and must be updated when
   patches affect the expected test results.
 
+In other cases the path to those directories muct be provided on the
+command line.
+
 Expectation File Format
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Test expectations are stored in ini files that use a
-manifestdestiny-like syntax. The default expectation is that each test
-runs without errors and all subtests pass. In this case no expectation
-file is needed. In the case that the expected result is not a simple
-pass, a file with the same relative path as the test, but in the
-metadata directory rather than the tests directory, and with `.ini`
-appended to the filename must be created. For example a test imported
-into `tests/example/sometests/test.html` would have its expected data
-in `metadata/example/sometests/test.html.ini`.
+Metadat about tests, notably including their expected results, is
+stored in a modified ini-like format that is designed to be human
+editable, but also to be machine updatable.
 
-The format of an expecation file is::
+Each test file that requires metadata to be specified (because it has
+a non-default expectation or because it is disabled, for example) has
+a corresponding expectation file in the `metadata` directory. For
+example a test file `html/test1.html` containing a failing test would
+have an expectation file called `html/test1.html.ini` in the
+`metadata` directory.
 
-  [FILE]
-  status = ERROR
+An example of an expectation file is::
 
-  [some subtest name]
-  status = FAIL
+  example_default_key: example_value
 
-For test types without subtests, the overall status goes in the
-`[FILE]` section.
+  [filename.html]
+    type: testharness
 
-Disabling Tests
-~~~~~~~~~~~~~~~
+    [subtest1]
+      expected: FAIL
 
-The expectation file may also be used to disable tests or ignore the
-results from certain subtests. For example an expectation file like::
+    [subtest2]
+      expected:
+        if platform == 'win': TIMEOUT
+        if platform == 'osx': ERROR
+        FAIL
 
-  [FILE]
-  disabled = bug123456
+  [filename.html?query=something]
+    type: testharness
+    disabled: bug12345
 
-would cause the entire test to be skipped, whereas
+The file consists of two elements, key-value pairs and
+sections.
 
-::
+Sections are delimited by headings enclosed in square brackets. Any
+closing square bracket in the heading itself my be escaped with a
+backslash. Each section may then contain any number of key-value pairs
+followed by any number of subsections. So that it is clear which data
+belongs to each section without the use of end-section markers, the
+data for each section (i.e. the key-value pairs and subsections) must
+be indented using spaces. Indentation need only be consistent, but
+using two spaces per level is recommended.
 
-  [some subtest name]
-  disabled = bug678901
+In a test expectation file, each resource provided by the file has a
+single section, with the section heading being the part after the last
+`/` in the test url. Tests that have subsections may have subsections
+for those subtests in which the heading is the name of the subtest.
 
-would cause the result from that specific subtest to be ignored.
+Simple key-value pairs are of the form::
+
+  key: value
+
+Note that unlike ini files, only `:` is a valid seperator; `=` will
+not work as expected. Key-value pairs may also have conditional
+values of the form::
+
+  key:
+    if condition1: value1
+    if condition2: value2
+    default
+
+In this case each conditional is evaluated in turn and the value is
+that on the right hand side of the first matching conditional. In the
+case that no condition matches, the unconditional default is used. If
+no condition matches and no default is provided it is equivalent to
+the key not being present. Conditionals use a simple python-like expression
+language e.g.::
+
+  if debug and (platform == "linux" or platform == "osx"): FAIL
+
+For test expectations the avaliable variables are those in the
+`run_info` which for desktop are `version`, `os`, `bits`, `processor`,
+`debug` and `product`.
+
+Key-value pairs specified at the top level of the file before any
+sections are special as they provide defaults for the rest of the file
+e.g.::
+
+  key1: value1
+
+  [section 1]
+    key2: value2
+
+  [section 2]
+    key1: value3
+
+In this case, inside section 1, `key1` would have the value `value1`
+and `key2` the value `value2` whereas in section 2 `key1` would have
+the value `value3` and `key2` would be undefined.
+
+The web-platform-test harness knows about several keys:
+
+`expected`
+  Must evaluate to a possible test status indicating the expected
+  result of the test. The implicit default is PASS or OK when the
+  field isn't present.
+
+`disabled`
+  Any value indicates that the test is disabled.
+
+`type`
+  The test type e.g. `testharness` or `reftest`.
+
+`reftype`
+  The type of comparison for reftests; either `==` or `!=`.
+
+`refurl`
+  The reference url for reftests.
 
 Updating the Tests
 ------------------
 
-[Work In Progress]
+Running in a gecko tree, the `tests` directory and the `MANIFEST.json`
+file in the `metadata` directory can be synced using `mach
+web-platform-tests-update`. The same command can be used in
+conjunction with the raw logs from a set of test runs to update the
+expected data in the `metadata` directory.
 
-The tests are updated with the update.py file. The plan is to make
-this fully automated, so that this file will pull in the git repo,
-update m-c, schedule a try run, and update the expected results based
-on the results from try, only requiring human intervention if there is
-an unexpected change. So far the update works, but scheduling the try
-run is not implemented. To enable manual updates, there should probably
-be a mach command like `mach web-platform-tests update`.
+Outside of a gecko tree, the `update.py` script may be used to perform
+the update; a `config.ini` must be provided to point to the correct
+location for the update files.
 
 _github: https://github.com/w3c/web-platform-tests
