@@ -8,7 +8,7 @@ import sys
 import time
 
 import mozprocess
-from mozprofile.profile import FirefoxProfile
+from mozprofile import FirefoxProfile, Preferences
 from mozprofile.permissions import ServerLocations
 from mozrunner import FirefoxRunner, B2GRunner
 import mozdevice
@@ -79,9 +79,10 @@ class NullBrowser(Browser):
 class FirefoxBrowser(Browser):
     used_ports = set()
 
-    def __init__(self, logger, binary):
+    def __init__(self, logger, binary, prefs_root):
         Browser.__init__(self, logger)
         self.binary = binary
+        self.prefs_root = prefs_root
         self.marionette_port = get_free_port(2828, exclude=self.used_ports)
         self.used_ports.add(self.marionette_port)
 
@@ -90,13 +91,12 @@ class FirefoxBrowser(Browser):
         env['MOZ_CRASHREPORTER_NO_REPORT'] = '1'
 
         locations = ServerLocations(filename=os.path.join(here, "server-locations.txt"))
-        profile = FirefoxProfile(locations=locations, proxy=True)
+
+        preferences = self.load_prefs()
+
+        profile = FirefoxProfile(locations=locations, proxy=True, preferences=preferences)
         profile.set_preferences({"marionette.defaultPrefs.enabled": True,
-                                 "marionette.defaultPrefs.port": self.marionette_port,
-                                 "dom.disable_open_during_load": False,
-                                 "dom.max_script_run_time": 0,
-                                 "browser.shell.checkDefaultBrowser": False,
-                                 "browser.dom.window.dump.enabled": True})
+                                 "marionette.defaultPrefs.port": self.marionette_port})
 
         self.runner = FirefoxRunner(profile,
                                     self.binary,
@@ -108,6 +108,16 @@ class FirefoxBrowser(Browser):
         self.logger.debug("Starting Firefox")
         self.runner.start()
         self.logger.debug("Firefox Started")
+
+    def load_prefs(self):
+        prefs_path = os.path.join(self.prefs_root, "prefs_general.js")
+        if os.path.exists(prefs_path):
+            preferences = Preferences.read_prefs(prefs_path)
+        else:
+            self.logger.warning("Failed to find base prefs file in %s" % prefs_path)
+            preferences = []
+
+        return preferences
 
     def stop(self):
         self.logger.debug("Stopping browser")

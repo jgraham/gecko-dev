@@ -60,6 +60,9 @@ class WebPlatformTestsRunner(MozbuildObject):
         if kwargs["metadata_root"] is None:
             kwargs["metadata_root"] = os.path.join(self.topobjdir, '_tests', 'web-platform-tests', "metadata")
 
+        if kwargs["prefs_root"] is None:
+            kwargs["prefs_root"] = os.path.join(self.topobjdir, '_tests', 'web-platform-tests', "prefs")
+
         kwargs["capture_stdio"] = True
 
         logger = wptrunner.setup_logging(kwargs, {})

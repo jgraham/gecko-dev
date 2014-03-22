@@ -333,7 +333,7 @@ class LoggingWrapper(StringIO):
         pass
 
 
-def get_browser(product, binary):
+def get_browser(product, binary, prefs_root):
     browser_classes = {"firefox": browser.FirefoxBrowser,
                        "servo": browser.NullBrowser,
                        "b2g": browser.B2GBrowser}
@@ -341,6 +341,8 @@ def get_browser(product, binary):
     browser_cls = browser_classes[product]
 
     browser_kwargs = {"binary": binary} if product == "firefox" else {}
+    if product in ("firefox", "b2g"):
+        browser_kwargs["prefs_root"] = prefs_root
 
     return browser_cls, browser_kwargs
 
@@ -364,8 +366,8 @@ def get_executor(product, test_type, http_server_url, timeout_multiplier):
 
     return executor_cls, executor_kwargs
 
-def run_tests(tests_root, metadata_root, test_types, binary=None, processes=1,
-              include=None, capture_stdio=True, product="firefox",
+def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
+              processes=1, include=None, capture_stdio=True, product="firefox",
               chunk_type="none", total_chunks=1, this_chunk=1, timeout_multiplier=1):
     logging_queue = None
     original_stdio = (sys.stdout, sys.stderr)
@@ -385,7 +387,7 @@ def run_tests(tests_root, metadata_root, test_types, binary=None, processes=1,
 
         logger.info("Using %i client processes" % processes)
 
-        browser_cls, browser_kwargs = get_browser(product, binary)
+        browser_cls, browser_kwargs = get_browser(product, binary, prefs_root)
         env_options = get_options(product)
 
         unexpected_count = 0

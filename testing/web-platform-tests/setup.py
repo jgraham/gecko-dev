@@ -2,6 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import sys
+import os
+import shutil
 from setuptools import setup, find_packages
 
 PACKAGE_NAME = 'wptrunner'
@@ -11,21 +14,34 @@ PACKAGE_VERSION = '0.1.1'
 with open('requirements.txt') as f:
     deps = f.read().splitlines()
 
-setup(name=PACKAGE_NAME,
-      version=PACKAGE_VERSION,
-      description="Harness for running the W3C web-platform-tests against various Mozilla products",
-      author='Mozilla Automation and Testing Team',
-      author_email='tools@lists.mozilla.org',
-      license='MPL 1.1/GPL 2.0/LGPL 2.1',
-      packages=find_packages(exclude=["tests", "metadata"]),
-      scripts=["runtests.py", "update.py"],
-      zip_safe=False,
-      platforms =['Any'],
-      classifiers=['Development Status :: 4 - Beta',
-                   'Environment :: Console',
-                   'Intended Audience :: Developers',
-                   'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
-                   'Operating System :: OS Independent',
-                  ],
-      install_requires=deps
-     )
+profile_dest = None
+dest_exists = False
+try:
+    # Hack to include the default profiles in the distribution
+    if "sdist" in sys.argv:
+        profile_src = os.path.abspath(os.path.join("..", "profiles"))
+        profile_dest = os.path.abspath(os.path.join("prefs"))
+        dest_exists = os.path.exists(profile_dest)
+        shutil.copytree(profile_src, profile_dest)
+
+    setup(name=PACKAGE_NAME,
+          version=PACKAGE_VERSION,
+          description="Harness for running the W3C web-platform-tests against various Mozilla products",
+          author='Mozilla Automation and Testing Team',
+          author_email='tools@lists.mozilla.org',
+          license='MPL 1.1/GPL 2.0/LGPL 2.1',
+          packages=find_packages(exclude=["tests", "metadata", "prefs"]),
+          scripts=["runtests.py", "update.py"],
+          zip_safe=False,
+          platforms =['Any'],
+          classifiers=['Development Status :: 4 - Beta',
+                       'Environment :: Console',
+                       'Intended Audience :: Developers',
+                       'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
+                       'Operating System :: OS Independent',
+                      ],
+          install_requires=deps
+         )
+finally:
+    if profile_dest is not None and not dest_exists and os.path.exists(profile_dest):
+        shutil.rmtree(profile_dest)

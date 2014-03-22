@@ -9,6 +9,8 @@ from multiprocessing import cpu_count
 
 from mozlog.structured import commandline
 
+root = os.path.join(os.path.split(__file__)[0], "..")
+
 def abs_path(path):
     return os.path.abspath(path)
 
@@ -28,8 +30,11 @@ def create_parser(allow_mandatory=True):
     parser.add_argument("--metadata-root", dest="metadata_root",
                         action="store", type=abs_path,
                         help="Path to the folder containing test metadata",
-                        default=abs_path(
-                            os.path.join(os.path.split(__file__)[0], "..", "metadata"))),
+                        default=abs_path(os.path.join(root, "metadata"))),
+    parser.add_argument("--prefs-root", dest="prefs_root",
+                        action="store", type=abs_path,
+                        default=abs_path(os.path.join(root, "prefs")),
+                        help="Path to the folder containing browser prefs"),
     parser.add_argument("--test-types", action="store",
                         nargs="*", default=["testharness", "reftest"],
                     choices=["testharness", "reftest"],

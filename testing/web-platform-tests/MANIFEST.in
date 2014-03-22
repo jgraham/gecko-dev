@@ -1,3 +1,4 @@
 exclude MANIFEST.in
 include requirements.txt
 include wpttests/device_setup/*
+include prefs/*.js

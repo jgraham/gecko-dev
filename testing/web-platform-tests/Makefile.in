@@ -30,8 +30,5 @@ libs:: $(WPT_METADATA)
 stage-package: PKG_STAGE = $(DIST)/test-package-stage
 stage-package:
 	$(NSINSTALL) -D $(PKG_STAGE)/web-platform-tests
-	@(cd $(srcdir) && tar $(TAR_CREATE_FLAGS) - $(WPT_HARNESS)) | (cd $(PKG_STAGE)/web-platform-tests && tar -xf -)
-	@(cd $(srcdir) && tar $(TAR_CREATE_FLAGS) - $(WPT_TESTS)) | (cd $(PKG_STAGE)/web-platform-tests && tar -xf -)
-	@(cd $(srcdir) && tar $(TAR_CREATE_FLAGS) - $(WPT_METADATA)) | (cd $(PKG_STAGE)/web-platform-tests && tar -xf -)
-
+	@(cd $(DEPTH)/_tests/ && tar $(TAR_CREATE_FLAGS) - web-platform-tests) | (cd $(PKG_STAGE) && tar -xf -)
 endif
