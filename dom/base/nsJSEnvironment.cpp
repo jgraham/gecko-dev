@@ -355,7 +355,7 @@ AsyncErrorReporter::AsyncErrorReporter(JSRuntime* aRuntime,
                                        nsPIDOMWindow* aWindow)
   : mSourceLine(static_cast<const char16_t*>(aErrorReport->uclinebuf))
   , mLineNumber(aErrorReport->lineno)
-  , mColumn(aErrorReport->uctokenptr - aErrorReport->uclinebuf)
+  , mColumn(aErrorReport->column)
   , mFlags(aErrorReport->flags)
 {
   if (!aErrorReport->filename) {
@@ -431,6 +431,7 @@ public:
                    nsIPrincipal* aScriptOriginPrincipal,
                    nsIPrincipal* aGlobalPrincipal,
                    nsPIDOMWindow* aWindow,
+                   JS::Handle<JS::Value> aError,
                    bool aDispatchEvent)
     // Pass an empty category, then compute ours
     : AsyncErrorReporter(aRuntime, aErrorReport, aFallbackMessage,
@@ -439,6 +440,7 @@ public:
     , mScriptGlobal(aScriptGlobal)
     , mOriginPrincipal(aScriptOriginPrincipal)
     , mDispatchEvent(aDispatchEvent)
+    , mError(aRuntime, aError)
   {
   }
 
@@ -458,7 +460,8 @@ public:
         nsRefPtr<nsPresContext> presContext;
         docShell->GetPresContext(getter_AddRefs(presContext));
 
-        ErrorEventInit init;
+        ThreadsafeAutoJSContext cx;
+        RootedDictionary<ErrorEventInit> init(cx);
         init.mCancelable = true;
         init.mFilename = mFileName;
         init.mBubbles = true;
@@ -480,6 +483,8 @@ public:
         if (sameOrigin) {
           init.mMessage = mErrorMsg;
           init.mLineno = mLineNumber;
+          init.mColumn = mColumn;
+          init.mError = mError;
         } else {
           NS_WARNING("Not same origin error!");
           init.mMessage = xoriginMsg;
@@ -507,6 +512,7 @@ private:
   nsCOMPtr<nsIScriptGlobalObject> mScriptGlobal;
   nsCOMPtr<nsIPrincipal>          mOriginPrincipal;
   bool                            mDispatchEvent;
+  JS::PersistentRootedValue       mError;
 
   static bool sHandlingScriptError;
 };
@@ -551,6 +557,9 @@ NS_ScriptErrorReporter(JSContext *cx,
   // XXX this means we are not going to get error reports on non DOM contexts
   nsIScriptContext *context = nsJSUtils::GetDynamicScriptContext(cx);
 
+  JS::Rooted<JS::Value> exception(cx);
+  ::JS_GetPendingException(cx, &exception);
+
   // Note: we must do this before running any more code on cx (if cx is the
   // dynamic script context).
   ::JS_ClearPendingException(cx);
@@ -573,6 +582,7 @@ NS_ScriptErrorReporter(JSContext *cx,
                              nsJSPrincipals::get(report->originPrincipals),
                              scriptPrincipal->GetPrincipal(),
                              win,
+                             exception,
                              /* We do not try to report Out Of Memory via a dom
                               * event because the dom event handler would
                               * encounter an OOM exception trying to process the
@@ -880,23 +890,6 @@ nsJSContext::GetCCRefcnt()
   return refcnt;
 }
 
-nsresult
-nsJSContext::EvaluateString(const nsAString& aScript,
-                            JS::Handle<JSObject*> aScopeObject,
-                            JS::CompileOptions& aCompileOptions,
-                            bool aCoerceToString,
-                            JS::Value* aRetValue,
-                            void **aOffThreadToken)
-{
-  NS_ENSURE_TRUE(mIsInitialized, NS_ERROR_NOT_INITIALIZED);
-  AutoCxPusher pusher(mContext);
-  nsJSUtils::EvaluateOptions evalOptions;
-  evalOptions.setCoerceToString(aCoerceToString);
-  return nsJSUtils::EvaluateString(mContext, aScript, aScopeObject,
-                                   aCompileOptions, evalOptions, aRetValue,
-                                   aOffThreadToken);
-}
-
 #ifdef DEBUG
 bool
 AtomIsEventHandlerName(nsIAtom *aName)
@@ -915,95 +908,6 @@ AtomIsEventHandlerName(nsIAtom *aName)
   return true;
 }
 #endif
-
-// Helper function to find the JSObject associated with a (presumably DOM)
-// interface.
-nsresult
-nsJSContext::JSObjectFromInterface(nsISupports* aTarget,
-                                   JS::Handle<JSObject*> aScope,
-                                   JSObject** aRet)
-{
-  // It is legal to specify a null target.
-  if (!aTarget) {
-    *aRet = nullptr;
-    return NS_OK;
-  }
-
-  AutoJSContext cx;
-
-  // Get the jsobject associated with this target
-  // We don't wrap here because we trust the JS engine to wrap the target
-  // later.
-  JS::Rooted<JS::Value> v(cx);
-  nsresult rv = nsContentUtils::WrapNative(cx, aScope, aTarget, &v);
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  JSObject* obj = v.toObjectOrNull();
-  if (obj) {
-    JS::ExposeObjectToActiveJS(obj);
-  }
-
-#ifdef DEBUG
-  JS::Rooted<JSObject*> rootedObj(cx, obj);
-  nsCOMPtr<nsISupports> targetSupp = do_QueryInterface(aTarget);
-  nsCOMPtr<nsISupports> native =
-    nsContentUtils::XPConnect()->GetNativeOfWrapper(cx, rootedObj);
-  NS_ASSERTION(native == targetSupp, "Native should be the target!");
-  obj = rootedObj;
-#endif
-
-  *aRet = obj;
-  return NS_OK;
-}
-
-nsresult
-nsJSContext::BindCompiledEventHandler(nsISupports* aTarget,
-                                      JS::Handle<JSObject*> aScope,
-                                      JS::Handle<JSObject*> aHandler,
-                                      JS::MutableHandle<JSObject*> aBoundHandler)
-{
-  NS_ENSURE_ARG(aHandler);
-  NS_ENSURE_TRUE(mIsInitialized, NS_ERROR_NOT_INITIALIZED);
-  NS_PRECONDITION(!aBoundHandler, "Shouldn't already have a bound handler!");
-
-  if (aScope) {
-    JS::ExposeObjectToActiveJS(aScope);
-  }
-  JS::ExposeObjectToActiveJS(aHandler);
-  AutoPushJSContext cx(mContext);
-
-  // Get the jsobject associated with this target
-  JS::Rooted<JSObject*> target(cx);
-  JS::Rooted<JSObject*> scope(cx, aScope);
-  nsresult rv = JSObjectFromInterface(aTarget, scope, target.address());
-  NS_ENSURE_SUCCESS(rv, rv);
-
-#ifdef DEBUG
-  {
-    JSAutoCompartment ac(cx, aHandler);
-    JS::Rooted<JS::Value> val(cx, JS::ObjectValue(*aHandler));
-    NS_ASSERTION(JS_TypeOfValue(cx, val) == JSTYPE_FUNCTION,
-                 "Event handler object not a function");
-  }
-#endif
-
-  JSAutoCompartment ac(cx, target);
-
-  JSObject* funobj;
-  // Make sure the handler function is parented by its event target object
-  if (aHandler) {
-    funobj = JS_CloneFunctionObject(cx, aHandler, target);
-    if (!funobj) {
-      rv = NS_ERROR_OUT_OF_MEMORY;
-    }
-  } else {
-    funobj = nullptr;
-  }
-
-  aBoundHandler.set(funobj);
-
-  return rv;
-}
 
 nsIScriptGlobalObject *
 nsJSContext::GetGlobalObject()
@@ -2860,7 +2764,7 @@ NS_DOMReadStructuredClone(JSContext* cx,
     uint32_t width, height;
     JS::Rooted<JS::Value> dataArray(cx);
     if (!JS_ReadUint32Pair(reader, &width, &height) ||
-        !JS_ReadTypedArray(reader, dataArray.address())) {
+        !JS_ReadTypedArray(reader, &dataArray)) {
       return nullptr;
     }
     MOZ_ASSERT(dataArray.isObject());

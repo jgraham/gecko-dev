@@ -53,7 +53,7 @@ ReadFrameDoubleSlot(IonJSFrameLayout *fp, int32_t slot)
     return *(double *)((char *)fp + OffsetOfFrameSlot(slot));
 }
 
-static inline double
+static inline float
 ReadFrameFloat32Slot(IonJSFrameLayout *fp, int32_t slot)
 {
     return *(float *)((char *)fp + OffsetOfFrameSlot(slot));
@@ -1370,7 +1370,7 @@ SnapshotIterator::allocationReadable(const RValueAllocation &alloc)
         return hasRegister(alloc.fpuReg());
 
       case RValueAllocation::TYPED_REG:
-        return hasRegister(alloc.reg());
+        return hasRegister(alloc.reg2());
 
 #if defined(JS_NUNBOX32)
       case RValueAllocation::UNTYPED_REG_REG:

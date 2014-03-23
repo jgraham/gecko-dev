@@ -628,7 +628,7 @@ TabChild::HandlePossibleViewportChange()
                defaultZoom <= viewportInfo.GetMaxZoom());
     metrics.SetZoom(defaultZoom);
 
-    metrics.mScrollId = viewId;
+    metrics.SetScrollId(viewId);
   }
 
   metrics.mCumulativeResolution = metrics.GetZoom() / metrics.mDevPixelsPerCSSPixel * ScreenToLayerScale(1);
@@ -1472,7 +1472,7 @@ TabChild::DispatchMessageManagerMessage(const nsAString& aMessageName,
 bool
 TabChild::RecvUpdateFrame(const FrameMetrics& aFrameMetrics)
 {
-  MOZ_ASSERT(aFrameMetrics.mScrollId != FrameMetrics::NULL_SCROLL_ID);
+  MOZ_ASSERT(aFrameMetrics.GetScrollId() != FrameMetrics::NULL_SCROLL_ID);
 
   if (aFrameMetrics.mIsRoot) {
     nsCOMPtr<nsIDOMWindowUtils> utils(GetDOMWindowUtils());
@@ -1485,7 +1485,7 @@ TabChild::RecvUpdateFrame(const FrameMetrics& aFrameMetrics)
     // aFrameMetrics.mIsRoot is false, so we are trying to update a subframe.
     // This requires special handling.
     nsCOMPtr<nsIContent> content = nsLayoutUtils::FindContentFor(
-                                      aFrameMetrics.mScrollId);
+                                      aFrameMetrics.GetScrollId());
     if (content) {
       FrameMetrics newSubFrameMetrics(aFrameMetrics);
       APZCCallbackHelper::UpdateSubFrame(content, newSubFrameMetrics);
@@ -1917,8 +1917,20 @@ TabChild::RecvRealTouchMoveEvent(const WidgetTouchEvent& aEvent,
 }
 
 bool
-TabChild::RecvRealKeyEvent(const WidgetKeyboardEvent& event)
-{
+TabChild::RecvRealKeyEvent(const WidgetKeyboardEvent& event,
+                           const MaybeNativeKeyBinding& aBindings)
+ {
+  if (event.message == NS_KEY_PRESS) {
+    PuppetWidget* widget = static_cast<PuppetWidget*>(mWidget.get());
+    if (aBindings.type() == MaybeNativeKeyBinding::TNativeKeyBinding) {
+      const NativeKeyBinding& bindings = aBindings;
+      widget->CacheNativeKeyCommands(bindings.singleLineCommands(),
+                                     bindings.multiLineCommands(),
+                                     bindings.richTextCommands());
+    } else {
+      widget->ClearNativeKeyCommands();
+    }
+  }
   // If content code called preventDefault() on a keydown event, then we don't
   // want to process any following keypress events.
   if (event.message == NS_KEY_PRESS && mIgnoreKeyPressEvent) {
