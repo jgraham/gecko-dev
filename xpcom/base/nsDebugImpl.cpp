@@ -256,7 +256,7 @@ StuffFixedBuffer(void *closure, const char *buf, uint32_t len)
 {
   if (!len)
     return 0;
-
+  
   FixedBuffer *fb = (FixedBuffer*) closure;
 
   // strip the trailing null, we add it again later
@@ -340,12 +340,15 @@ NS_DebugBreak(uint32_t aSeverity, const char *aStr, const char *aExpr,
      fprintf(stderr, "\07");
 #endif
 
+#ifdef ANDROID
+   __android_log_print(ANDROID_LOG_INFO, "Gecko", "%s", buf.buffer);
+#endif
+
    // Write the message to stderr unless it's a warning and MOZ_IGNORE_WARNINGS
    // is set.
-   bool ignoreBecauseWarning = PR_GetEnv("MOZ_IGNORE_WARNINGS") &&
-                               aSeverity == NS_DEBUG_WARNING;
-   if (!ignoreBecauseWarning) {
-      printf_stderr("%s\n", buf.buffer);
+   if (!(PR_GetEnv("MOZ_IGNORE_WARNINGS") && aSeverity == NS_DEBUG_WARNING)) {
+     fprintf(stderr, "%s\n", buf.buffer);
+     fflush(stderr);
    }
 
    switch (aSeverity) {
@@ -409,7 +412,7 @@ NS_DebugBreak(uint32_t aSeverity, const char *aStr, const char *aExpr,
    case NS_ASSERT_UNINITIALIZED: // Default to "trap" behavior
      Break(buf.buffer);
      return;
-   }
+   }   
 }
 
 static void
@@ -462,7 +465,7 @@ Break(const char *aMsg)
   if ((ignoreDebugger == 2) || !::IsDebuggerPresent()) {
     DWORD code = IDRETRY;
 
-    /* Create the debug dialog out of process to avoid the crashes caused by
+    /* Create the debug dialog out of process to avoid the crashes caused by 
      * Windows events leaking into our event loop from an in process dialog.
      * We do this by launching windbgdlg.exe (built in xpcom/windbgdlg).
      * See http://bugzilla.mozilla.org/show_bug.cgi?id=54792
@@ -500,7 +503,7 @@ Break(const char *aMsg)
       raise(SIGABRT);
       //If we are ignored exit this way..
       _exit(3);
-
+         
     case IDIGNORE:
       return;
     }
