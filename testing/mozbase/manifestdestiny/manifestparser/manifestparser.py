@@ -446,9 +446,6 @@ class ManifestParser(object):
 
         # get the tests
         for section, data in sections:
-            subsuite = ''
-            if 'subsuite' in data:
-                subsuite = data['subsuite']
 
             # a file to include
             # TODO: keep track of included file structure:
@@ -501,7 +498,6 @@ class ManifestParser(object):
                 else:
                     _relpath = relpath(path, rootdir)
 
-            test['subsuite'] = subsuite
             test['path'] = path
             test['relpath'] = _relpath
 
@@ -1084,20 +1080,14 @@ class TestManifest(ManifestParser):
                 if parse(condition, **values):
                     test['expected'] = 'fail'
 
-    def active_tests(self, exists=True, disabled=True, options=None, **values):
+    def active_tests(self, exists=True, disabled=True, **values):
         """
         - exists : return only existing tests
         - disabled : whether to return disabled tests
         - tags : keys and values to filter on (e.g. `os = linux mac`)
         """
-        tests = [i.copy() for i in self.tests] # shallow copy
 
-        # Filter on current subsuite
-        if options:
-            if options.subsuite:
-                tests = [test for test in tests if options.subsuite == test['subsuite']]
-            else:
-                tests = [test for test in tests if not test['subsuite']]
+        tests = [i.copy() for i in self.tests] # shallow copy
 
         # mark all tests as passing unless indicated otherwise
         for test in tests:

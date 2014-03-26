@@ -258,7 +258,6 @@ class MochitestRunner(MozbuildObject):
         opts = mochitest.MochitestOptions()
         options, args = opts.parse_args([])
 
-        options.subsuite = ''
 
         # Need to set the suite options before verifyOptions below.
         if suite == 'plain':
@@ -268,9 +267,6 @@ class MochitestRunner(MozbuildObject):
             options.chrome = True
         elif suite == 'browser':
             options.browserChrome = True
-        elif suite == 'devtools':
-            options.browserChrome = True
-            options.subsuite = 'devtools'
         elif suite == 'metro':
             options.immersiveMode = True
             options.browserChrome = True
@@ -590,13 +586,6 @@ class MachCommands(MachCommandBase):
     @MochitestCommand
     def run_mochitest_browser(self, test_file, **kwargs):
         return self.run_mochitest(test_file, 'browser', **kwargs)
-
-    @Command('mochitest-devtools', category='testing',
-        conditions=[conditions.is_firefox],
-        description='Run a devtools mochitest with browser chrome.')
-    @MochitestCommand
-    def run_mochitest_devtools(self, test_file, **kwargs):
-        return self.run_mochitest(test_file, 'devtools', **kwargs)
 
     @Command('mochitest-metro', category='testing',
         conditions=[conditions.is_firefox],

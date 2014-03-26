@@ -20,7 +20,7 @@ include $(topsrcdir)/build/binary-location.mk
 SYMBOLS_PATH := --symbols-path=$(DIST)/crashreporter-symbols
 
 # Usage: |make [TEST_PATH=...] [EXTRA_TEST_ARGS=...] mochitest*|.
-MOCHITESTS := mochitest-plain mochitest-chrome mochitest-devtools mochitest-a11y mochitest-ipcplugins
+MOCHITESTS := mochitest-plain mochitest-chrome mochitest-a11y mochitest-ipcplugins
 mochitest:: $(MOCHITESTS)
 
 ifndef TEST_PACKAGE_NAME
@@ -143,10 +143,6 @@ mochitest-1 mochitest-2 mochitest-3 mochitest-4 mochitest-5: mochitest-%:
 
 mochitest-chrome:
 	$(RUN_MOCHITEST) --chrome
-	$(CHECK_TEST_ERROR)
-
-mochitest-devtools:
-	$(RUN_MOCHITEST) --subsuite=devtools
 	$(CHECK_TEST_ERROR)
 
 mochitest-a11y:
@@ -549,7 +545,6 @@ endif
   mochitest \
   mochitest-plain \
   mochitest-chrome \
-  mochitest-devtools \
   mochitest-a11y \
   mochitest-ipcplugins \
   reftest \
