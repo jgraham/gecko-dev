@@ -150,13 +150,14 @@ class B2GBrowser(Browser):
     used_ports = set()
     init_timeout = 180
 
-    def __init__(self, logger):
+    def __init__(self, logger, prefs_root):
         Browser.__init__(self, logger)
         self.device = mozdevice.DeviceManagerADB()
         self.marionette_port = get_free_port(2828, exclude=self.used_ports)
         self.used_ports.add(self.marionette_port)
         self.cert_test_app = None
         self.runner = None
+        self.prefs_root = prefs_root
 
     def start(self):
         locations = ServerLocations(filename=os.path.join(here, "server-locations.txt"))

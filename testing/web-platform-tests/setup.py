@@ -8,7 +8,7 @@ import shutil
 from setuptools import setup, find_packages
 
 PACKAGE_NAME = 'wptrunner'
-PACKAGE_VERSION = '0.1.2'
+PACKAGE_VERSION = '0.1.4'
 
 # dependencies
 with open('requirements.txt') as f:
