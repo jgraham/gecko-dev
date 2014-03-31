@@ -69,15 +69,13 @@ def create_parser_update():
                                      description="Update script for web-platform-tests tests.")
 
     parser.add_argument("--rev", action="store", help="Revision to sync to")
-    parser.add_argument("--run-type", action="store", choices=["try", "logfile"],
-                        default="try", help="Place to run tests and update expected data")
     parser.add_argument("--no-check-clean", action="store_true", default=False,
                         help="Don't check the working directory is clean before updating")
-    parser.add_argument("--no-expected", dest="update_expected",
-                        action="store_false", default=True,
-                        help="Don't update the expected results, just resync the tests")
     parser.add_argument("--no-sync", dest="sync", action="store_false", default=True,
                         help="Don't resync the tests, just update the expected results")
+    parser.add_argument("--update-expected-type", action="store", dest="run_type",
+                        choices=["none", "try", "logfile"],
+                        default="none", help="Process to use for updating the expectation data")
     #Should make this required iff run=logfile
     parser.add_argument("--run-log", action="append", type=abs_path,
                         help="Log file from run of tests")

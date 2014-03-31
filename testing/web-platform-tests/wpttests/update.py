@@ -415,7 +415,7 @@ def main(**kwargs):
         initial_manifest, new_manifest = sync_tests(config, paths, mozilla_tree, wpt, bug)
         initial_rev = initial_manifest.rev
 
-    if config["command-args"]["update_expected"]:
+    if config["command-args"]["run_type"] != "none":
         update_metadata(config, paths, mozilla_tree, wpt, initial_rev, bug)
 
     sys.exit(1)

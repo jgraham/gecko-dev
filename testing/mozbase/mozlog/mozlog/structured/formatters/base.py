@@ -4,7 +4,6 @@
 
 import json
 
-
 class BaseFormatter(object):
     """Base class for implementing non-trivial formatters.
 
