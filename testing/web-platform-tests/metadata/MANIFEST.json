@@ -602,6 +602,12 @@
         "ref_url": "/html/semantics/text-level-semantics/the-br-element/br-bidi-ref.html"
       }, 
       {
+        "url": "/html/semantics/text-level-semantics/the-wbr-element/wbr-element.html", 
+        "path": "html/semantics/text-level-semantics/the-wbr-element/wbr-element.html", 
+        "ref_type": "==", 
+        "ref_url": "/html/semantics/text-level-semantics/the-wbr-element/wbr-element-ref.html"
+      }, 
+      {
         "url": "/old-tests/submission/Opera/preload/reftest/preload-none-poster.html", 
         "path": "old-tests/submission/Opera/preload/reftest/preload-none-poster.html", 
         "ref_type": "==", 
@@ -6384,6 +6390,10 @@
         "path": "XMLHttpRequest/abort-after-send.htm"
       }, 
       {
+        "url": "/XMLHttpRequest/abort-after-stop.htm", 
+        "path": "XMLHttpRequest/abort-after-stop.htm"
+      }, 
+      {
         "url": "/XMLHttpRequest/abort-after-timeout.htm", 
         "path": "XMLHttpRequest/abort-after-timeout.htm"
       }, 
@@ -6905,6 +6915,10 @@
         "path": "XMLHttpRequest/setrequestheader-after-send.htm"
       }, 
       {
+        "url": "/XMLHttpRequest/setrequestheader-allow-empty-value.htm", 
+        "path": "XMLHttpRequest/setrequestheader-allow-empty-value.htm"
+      }, 
+      {
         "url": "/XMLHttpRequest/setrequestheader-before-open.htm", 
         "path": "XMLHttpRequest/setrequestheader-before-open.htm"
       }, 
@@ -7143,6 +7157,22 @@
       {
         "url": "/custom-elements/concepts/custom-elements-type-naming.html", 
         "path": "custom-elements/concepts/custom-elements-type-naming.html"
+      }, 
+      {
+        "url": "/custom-elements/creating-and-passing-registries/new-registry-test.html", 
+        "path": "custom-elements/creating-and-passing-registries/new-registry-test.html"
+      }, 
+      {
+        "url": "/custom-elements/creating-and-passing-registries/no-registry-test.html", 
+        "path": "custom-elements/creating-and-passing-registries/no-registry-test.html"
+      }, 
+      {
+        "url": "/custom-elements/creating-and-passing-registries/share-registry-create-document.html", 
+        "path": "custom-elements/creating-and-passing-registries/share-registry-create-document.html"
+      }, 
+      {
+        "url": "/custom-elements/creating-and-passing-registries/share-registry-import-document.html", 
+        "path": "custom-elements/creating-and-passing-registries/share-registry-import-document.html"
       }, 
       {
         "url": "/dom/collections/HTMLCollection-empty-name.html", 
@@ -8359,8 +8389,8 @@
         "path": "html/browsers/history/the-location-interface/location-stringifier.html"
       }, 
       {
-        "url": "/html/browsers/history/the-location-interface/security_location_0.htm", 
-        "path": "html/browsers/history/the-location-interface/security_location_0.htm"
+        "url": "/html/browsers/history/the-location-interface/security_location_0.sub.htm", 
+        "path": "html/browsers/history/the-location-interface/security_location_0.sub.htm"
       }, 
       {
         "url": "/html/browsers/the-window-object/accessing-other-browsing-contexts/indexed-browsing-contexts-01.html", 
@@ -8373,6 +8403,10 @@
       {
         "url": "/html/browsers/the-window-object/accessing-other-browsing-contexts/indexed-browsing-contexts-03.html", 
         "path": "html/browsers/the-window-object/accessing-other-browsing-contexts/indexed-browsing-contexts-03.html"
+      }, 
+      {
+        "url": "/html/browsers/the-window-object/named-access-on-the-window-object/named-objects.html", 
+        "path": "html/browsers/the-window-object/named-access-on-the-window-object/named-objects.html"
       }, 
       {
         "url": "/html/browsers/the-window-object/named-access-on-the-window-object/window-null-names.html", 
@@ -8533,6 +8567,10 @@
       {
         "url": "/html/dom/documents/dom-tree-accessors/document.title-07.html", 
         "path": "html/dom/documents/dom-tree-accessors/document.title-07.html"
+      }, 
+      {
+        "url": "/html/dom/documents/dom-tree-accessors/document.title-08.html", 
+        "path": "html/dom/documents/dom-tree-accessors/document.title-08.html"
       }, 
       {
         "url": "/html/dom/documents/dom-tree-accessors/nameditem-01.html", 
@@ -9080,28 +9118,8 @@
         "path": "html/editing/dnd/dom/specials.html"
       }, 
       {
-        "url": "/html/editing/dnd/events/events-cross-document-suite-HELPER-1.html", 
-        "path": "html/editing/dnd/events/events-cross-document-suite-HELPER-1.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/events/events-file-suite.html", 
-        "path": "html/editing/dnd/events/events-file-suite.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/events/events-suite.html", 
-        "path": "html/editing/dnd/events/events-suite.html"
-      }, 
-      {
         "url": "/html/editing/dnd/synthetic/001.html", 
         "path": "html/editing/dnd/synthetic/001.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/target-origin/101.html", 
-        "path": "html/editing/dnd/target-origin/101.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dragevent-interface/dragevent.html", 
-        "path": "html/editing/dnd/the-dragevent-interface/dragevent.html"
       }, 
       {
         "url": "/html/editing/dnd/the-draggable-attribute/draggable_attribute.html", 
@@ -9112,84 +9130,8 @@
         "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute.html"
       }, 
       {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_file_type.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_file_type.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_kind_file.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_kind_file.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_kind_string.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_kind_string.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_string_type.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_string_type.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_inputbox_element.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_inputbox_element.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_inputbox_element_dbcs.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_inputbox_element_dbcs.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_link_element.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_link_element.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_COpy.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_COpy.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_STRING.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_STRING.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_String_.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_String_.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_linK.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_linK.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_copy.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_copy.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_foo.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_foo.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_link.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_link.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_move.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_move.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_multiple_values_foo_bar_move.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_multiple_values_foo_bar_move.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_multiple_values_foo_link.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_multiple_values_foo_link.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_multiple_values_move_copy.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_multiple_values_move_copy.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_not_specified.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_not_specified.html"
-      }, 
-      {
-        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_unordered_unique_space_separated.html", 
-        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_unordered_unique_space_separated.html"
+        "url": "/html/editing/editing-0/contenteditable/contentEditable-invalidvalue.html", 
+        "path": "html/editing/editing-0/contenteditable/contentEditable-invalidvalue.html"
       }, 
       {
         "url": "/html/editing/editing-0/contenteditable/user-interaction-editing-contenteditable.html", 
@@ -9206,6 +9148,10 @@
       {
         "url": "/html/editing/focus/document-level-focus-apis/document-level-apis.html", 
         "path": "html/editing/focus/document-level-focus-apis/document-level-apis.html"
+      }, 
+      {
+        "url": "/html/editing/focus/focus-management/focus-events.html", 
+        "path": "html/editing/focus/focus-management/focus-events.html"
       }, 
       {
         "url": "/html/editing/focus/sequential-focus-navigation-and-the-tabindex-attribute/focus-tabindex-default-value.html", 
@@ -9259,6 +9205,10 @@
       {
         "url": "/html/infrastructure/urls/terminology-0/document-base-url.html", 
         "path": "html/infrastructure/urls/terminology-0/document-base-url.html"
+      }, 
+      {
+        "url": "/html/infrastructure/urls/terminology-0/multiple-base.html", 
+        "path": "html/infrastructure/urls/terminology-0/multiple-base.html"
       }, 
       {
         "url": "/html/obsolete/requirements-for-implementations/other-elements-attributes-and-apis/document-color-01.html", 
@@ -9394,88 +9344,8 @@
         "timeout": "long"
       }, 
       {
-        "url": "/html/semantics/embedded-content/media-elements/audio_muted_check.html", 
-        "path": "html/semantics/embedded-content/media-elements/audio_muted_check.html"
-      }, 
-      {
         "url": "/html/semantics/embedded-content/media-elements/audio_volume_check.html", 
         "path": "html/semantics/embedded-content/media-elements/audio_volume_check.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_application_octet_stream.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_application_octet_stream.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_application_octet_stream_with_codecs_1.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_application_octet_stream_with_codecs_1.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_application_octet_stream_with_codecs_2.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_application_octet_stream_with_codecs_2.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_application_octet_stream_with_codecs_3.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_application_octet_stream_with_codecs_3.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_bogus_type.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_bogus_type.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_codecs_order_1.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_codecs_order_1.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_codecs_order_2.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_codecs_order_2.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_codecs_order_3.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_codecs_order_3.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_supported_but_no_codecs_parameter_1.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_supported_but_no_codecs_parameter_1.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_supported_but_no_codecs_parameter_2.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_supported_but_no_codecs_parameter_2.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_supported_but_no_codecs_parameter_3.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_supported_but_no_codecs_parameter_3.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_two_implies_one_1.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_two_implies_one_1.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_two_implies_one_2.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_two_implies_one_2.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_two_implies_one_3.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_two_implies_one_3.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_two_implies_one_4.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_two_implies_one_4.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_two_implies_one_5.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_two_implies_one_5.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/canPlayType_two_implies_one_6.html", 
-        "path": "html/semantics/embedded-content/media-elements/canPlayType_two_implies_one_6.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/currentSrc_nonempty_after_adding_source_child.html", 
-        "path": "html/semantics/embedded-content/media-elements/currentSrc_nonempty_after_adding_source_child.html"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/currentSrc_nonempty_after_setting_src.html", 
-        "path": "html/semantics/embedded-content/media-elements/currentSrc_nonempty_after_setting_src.html"
       }, 
       {
         "url": "/html/semantics/embedded-content/media-elements/error-codes/error.html", 
@@ -9894,6 +9764,10 @@
         "path": "html/semantics/embedded-content/media-elements/location-of-the-media-resource/currentSrc.html"
       }, 
       {
+        "url": "/html/semantics/embedded-content/media-elements/mime-types/canPlayType.html", 
+        "path": "html/semantics/embedded-content/media-elements/mime-types/canPlayType.html"
+      }, 
+      {
         "url": "/html/semantics/embedded-content/media-elements/networkState_during_loadstart.html", 
         "path": "html/semantics/embedded-content/media-elements/networkState_during_loadstart.html"
       }, 
@@ -9920,6 +9794,26 @@
       {
         "url": "/html/semantics/embedded-content/media-elements/paused_true_during_pause.html", 
         "path": "html/semantics/embedded-content/media-elements/paused_true_during_pause.html"
+      }, 
+      {
+        "url": "/html/semantics/embedded-content/media-elements/playing-the-media-resource/pause-move-to-other-document.html", 
+        "path": "html/semantics/embedded-content/media-elements/playing-the-media-resource/pause-move-to-other-document.html"
+      }, 
+      {
+        "url": "/html/semantics/embedded-content/media-elements/playing-the-media-resource/pause-move-within-document.html", 
+        "path": "html/semantics/embedded-content/media-elements/playing-the-media-resource/pause-move-within-document.html"
+      }, 
+      {
+        "url": "/html/semantics/embedded-content/media-elements/playing-the-media-resource/pause-remove-from-document-networkState.html", 
+        "path": "html/semantics/embedded-content/media-elements/playing-the-media-resource/pause-remove-from-document-networkState.html"
+      }, 
+      {
+        "url": "/html/semantics/embedded-content/media-elements/playing-the-media-resource/pause-remove-from-document.html", 
+        "path": "html/semantics/embedded-content/media-elements/playing-the-media-resource/pause-remove-from-document.html"
+      }, 
+      {
+        "url": "/html/semantics/embedded-content/media-elements/playing-the-media-resource/play-in-detached-document.html", 
+        "path": "html/semantics/embedded-content/media-elements/playing-the-media-resource/play-in-detached-document.html"
       }, 
       {
         "url": "/html/semantics/embedded-content/media-elements/playing-the-media-resource/playbackRate.html", 
@@ -10158,13 +10052,13 @@
         "path": "html/semantics/embedded-content/media-elements/track/track-element/src-clear-cues.html"
       }, 
       {
+        "url": "/html/semantics/embedded-content/media-elements/user-interface/muted.html", 
+        "path": "html/semantics/embedded-content/media-elements/user-interface/muted.html"
+      }, 
+      {
         "url": "/html/semantics/embedded-content/media-elements/video_loop_base.html", 
         "path": "html/semantics/embedded-content/media-elements/video_loop_base.html", 
         "timeout": "long"
-      }, 
-      {
-        "url": "/html/semantics/embedded-content/media-elements/video_muted_check.html", 
-        "path": "html/semantics/embedded-content/media-elements/video_muted_check.html"
       }, 
       {
         "url": "/html/semantics/embedded-content/media-elements/video_volume_check.html", 
@@ -10615,6 +10509,10 @@
         "path": "html/semantics/embedded-content/the-video-element/video-tabindex.html"
       }, 
       {
+        "url": "/html/semantics/forms/attributes-common-to-form-controls/dirname-ltr.html", 
+        "path": "html/semantics/forms/attributes-common-to-form-controls/dirname-ltr.html"
+      }, 
+      {
         "url": "/html/semantics/forms/attributes-common-to-form-controls/formAction_document_address.html", 
         "path": "html/semantics/forms/attributes-common-to-form-controls/formAction_document_address.html"
       }, 
@@ -10703,6 +10601,10 @@
         "path": "html/semantics/forms/the-button-element/button-events.html"
       }, 
       {
+        "url": "/html/semantics/forms/the-button-element/button-validation.html", 
+        "path": "html/semantics/forms/the-button-element/button-validation.html"
+      }, 
+      {
         "url": "/html/semantics/forms/the-datalist-element/datalistelement.html", 
         "path": "html/semantics/forms/the-datalist-element/datalistelement.html"
       }, 
@@ -10717,6 +10619,10 @@
       {
         "url": "/html/semantics/forms/the-fieldset-element/disabled.html", 
         "path": "html/semantics/forms/the-fieldset-element/disabled.html"
+      }, 
+      {
+        "url": "/html/semantics/forms/the-form-element/form-autocomplete.html", 
+        "path": "html/semantics/forms/the-form-element/form-autocomplete.html"
       }, 
       {
         "url": "/html/semantics/forms/the-form-element/form-elements-interfaces-01.html", 
@@ -10847,6 +10753,10 @@
         "path": "html/semantics/forms/the-option-element/option-text-spaces.html"
       }, 
       {
+        "url": "/html/semantics/forms/the-output-element/output.html", 
+        "path": "html/semantics/forms/the-output-element/output.html"
+      }, 
+      {
         "url": "/html/semantics/forms/the-progress-element/progress.html", 
         "path": "html/semantics/forms/the-progress-element/progress.html"
       }, 
@@ -10923,6 +10833,18 @@
         "path": "html/semantics/grouping-content/the-ul-element/grouping-ul.html"
       }, 
       {
+        "url": "/html/semantics/interactive-elements/the-details-element/toggleEvent.html", 
+        "path": "html/semantics/interactive-elements/the-details-element/toggleEvent.html"
+      }, 
+      {
+        "url": "/html/semantics/interactive-elements/the-dialog-element/dialog-close.html", 
+        "path": "html/semantics/interactive-elements/the-dialog-element/dialog-close.html"
+      }, 
+      {
+        "url": "/html/semantics/interactive-elements/the-dialog-element/dialog-showModal.html", 
+        "path": "html/semantics/interactive-elements/the-dialog-element/dialog-showModal.html"
+      }, 
+      {
         "url": "/html/semantics/interfaces.html", 
         "path": "html/semantics/interfaces.html"
       }, 
@@ -10971,6 +10893,10 @@
         "path": "html/semantics/scripting-1/the-script-element/async_011.htm"
       }, 
       {
+        "url": "/html/semantics/scripting-1/the-script-element/script-before-after-events.html", 
+        "path": "html/semantics/scripting-1/the-script-element/script-before-after-events.html"
+      }, 
+      {
         "url": "/html/semantics/scripting-1/the-script-element/script-for-event.html", 
         "path": "html/semantics/scripting-1/the-script-element/script-for-event.html"
       }, 
@@ -11005,6 +10931,54 @@
       {
         "url": "/html/semantics/scripting-1/the-script-element/script-text.html", 
         "path": "html/semantics/scripting-1/the-script-element/script-text.html"
+      }, 
+      {
+        "url": "/html/semantics/selectors/pseudo-classes/checked.html", 
+        "path": "html/semantics/selectors/pseudo-classes/checked.html"
+      }, 
+      {
+        "url": "/html/semantics/selectors/pseudo-classes/default.html", 
+        "path": "html/semantics/selectors/pseudo-classes/default.html"
+      }, 
+      {
+        "url": "/html/semantics/selectors/pseudo-classes/dir.html", 
+        "path": "html/semantics/selectors/pseudo-classes/dir.html"
+      }, 
+      {
+        "url": "/html/semantics/selectors/pseudo-classes/dir01.html", 
+        "path": "html/semantics/selectors/pseudo-classes/dir01.html"
+      }, 
+      {
+        "url": "/html/semantics/selectors/pseudo-classes/disabled.html", 
+        "path": "html/semantics/selectors/pseudo-classes/disabled.html"
+      }, 
+      {
+        "url": "/html/semantics/selectors/pseudo-classes/enabled.html", 
+        "path": "html/semantics/selectors/pseudo-classes/enabled.html"
+      }, 
+      {
+        "url": "/html/semantics/selectors/pseudo-classes/focus.html", 
+        "path": "html/semantics/selectors/pseudo-classes/focus.html"
+      }, 
+      {
+        "url": "/html/semantics/selectors/pseudo-classes/indeterminate.html", 
+        "path": "html/semantics/selectors/pseudo-classes/indeterminate.html"
+      }, 
+      {
+        "url": "/html/semantics/selectors/pseudo-classes/inrange-outofrange.html", 
+        "path": "html/semantics/selectors/pseudo-classes/inrange-outofrange.html"
+      }, 
+      {
+        "url": "/html/semantics/selectors/pseudo-classes/link.html", 
+        "path": "html/semantics/selectors/pseudo-classes/link.html"
+      }, 
+      {
+        "url": "/html/semantics/selectors/pseudo-classes/required-optional.html", 
+        "path": "html/semantics/selectors/pseudo-classes/required-optional.html"
+      }, 
+      {
+        "url": "/html/semantics/selectors/pseudo-classes/valid-invalid.html", 
+        "path": "html/semantics/selectors/pseudo-classes/valid-invalid.html"
       }, 
       {
         "url": "/html/semantics/tabular-data/attributes-common-to-td-and-th-elements/cellIndex.html", 
@@ -12991,10 +12965,6 @@
         "path": "shadow-dom/elements-and-dom-objects/extensions-to-element-interface/attributes/test-001.html"
       }, 
       {
-        "url": "/shadow-dom/elements-and-dom-objects/extensions-to-element-interface/attributes/test-004.html", 
-        "path": "shadow-dom/elements-and-dom-objects/extensions-to-element-interface/attributes/test-004.html"
-      }, 
-      {
         "url": "/shadow-dom/elements-and-dom-objects/extensions-to-element-interface/attributes/test-005.html", 
         "path": "shadow-dom/elements-and-dom-objects/extensions-to-element-interface/attributes/test-005.html"
       }, 
@@ -13031,34 +13001,6 @@
         "path": "shadow-dom/elements-and-dom-objects/extensions-to-event-interface/event-path-002.html"
       }, 
       {
-        "url": "/shadow-dom/elements-and-dom-objects/extensions-to-event-interface/event-path-003.html", 
-        "path": "shadow-dom/elements-and-dom-objects/extensions-to-event-interface/event-path-003.html"
-      }, 
-      {
-        "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-001.html", 
-        "path": "shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-001.html"
-      }, 
-      {
-        "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-002.html", 
-        "path": "shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-002.html"
-      }, 
-      {
-        "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-003.html", 
-        "path": "shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-003.html"
-      }, 
-      {
-        "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-004.html", 
-        "path": "shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-004.html"
-      }, 
-      {
-        "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-005.html", 
-        "path": "shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-005.html"
-      }, 
-      {
-        "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-006.html", 
-        "path": "shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-006.html"
-      }, 
-      {
         "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-007.html", 
         "path": "shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-007.html"
       }, 
@@ -13085,6 +13027,10 @@
       {
         "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-013.html", 
         "path": "shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-013.html"
+      }, 
+      {
+        "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-014.html", 
+        "path": "shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-attributes/test-014.html"
       }, 
       {
         "url": "/shadow-dom/elements-and-dom-objects/shadowroot-object/shadowroot-methods/test-001.html", 
@@ -13157,10 +13103,6 @@
       {
         "url": "/shadow-dom/elements-and-dom-objects/the-shadow-html-element/test-004.html", 
         "path": "shadow-dom/elements-and-dom-objects/the-shadow-html-element/test-004.html"
-      }, 
-      {
-        "url": "/shadow-dom/elements-and-dom-objects/the-shadow-html-element/test-005.html", 
-        "path": "shadow-dom/elements-and-dom-objects/the-shadow-html-element/test-005.html"
       }, 
       {
         "url": "/shadow-dom/events/event-dispatch/test-001.html", 
@@ -13483,14 +13425,6 @@
         "path": "shadow-dom/shadow-trees/upper-boundary-encapsulation/window-named-properties-003.html"
       }, 
       {
-        "url": "/shadow-dom/styles/at-host-at-rule/matching-specificity-of-css-rules-001.html", 
-        "path": "shadow-dom/styles/at-host-at-rule/matching-specificity-of-css-rules-001.html"
-      }, 
-      {
-        "url": "/shadow-dom/styles/at-host-at-rule/test-001.html", 
-        "path": "shadow-dom/styles/at-host-at-rule/test-001.html"
-      }, 
-      {
         "url": "/shadow-dom/styles/css-variables/test-001.html", 
         "path": "shadow-dom/styles/css-variables/test-001.html"
       }, 
@@ -13505,10 +13439,6 @@
       {
         "url": "/shadow-dom/styles/test-003.html", 
         "path": "shadow-dom/styles/test-003.html"
-      }, 
-      {
-        "url": "/shadow-dom/styles/test-004.html", 
-        "path": "shadow-dom/styles/test-004.html"
       }, 
       {
         "url": "/shadow-dom/styles/test-005.html", 
@@ -13529,14 +13459,6 @@
       {
         "url": "/shadow-dom/styles/test-010.html", 
         "path": "shadow-dom/styles/test-010.html"
-      }, 
-      {
-        "url": "/shadow-dom/styles/test-011.html", 
-        "path": "shadow-dom/styles/test-011.html"
-      }, 
-      {
-        "url": "/shadow-dom/styles/test-012.html", 
-        "path": "shadow-dom/styles/test-012.html"
       }, 
       {
         "url": "/shadow-dom/user-interaction/active-element/test-001.html", 
@@ -13639,28 +13561,8 @@
         "path": "vibration/api-is-present.html"
       }, 
       {
-        "url": "/vibration/cancel-with-0.html", 
-        "path": "vibration/cancel-with-0.html"
-      }, 
-      {
-        "url": "/vibration/cancel-with-new.html", 
-        "path": "vibration/cancel-with-new.html"
-      }, 
-      {
-        "url": "/vibration/pattern-array-extra.html", 
-        "path": "vibration/pattern-array-extra.html"
-      }, 
-      {
-        "url": "/vibration/pattern-array.html", 
-        "path": "vibration/pattern-array.html"
-      }, 
-      {
         "url": "/vibration/silent-ignore.html", 
         "path": "vibration/silent-ignore.html"
-      }, 
-      {
-        "url": "/vibration/simple-scalar.html", 
-        "path": "vibration/simple-scalar.html"
       }, 
       {
         "url": "/webaudio/the-audio-api/the-audiobuffer-interface/idl-test.html", 
@@ -15925,6 +15827,18 @@
         "path": "html/editing/dnd/datastore/015-manual.html"
       }, 
       {
+        "url": "/html/editing/dnd/events/events-cross-document-suite-manual.html", 
+        "path": "html/editing/dnd/events/events-cross-document-suite-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/events/events-file-suite-manual.html", 
+        "path": "html/editing/dnd/events/events-file-suite-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/events/events-suite-manual.html", 
+        "path": "html/editing/dnd/events/events-suite-manual.html"
+      }, 
+      {
         "url": "/html/editing/dnd/synthetic/005-manual.html", 
         "path": "html/editing/dnd/synthetic/005-manual.html"
       }, 
@@ -15939,6 +15853,94 @@
       {
         "url": "/html/editing/dnd/target-origin/002-manual.html", 
         "path": "html/editing/dnd/target-origin/002-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/target-origin/101-manual.html", 
+        "path": "html/editing/dnd/target-origin/101-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dragevent-interface/dragevent-manual.html", 
+        "path": "html/editing/dnd/the-dragevent-interface/dragevent-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_file_type-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_file_type-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_kind_file-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_kind_file-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_kind_string-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_kind_string-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_string_type-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_data_item_string_type-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_inputbox_element-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_inputbox_element-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_inputbox_element_dbcs-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_inputbox_element_dbcs-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_link_element-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_link_element-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_COpy-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_COpy-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_STRING-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_STRING-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_String_-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_String_-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_linK-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_case_insensitive_linK-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_copy-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_copy-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_foo-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_foo-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_link-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_link-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_move-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_move-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_multiple_values_foo_bar_move-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_multiple_values_foo_bar_move-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_multiple_values_foo_link-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_multiple_values_foo_link-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_multiple_values_move_copy-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_multiple_values_move_copy-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_not_specified-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_not_specified-manual.html"
+      }, 
+      {
+        "url": "/html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_unordered_unique_space_separated-manual.html", 
+        "path": "html/editing/dnd/the-dropzone-attribute/dropzone_attribute_value_unordered_unique_space_separated-manual.html"
       }, 
       {
         "url": "/html/editing/focus/focus-01-manual.html", 
@@ -16037,6 +16039,10 @@
         "path": "html/semantics/embedded-content/the-canvas-element/2d.scaled-manual.png"
       }, 
       {
+        "url": "/html/semantics/forms/attributes-common-to-form-controls/dirname-rtl-manual.html", 
+        "path": "html/semantics/forms/attributes-common-to-form-controls/dirname-rtl-manual.html"
+      }, 
+      {
         "url": "/html/semantics/grouping-content/the-li-element/grouping-li-novalue-MANUAL.html", 
         "path": "html/semantics/grouping-content/the-li-element/grouping-li-novalue-MANUAL.html"
       }, 
@@ -16105,12 +16111,32 @@
         "path": "page-visibility/test_tab_state_change-manual.html"
       }, 
       {
+        "url": "/vibration/cancel-with-0-manual.html", 
+        "path": "vibration/cancel-with-0-manual.html"
+      }, 
+      {
         "url": "/vibration/cancel-with-[]-manual.html", 
         "path": "vibration/cancel-with-[]-manual.html"
       }, 
       {
+        "url": "/vibration/cancel-with-new-manual.html", 
+        "path": "vibration/cancel-with-new-manual.html"
+      }, 
+      {
+        "url": "/vibration/pattern-array-extra-manual.html", 
+        "path": "vibration/pattern-array-extra-manual.html"
+      }, 
+      {
+        "url": "/vibration/pattern-array-manual.html", 
+        "path": "vibration/pattern-array-manual.html"
+      }, 
+      {
         "url": "/vibration/simple-array-manual.html", 
         "path": "vibration/simple-array-manual.html"
+      }, 
+      {
+        "url": "/vibration/simple-scalar-manual.html", 
+        "path": "vibration/simple-scalar-manual.html"
       }
     ], 
     "helper": [
@@ -18719,6 +18745,10 @@
         "path": "html/semantics/sections/the-h1-h2-h3-h4-h5-and-h6-elements/original-id.json"
       }, 
       {
+        "url": "/html/semantics/selectors/pseudo-classes/utils.js", 
+        "path": "html/semantics/selectors/pseudo-classes/utils.js"
+      }, 
+      {
         "url": "/html/semantics/tabular-data/processing-model-1/contains.json", 
         "path": "html/semantics/tabular-data/processing-model-1/contains.json"
       }, 
@@ -18801,6 +18831,10 @@
       {
         "url": "html/semantics/text-level-semantics/the-br-element/br-bidi-ref.html", 
         "path": "html/semantics/text-level-semantics/the-br-element/br-bidi-ref.html"
+      }, 
+      {
+        "url": "html/semantics/text-level-semantics/the-wbr-element/wbr-element-ref.html", 
+        "path": "html/semantics/text-level-semantics/the-wbr-element/wbr-element-ref.html"
       }, 
       {
         "url": "/html/syntax/parsing-html-fragments/support/encodingtests-1.css", 
@@ -19635,14 +19669,6 @@
         "path": "vibration/manifest.txt"
       }, 
       {
-        "url": "/vibration/support/feature-detection.js", 
-        "path": "vibration/support/feature-detection.js"
-      }, 
-      {
-        "url": "/vibration/support/helpers.js", 
-        "path": "vibration/support/helpers.js"
-      }, 
-      {
         "url": "/webaudio/README.md", 
         "path": "webaudio/README.md"
       }, 
@@ -19673,106 +19699,6 @@
       {
         "url": "/webaudio/the-audio-api/the-gainnode-interface/gain-expected.wav", 
         "path": "webaudio/the-audio-api/the-gainnode-interface/gain-expected.wav"
-      }, 
-      {
-        "url": "/webdriver/README.md", 
-        "path": "webdriver/README.md"
-      }, 
-      {
-        "url": "/webdriver/base_test.py", 
-        "path": "webdriver/base_test.py"
-      }, 
-      {
-        "url": "/webdriver/cookie/cookie_test.py", 
-        "path": "webdriver/cookie/cookie_test.py"
-      }, 
-      {
-        "url": "/webdriver/ecmascript/__init__.py", 
-        "path": "webdriver/ecmascript/__init__.py"
-      }, 
-      {
-        "url": "/webdriver/ecmascript/ecmascript_test.py", 
-        "path": "webdriver/ecmascript/ecmascript_test.py"
-      }, 
-      {
-        "url": "/webdriver/element_location/__init__.py", 
-        "path": "webdriver/element_location/__init__.py"
-      }, 
-      {
-        "url": "/webdriver/element_location/element_location_test.py", 
-        "path": "webdriver/element_location/element_location_test.py"
-      }, 
-      {
-        "url": "/webdriver/element_state/__init__.py", 
-        "path": "webdriver/element_state/__init__.py"
-      }, 
-      {
-        "url": "/webdriver/element_state/method_test.py", 
-        "path": "webdriver/element_state/method_test.py"
-      }, 
-      {
-        "url": "/webdriver/element_state/visibility_test.py", 
-        "path": "webdriver/element_state/visibility_test.py"
-      }, 
-      {
-        "url": "/webdriver/modal/__init__.py", 
-        "path": "webdriver/modal/__init__.py"
-      }, 
-      {
-        "url": "/webdriver/modal/alerts_quit_test.py", 
-        "path": "webdriver/modal/alerts_quit_test.py"
-      }, 
-      {
-        "url": "/webdriver/modal/alerts_test.py", 
-        "path": "webdriver/modal/alerts_test.py"
-      }, 
-      {
-        "url": "/webdriver/navigation/__init__.py", 
-        "path": "webdriver/navigation/__init__.py"
-      }, 
-      {
-        "url": "/webdriver/navigation/auth_tests.py", 
-        "path": "webdriver/navigation/auth_tests.py"
-      }, 
-      {
-        "url": "/webdriver/navigation/forward.py", 
-        "path": "webdriver/navigation/forward.py"
-      }, 
-      {
-        "url": "/webdriver/navigation/forwardToNothing.py", 
-        "path": "webdriver/navigation/forwardToNothing.py"
-      }, 
-      {
-        "url": "/webdriver/navigation/get_from_http_test.py", 
-        "path": "webdriver/navigation/get_from_http_test.py"
-      }, 
-      {
-        "url": "/webdriver/navigation/invalid_cert_test.py", 
-        "path": "webdriver/navigation/invalid_cert_test.py"
-      }, 
-      {
-        "url": "/webdriver/navigation/refresh-page.py", 
-        "path": "webdriver/navigation/refresh-page.py"
-      }, 
-      {
-        "url": "/webdriver/navigation/res/self-signed.key", 
-        "path": "webdriver/navigation/res/self-signed.key"
-      }, 
-      {
-        "url": "/webdriver/network.py", 
-        "path": "webdriver/network.py"
-      }, 
-      {
-        "url": "/webdriver/runtests.py", 
-        "path": "webdriver/runtests.py"
-      }, 
-      {
-        "url": "/webdriver/webdriver.cfg", 
-        "path": "webdriver/webdriver.cfg"
-      }, 
-      {
-        "url": "/webdriver/webserver.py", 
-        "path": "webdriver/webserver.py"
       }, 
       {
         "url": "/webgl/common.js", 
@@ -21453,5 +21379,5 @@
     ]
   }, 
   "local_changes": [], 
-  "rev": "776e4c141cb35bdd922dd8a975db3fcdbe353ddf"
+  "rev": "3e544e8fec95549f7ef9cfa4a6f756abd1d85e99"
 }
