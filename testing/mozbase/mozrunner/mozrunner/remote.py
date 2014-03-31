@@ -128,16 +128,18 @@ class B2GRunner(RemoteRunner):
         self.last_test = "automation"
 
         self.marionette = marionette
-        if marionette_port is None and self.marionette is not None:
-            marionette_port = self.marionette.port
-        elif marionette_port is not None and self.marionette is not None:
-            if self.marionette.port != marionette_port:
+        if self.marionette is not None:
+            if marionette_port is None:
+                marionette_port = self.marionette.port
+            elif self.marionette.port != marionette_port:
                 raise ValueError("Got a marionette object and a port but they don't match")
-        self.marionette_port = marionette_port
 
-        if marionette and emulator is not None:
-            if marionette.emulator != emulator:
+            if emulator is None:
+                emulator = marionette.emulator
+            elif marionette.emulator != emulator:
                 raise ValueError("Got a marionette object and an emulator argument but they don't match")
+
+        self.marionette_port = marionette_port
         self.emulator = emulator
 
         self.context_chrome = context_chrome
@@ -165,9 +167,7 @@ class B2GRunner(RemoteRunner):
         # reboot device so it starts up with the proper profile
         if not self.emulator:
             t0 = time.time()
-            #self._reboot_device()
             self.dm.reboot(wait=True)
-            print "Rebooted in %f" % (time.time() - t0)
             #wait for wlan to come up
             if not self._wait_for_net():
                 raise Exception("network did not come up, please configure the network" +
@@ -184,20 +184,19 @@ class B2GRunner(RemoteRunner):
 
         # Set up port forwarding again for Marionette, since any that
         # existed previously got wiped out by the reboot.
-        if not self.emulator:
+        if self.emulator is None:
             subprocess.Popen([self.dm._adbPath,
                               'forward',
                               'tcp:%s' % self.marionette_port,
                               'tcp:2828']).communicate()
-        print "Set up port forwarding for marionette from local port %s to remote port 2828" % (self.marionette_port)
 
-        if self.marionette:
+        if self.marionette is not None:
             self.start_marionette()
 
-        if self.test_script:
+        if self.test_script is not None:
             self.start_tests()
 
-    def start_marionette():
+    def start_marionette(self):
         self.marionette.wait_for_port()
 
         # start a marionette session
@@ -249,29 +248,6 @@ class B2GRunner(RemoteRunner):
 
         self.log.testFail(msg % (self.last_test, timeout))
         self.check_for_crashes()
-
-    def _reboot_device(self):
-        serial, status = self._get_device_status()
-
-        buf = StringIO()
-        self.dm.shell('/system/bin/reboot', buf)
-        buf.close()
-
-        # The reboot command can return while adb still thinks the device is
-        # connected, so wait a little bit for it to disconnect from adb.
-        time.sleep(10)
-
-        # wait for device to come back to previous status
-        self.log.info('waiting for device to come back online after reboot')
-        start = time.time()
-        rserial, rstatus = self._get_device_status(serial)
-        while rstatus != 'device':
-            if time.time() - start > 120:
-                # device hasn't come back online in 2 minutes, something's wrong
-                raise Exception("Device %s (status: %s) not back online after reboot" % (serial, rstatus))
-            time.sleep(5)
-            rserial, rstatus = self._get_device_status(serial)
-        self.log.info('device: %s, status: %s' % (serial, rstatus))
 
     def _get_device_status(self, serial=None):
         # If we know the device serial number, we look for that,
