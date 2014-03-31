@@ -19,8 +19,7 @@ manifest = None
 import metadata
 import wptrunner
 
-base_path = os.path.abspath(
-    os.path.join(os.path.split(__file__)[0], ".."))
+base_path = os.path.abspath(os.path.split(__file__)[0])
 
 def do_test_relative_imports(test_root):
     global manifest
@@ -118,14 +117,16 @@ class WebPlatformTests(object):
         for source, destination in [("gecko_runner.html", ""),
                                     ("testharnessreport.js", "resources/")]:
             source_path = os.path.join(base_path, source)
-            dest_path = os.path.join(base_path, dest, destination, os.path.split(source)[1])
+            dest_path = os.path.join(dest, destination, os.path.split(source)[1])
             shutil.copy2(source_path, dest_path)
 
 class NoVCSTree(object):
     name = "non-vcs"
 
     def __init__(self, root=None):
-        pass
+        if root is None:
+            root = os.path.abspath(os.curdir)
+        self.root = root
 
     @classmethod
     def is_type(cls, path):
@@ -251,13 +252,13 @@ class Try(object):
         #XXX - probably want more platforms
         return "try: -b o -p linux -u web-platform-tests -t none"
 
-    def push(self, mozilla_tree):
+    def push(self, local_tree):
         sys.exit(1)
         patch_name = "try_" + str(uuid.uuid4())
-        hg("qnew", "-m", self.options_message(), patch_name, repo=mozilla_tree.root)
-        hg("push", "-f", "-r tip", try_server.url, repo=mozilla_tree.root)
-        hg("qpop", repo=mozilla_tree.root)
-        hg("qremove", patch_name, repo=mozilla_tree.root)
+        hg("qnew", "-m", self.options_message(), patch_name, repo=local_tree.root)
+        hg("push", "-f", "-r tip", try_server.url, repo=local_tree.root)
+        hg("qpop", repo=local_tree.root)
+        hg("qremove", patch_name, repo=local_tree.root)
 
 class Runner(object):
     def __init__(self, config, bug):
@@ -278,9 +279,9 @@ class TryRunner(Runner):
         self.bug = bug
         self.server = Try(config["try"]["url"])
 
-    def do_run(self, mozilla_tree, log_file):
-#        self.bug.comment("Pushing hg revision %s to try" % mozilla_tree.revision)
-        self.server.push(mozilla_tree)
+    def do_run(self, local_tree, log_file):
+#        self.bug.comment("Pushing hg revision %s to try" % local_tree.revision)
+        self.server.push(local_tree)
 
         sys.exit(0)
 
@@ -299,23 +300,27 @@ class LogFilesRunner(Runner):
         self.config = config
         self.bug = bug
 
-    def do_run(self, mozilla_tree):
+    def do_run(self, local_tree):
         return self.config["command-args"]["run_log"]
 
 class ConfigDict(dict):
+    def __init__(self, base_path, *args, **kwargs):
+        self.base_path = base_path
+        dict.__init__(self, *args, **kwargs)
+
     def get_path(self, key):
-        return os.path.join(base_path, os.path.expanduser(self[key]))
+        return os.path.join(self.base_path, os.path.expanduser(self[key]))
 
 
 def read_config(command_args):
     parser = ConfigParser.SafeConfigParser()
-    config_path = os.path.join(base_path, "config.ini")
+    config_path = command_args["config"]
     success = parser.read(config_path)
     assert config_path in success, success
     rv = {}
     for section in parser.sections():
-        rv[section] = ConfigDict(parser.items(section))
-    rv["command-args"] = ConfigDict(command_args.items())
+        rv[section] = ConfigDict(command_args["data_root"], parser.items(section))
+    rv["command-args"] = ConfigDict(command_args["data_root"], command_args.items())
     return rv
 
 
@@ -323,7 +328,7 @@ def ensure_exists(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def sync_tests(config, paths, mozilla_tree, wpt, bug):
+def sync_tests(config, paths, local_tree, wpt, bug):
     wpt.update()
 
     try:
@@ -332,12 +337,12 @@ def sync_tests(config, paths, mozilla_tree, wpt, bug):
         wpt.copy_work_tree(paths["test"])
         new_manifest= metadata.update_manifest(paths["sync"], paths["metadata"])
 
-        mozilla_tree.create_patch("web-platform-tests_update_%s"  % wpt.rev,
+        local_tree.create_patch("web-platform-tests_update_%s"  % wpt.rev,
                                   "Bug %i - Update web-platform-tests to revision %s" % (
                                       bug.id if bug else 0, wpt.rev
                                   ))
-        mozilla_tree.add_new(os.path.relpath(paths["test"], mozilla_tree.root))
-        mozilla_tree.update_patch(include=[paths["test"], paths["metadata"]])
+        local_tree.add_new(os.path.relpath(paths["test"], local_tree.root))
+        local_tree.update_patch(include=[paths["test"], paths["metadata"]])
     except Exception as e:
         #bug.comment("Update failed with error:\n %s" % traceback.format_exc())
         sys.stderr.write(traceback.format_exc())
@@ -347,16 +352,16 @@ def sync_tests(config, paths, mozilla_tree, wpt, bug):
 
     return initial_manifest, new_manifest
 
-def update_metadata(config, paths, mozilla_tree, wpt, initial_rev, bug):
+def update_metadata(config, paths, local_tree, wpt, initial_rev, bug):
     try:
         runner_cls = {"try": TryRunner,
                       "logfile": LogFilesRunner}[config["command-args"]["run_type"]]
 
         with runner_cls(config, bug) as runner:
-            log_files = runner.do_run(mozilla_tree)
+            log_files = runner.do_run(local_tree)
             try:
                 #XXX remove try/except
-                mozilla_tree.create_patch("web-platform-tests_update_%s_metadata"  % wpt.rev,
+                local_tree.create_patch("web-platform-tests_update_%s_metadata"  % wpt.rev,
                                           "Bug %i - Update web-platform-tests expected data to revision %s" % (
                                               bug.id if bug else 0, wpt.rev
                                           ))
@@ -367,9 +372,9 @@ def update_metadata(config, paths, mozilla_tree, wpt, initial_rev, bug):
                                                    paths["metadata"],
                                                    log_files,
                                                    rev_old=initial_rev)
-            if not mozilla_tree.is_clean():
-                mozilla_tree.add_new(os.path.relpath(paths["metadata"], mozilla_tree.root))
-                mozilla_tree.update_patch(include=[paths["metadata"]])
+            if not local_tree.is_clean():
+                local_tree.add_new(os.path.relpath(paths["metadata"], local_tree.root))
+                local_tree.update_patch(include=[paths["metadata"]])
     except Exception as e:
         #bug.comment("Update failed with error:\n %s" % traceback.format_exc())
         sys.stderr.write(traceback.format_exc())
@@ -382,19 +387,19 @@ def main(**kwargs):
     config = read_config(kwargs)
 
     paths = {"sync": config["web-platform-tests"].get_path("sync_path"),
-             "test": config["mozilla-central"].get_path("test_path"),
-             "metadata": config["mozilla-central"].get_path("metadata_path")}
+             "test": config["local"].get_path("test_path"),
+             "metadata": config["local"].get_path("metadata_path")}
 
     for path in paths.itervalues():
         ensure_exists(path)
 
     for tree_cls in [HgTree, GitTree, NoVCSTree]:
         if tree_cls.is_type(os.path.abspath(os.curdir)):
-            mozilla_tree = tree_cls()
-            print "Updating into a %s tree" % mozilla_tree.name
+            local_tree = tree_cls()
+            print "Updating into a %s tree" % local_tree.name
             break
 
-    if not mozilla_tree.is_clean():
+    if not local_tree.is_clean():
         sys.stderr.write("Working tree is not clean\n")
         if not config["command-args"]["no_check_clean"]:
             sys.exit(1)
@@ -412,23 +417,26 @@ def main(**kwargs):
 
     initial_rev = None
     if config["command-args"]["sync"]:
-        initial_manifest, new_manifest = sync_tests(config, paths, mozilla_tree, wpt, bug)
+        initial_manifest, new_manifest = sync_tests(config, paths, local_tree, wpt, bug)
         initial_rev = initial_manifest.rev
 
     if config["command-args"]["run_type"] != "none":
-        update_metadata(config, paths, mozilla_tree, wpt, initial_rev, bug)
+        update_metadata(config, paths, local_tree, wpt, initial_rev, bug)
 
     sys.exit(1)
 
+
+    ### Unimplemented past this point ###
+
     #Need to be more careful about only operating on patches that we have actually added
 
-    mozilla_tree.commit_patch_queue()
+    local_tree.commit_patch_queue()
 
-    patch = mozilla_tree.make_patches()
+    patch = local_tree.make_patches()
     bug.upload_patch(patch)
 
     if not needs_human:
-        #bug.request_checkin() or mozilla_tree.push()
+        #bug.request_checkin() or local_tree.push()
         pass
     else:
         #bug.comment("Not auto updating because of unexpected changes in the following files: ")

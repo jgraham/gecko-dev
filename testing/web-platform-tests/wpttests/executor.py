@@ -96,7 +96,7 @@ class MarionetteTestExecutor(TestExecutor):
             try:
                 self.after_connect()
             except Exception as e:
-                print >> sys.stderr, e
+                print >> sys.stderr, traceback.format_exc()
                 self.runner.send_message("log", "warning", "Failed to connect to navigate initial page")
                 self.runner.send_message("init_failed")
             else:

@@ -466,6 +466,12 @@ def main():
     args = wptcommandline.parse_args()
     kwargs = vars(args)
 
+    if kwargs["prefs_root"] is None:
+        kwargs["prefs_root"] = os.path.abspath(os.path.join(here, "prefs"))
+
+    if kwargs["metadata_root"] is None:
+        kwargs["metadata_root"] = os.path.abspath(os.path.join(here, "metadata"))
+
     setup_logging(kwargs, {"raw": sys.stdout})
 
     return run_tests(**kwargs)

@@ -9,7 +9,7 @@ from multiprocessing import cpu_count
 
 from mozlog.structured import commandline
 
-root = os.path.join(os.path.split(__file__)[0], "..")
+root = os.path.join(os.path.split(__file__)[0])
 
 def abs_path(path):
     return os.path.abspath(path)
@@ -29,11 +29,9 @@ def create_parser(allow_mandatory=True):
                         help="Path to web-platform-tests"),
     parser.add_argument("--metadata-root", dest="metadata_root",
                         action="store", type=abs_path,
-                        help="Path to the folder containing test metadata",
-                        default=abs_path(os.path.join(root, "metadata"))),
+                        help="Path to the folder containing test metadata"),
     parser.add_argument("--prefs-root", dest="prefs_root",
                         action="store", type=abs_path,
-                        default=abs_path(os.path.join(root, "prefs")),
                         help="Path to the folder containing browser prefs"),
     parser.add_argument("--test-types", action="store",
                         nargs="*", default=["testharness", "reftest"],
@@ -64,10 +62,18 @@ def create_parser(allow_mandatory=True):
     return parser
 
 
-def create_parser_update():
+def create_parser_update(allow_mandatory=True):
+    if not allow_mandatory:
+        prefix = "--"
+    else:
+        prefix = ""
+
     parser = argparse.ArgumentParser("web-platform-tests-update",
                                      description="Update script for web-platform-tests tests.")
-
+    parser.add_argument(prefix + "config", action="store", type=abs_path,
+                        help="Path to config file")
+    parser.add_argument(prefix + "data_root", action="store", type=abs_path,
+                        help="Base path for data files")
     parser.add_argument("--rev", action="store", help="Revision to sync to")
     parser.add_argument("--no-check-clean", action="store_true", default=False,
                         help="Don't check the working directory is clean before updating")

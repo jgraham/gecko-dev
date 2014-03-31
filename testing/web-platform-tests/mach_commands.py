@@ -78,6 +78,12 @@ class WebPlatformTestsUpdater(MozbuildObject):
         from wpttests import machlogging
         from mozlog.structured import structuredlog
 
+        if kwargs["data_root"] is None:
+            kwargs["data_root"] = os.path.join(self.topsrcdir, 'testing', 'web-platform-tests')
+
+        if kwargs["config"] is None:
+            kwargs["data_root"] = os.path.join(self.topsrcdir, 'testing', 'web-platform-tests', 'config.ini')
+
         log_manager = machlogging.StructuredLoggingManager()
         self._logger = structuredlog.StructuredLogger("web-platform-tests.update.mach")
         MozbuildObject.__init__(self, log_manager, settings, log_manager, topobjdir)
@@ -99,7 +105,7 @@ class MachCommands(MachCommandBase):
 
     @Command("web-platform-tests-update",
              category="testing",
-             parser=wptcommandline.create_parser_update())
+             parser=wptcommandline.create_parser_update(False))
     def update_web_platform_tests(self, **params):
         self.setup()
         self.virtualenv_manager.install_pip_package('html5lib==0.99')

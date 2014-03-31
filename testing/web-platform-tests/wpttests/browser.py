@@ -85,6 +85,7 @@ class FirefoxBrowser(Browser):
         self.prefs_root = prefs_root
         self.marionette_port = get_free_port(2828, exclude=self.used_ports)
         self.used_ports.add(self.marionette_port)
+        self.runner = None
 
     def start(self):
         env = os.environ.copy()

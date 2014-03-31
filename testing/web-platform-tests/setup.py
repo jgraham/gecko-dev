@@ -8,7 +8,7 @@ import shutil
 from setuptools import setup, find_packages
 
 PACKAGE_NAME = 'wptrunner'
-PACKAGE_VERSION = '0.1.1'
+PACKAGE_VERSION = '0.1.2'
 
 # dependencies
 with open('requirements.txt') as f:
@@ -20,7 +20,7 @@ try:
     # Hack to include the default profiles in the distribution
     if "sdist" in sys.argv:
         profile_src = os.path.abspath(os.path.join("..", "profiles"))
-        profile_dest = os.path.abspath(os.path.join("prefs"))
+        profile_dest = os.path.abspath(os.path.join("wpttests", "prefs"))
         dest_exists = os.path.exists(profile_dest)
         shutil.copytree(profile_src, profile_dest)
 
@@ -40,6 +40,16 @@ try:
                        'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
                        'Operating System :: OS Independent',
                       ],
+          package_data={"wpttests": ["testharness.js",
+                                     "reftest.js",
+                                     "testharnessreport.js",
+                                     "gecko_runner.html",
+                                     "config.json",
+                                     "server-locations.txt",
+                                     "device_setup/*",
+                                     "prefs/*"]},
+          include_package_data=True,
+          data_files=[("config", ["config.ini"])],
           install_requires=deps
          )
 finally:
