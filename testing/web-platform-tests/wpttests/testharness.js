@@ -5,7 +5,7 @@
 window.wrappedJSObject.timeout_multiplier = %(timeout_multiplier)d;
 
 function listener(e) {
-    if(e.data.type == "complete") {
+    if (e.data.type == "complete") {
         clearTimeout(timer);
         removeEventListener("message", listener);
         var test_results = e.data.tests.map(function(x) {
