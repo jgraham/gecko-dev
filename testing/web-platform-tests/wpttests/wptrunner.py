@@ -368,7 +368,8 @@ def get_executor(product, test_type, http_server_url, timeout_multiplier):
 
 def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
               processes=1, include=None, capture_stdio=True, product="firefox",
-              chunk_type="none", total_chunks=1, this_chunk=1, timeout_multiplier=1):
+              chunk_type="none", total_chunks=1, this_chunk=1, timeout_multiplier=1,
+              repeat=1):
     logging_queue = None
     original_stdio = (sys.stdout, sys.stderr)
     test_queues = None
@@ -398,33 +399,35 @@ def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
             test_ids, test_queues = queue_tests(tests_root, metadata_root,
                                                 test_types, run_info, include,
                                                 chunk_type, total_chunks, this_chunk)
-            logger.suite_start(test_ids, run_info)
-            for test_type in test_types:
-                tests_queue = test_queues[test_type]
+            for repeat_count in xrange(repeat):
+                logger.suite_start(test_ids, run_info)
+                for test_type in test_types:
+                    tests_queue = test_queues[test_type]
 
-                executor_cls, executor_kwargs = get_executor(product, test_type, base_server,
-                                                             timeout_multiplier)
+                    executor_cls, executor_kwargs = get_executor(product, test_type, base_server,
+                                                                 timeout_multiplier)
 
-                if executor_cls is None:
-                    logger.error("Unsupported test type %s for product %s" % (test_type, product))
-                    continue
+                    if executor_cls is None:
+                        logger.error("Unsupported test type %s for product %s" % (test_type, product))
+                        continue
 
-                with ManagerGroup("web-platform-tests",
-                                  processes,
-                                  browser_cls,
-                                  browser_kwargs,
-                                  executor_cls,
-                                  executor_kwargs) as manager_group:
-                    try:
-                        manager_group.start(tests_queue)
-                    except KeyboardInterrupt:
-                        logger.critical("Main thread got signal")
-                        manager_group.stop()
-                        raise
-                    manager_group.wait()
-                unexpected_count += manager_group.unexpected_count()
+                    with ManagerGroup("web-platform-tests",
+                                      processes,
+                                      browser_cls,
+                                      browser_kwargs,
+                                      executor_cls,
+                                      executor_kwargs) as manager_group:
+                        try:
+                            manager_group.start(tests_queue)
+                        except KeyboardInterrupt:
+                            logger.critical("Main thread got signal")
+                            manager_group.stop()
+                            raise
+                        manager_group.wait()
+                    unexpected_count += manager_group.unexpected_count()
 
-            logger.suite_end()
+                logger.info("Got %i unexpected results" % unexpected_count)
+                logger.suite_end()
     except KeyboardInterrupt:
         if test_queues is not None:
             for queue in test_queues.itervalues():
@@ -439,8 +442,6 @@ def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
             logging_queue.put(None)
             logging_thread.join(10)
             logging_queue.close()
-
-    logger.info("Got %i unexpected results" % unexpected_count)
 
     return manager_group.unexpected_count() == 0
 
