@@ -40,7 +40,7 @@ class WebPlatformTestsRunner(MozbuildObject):
 
         log_manager = machlogging.StructuredLoggingManager()
         self._logger = structuredlog.StructuredLogger("web-platform-tests.mach")
-        MozbuildObject.__init__(self, log_manager, settings, log_manager, topobjdir)
+        MozbuildObject.__init__(self, topsrcdir, settings, log_manager, topobjdir)
 
     def run_tests(self, **kwargs):
         # TODO Bug 794506 remove once mach integrates with virtualenv.
@@ -78,18 +78,18 @@ class WebPlatformTestsUpdater(MozbuildObject):
         from wpttests import machlogging
         from mozlog.structured import structuredlog
 
+        log_manager = machlogging.StructuredLoggingManager()
+        self._logger = structuredlog.StructuredLogger("web-platform-tests.update.mach")
+        MozbuildObject.__init__(self, topsrcdir, settings, log_manager, topobjdir)
+
+    def run_update(self, **kwargs):
+        from wpttests import update
+
         if kwargs["data_root"] is None:
             kwargs["data_root"] = os.path.join(self.topsrcdir, 'testing', 'web-platform-tests')
 
         if kwargs["config"] is None:
-            kwargs["data_root"] = os.path.join(self.topsrcdir, 'testing', 'web-platform-tests', 'config.ini')
-
-        log_manager = machlogging.StructuredLoggingManager()
-        self._logger = structuredlog.StructuredLogger("web-platform-tests.update.mach")
-        MozbuildObject.__init__(self, log_manager, settings, log_manager, topobjdir)
-
-    def run_update(self, **kwargs):
-        from wpttests import update
+            kwargs["config"] = os.path.join(self.topsrcdir, 'testing', 'web-platform-tests', 'config.ini')
 
         update.main(**kwargs)
 
