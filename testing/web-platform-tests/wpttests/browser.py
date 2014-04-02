@@ -76,6 +76,11 @@ class NullBrowser(Browser):
     def is_alive(self):
         return True
 
+class ServoBrowser(NullBrowser):
+    def __init__(self, logger, binary):
+        Browser.__init__(self, logger)
+        self.binary = binary
+
 class FirefoxBrowser(Browser):
     used_ports = set()
 

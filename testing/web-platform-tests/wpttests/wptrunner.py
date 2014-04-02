@@ -335,12 +335,12 @@ class LoggingWrapper(StringIO):
 
 def get_browser(product, binary, prefs_root):
     browser_classes = {"firefox": browser.FirefoxBrowser,
-                       "servo": browser.NullBrowser,
+                       "servo": browser.ServoBrowser,
                        "b2g": browser.B2GBrowser}
 
     browser_cls = browser_classes[product]
 
-    browser_kwargs = {"binary": binary} if product == "firefox" else {}
+    browser_kwargs = {"binary": binary} if product in ("firefox", "servo") else {}
     if product in ("firefox", "b2g"):
         browser_kwargs["prefs_root"] = prefs_root
 

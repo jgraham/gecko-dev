@@ -93,7 +93,7 @@ class TestRunner(object):
         try:
             return self.executor.run_test(test)
         except Exception as e:
-            self.send_message("log", "critical", traceback.format_exc())
+            self.send_message("log", ("critical", traceback.format_exc()))
             raise
 
     def send_message(self, command, *args):
@@ -110,7 +110,7 @@ def start_runner(test_queue, runner_command_queue, runner_result_queue,
             except KeyboardInterrupt:
                 stop_flag.set()
     except Exception as e:
-        runner_result_queue.put("log", "critical", traceback.format_exc())
+        runner_result_queue.put(("log", "critical", traceback.format_exc()))
         stop_flag.set()
     finally:
         runner_command_queue = None

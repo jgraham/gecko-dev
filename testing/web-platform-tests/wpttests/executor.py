@@ -8,9 +8,10 @@ import urlparse
 import threading
 import hashlib
 
-import testrunner
-
 import marionette
+from mozprocess import ProcessHandler
+
+import testrunner
 
 here = os.path.split(__file__)[0]
 
@@ -44,6 +45,7 @@ class TestExecutor(object):
 
     def __init__(self, browser, http_server_url, timeout_multiplier=1):
         self.runner = None
+        self.browser = browser
         self.http_server_url = http_server_url
         self.timeout_multiplier = timeout_multiplier
 
@@ -61,7 +63,6 @@ class MarionetteTestExecutor(TestExecutor):
         TestExecutor.__init__(self, browser, http_server_url, timeout_multiplier)
         self.marionette_port = browser.marionette_port
 
-        self.browser = browser
         self.timer = None
         self.window_id = str(uuid.uuid4())
 
@@ -270,9 +271,9 @@ class MarionetteReftestExecutor(MarionetteTestExecutor):
 
 
 class ProcessTestExecutor(TestExecutor):
-    def __init__(self, browser, http_server_url, result_converter, timeout_multiplier=1):
-        TestExecutor.__init__(self, runner, result_converter, timeout_multiplier)
-        self.binary = browser.binary
+    def __init__(self, *args, **kwargs):
+        TestExecutor.__init__(self, *args, **kwargs)
+        self.binary = self.browser.binary
 
     def setup(self, runner):
         self.runner = runner
@@ -294,12 +295,12 @@ class ServoTestharnessExecutor(ProcessTestExecutor):
         self.result_data = None
         self.result_flag = None
 
-    def do_test(self, backend, test):
+    def run_test(self, test):
         self.result_data = None
         self.result_flag = threading.Event()
 
         proc = ProcessHandler([self.binary,
-                               urlparse.urljoin(self.backend.http_server_url, test.url)],
+                               urlparse.urljoin(self.http_server_url, test.url)],
                               processOutputLine=[self.on_output])
         proc.run()
 
