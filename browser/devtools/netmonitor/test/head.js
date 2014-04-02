@@ -57,7 +57,7 @@ waitForExplicitFinish();
 
 // Enable logging for all the relevant tests.
 const gEnableLogging = Services.prefs.getBoolPref("devtools.debugger.log");
-Services.prefs.setBoolPref("devtools.debugger.log", false);
+Services.prefs.setBoolPref("devtools.debugger.log", true);
 
 // Always reset some prefs to their original values after the test finishes.
 const gDefaultFilters = Services.prefs.getCharPref("devtools.netmonitor.filters");

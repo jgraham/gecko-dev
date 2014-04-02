@@ -6,7 +6,7 @@
  */
 
 // Enable logging for this test, bug 860349.
-Services.prefs.setBoolPref("devtools.debugger.log", false);
+Services.prefs.setBoolPref("devtools.debugger.log", true);
 
 let gProcess;
 

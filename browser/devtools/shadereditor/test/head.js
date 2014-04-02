@@ -9,7 +9,7 @@ let { Services } = Cu.import("resource://gre/modules/Services.jsm", {});
 // Enable logging for all the tests. Both the debugger server and frontend will
 // be affected by this pref.
 let gEnableLogging = Services.prefs.getBoolPref("devtools.debugger.log");
-Services.prefs.setBoolPref("devtools.debugger.log", false);
+Services.prefs.setBoolPref("devtools.debugger.log", true);
 
 let { Task } = Cu.import("resource://gre/modules/Task.jsm", {});
 let { Promise: promise } = Cu.import("resource://gre/modules/Promise.jsm", {});
