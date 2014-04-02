@@ -18,6 +18,8 @@ skip-if(B2G||B2GDT) include w3c-css/received/reftest.list
 # relative and absolute positioning
 skip-if(B2G||B2GDT) include abs-pos/reftest.list
 
+include async-scrolling/reftest.list
+
 # backgrounds/
 skip-if(B2G||B2GDT) include backgrounds/reftest.list
 
@@ -308,6 +310,8 @@ skip-if(B2G||B2GDT) include text-transform/reftest.list
 # theme (osx)
 skip-if(B2G||B2GDT) include ../../toolkit/themes/osx/reftests/reftest.list
 
+include ../../toolkit/content/tests/reftests/reftest.list
+
 # -moz-transform/
 include transform/reftest.list
 
@@ -317,7 +321,9 @@ include transform-3d/reftest.list
 # unicode/ (verify that we don't do expend effort doing unicode-aware case checks)
 skip-if(B2G||B2GDT) include unicode/reftest.list
 
-# webcomonents/
+include view-source/reftest.list
+
+# webcomponents/
 include webcomponents/reftest.list
 
 # widget/
@@ -331,9 +337,6 @@ skip-if(B2G||B2GDT) include xul-document-load/reftest.list
 
 # xul/
 skip-if(B2G||B2GDT) include xul/reftest.list
-
-# webcomonents/
-include webcomponents/reftest.list
 
 # xul
 skip-if(B2G||B2GDT) include ../xul/reftest/reftest.list
@@ -355,8 +358,8 @@ skip-if(B2G||B2GDT) include ../../editor/reftests/reftest.list
 # box-sizing
 skip-if(B2G||B2GDT) include box-sizing/reftest.list
 
-# invalidation - only run on B2G
-skip-if(!(B2G||B2GDT)) include invalidation/reftest.list
+# invalidation
+include invalidation/reftest.list
 
 # encodings
 include ../../dom/encoding/test/reftest/reftest.list
