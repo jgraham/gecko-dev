@@ -6,6 +6,7 @@ function test() {
   // Don't use about:home as the homepage for new windows
   Services.prefs.setIntPref("browser.startup.page", 0);
   registerCleanupFunction(function() Services.prefs.clearUserPref("browser.startup.page"));
+  disableSpeculativeConnections();
 
   waitForExplicitFinish();
 

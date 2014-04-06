@@ -9,6 +9,7 @@ XPCOMUtils.defineLazyModuleGetter(this, "FormHistory",
   "resource://gre/modules/FormHistory.jsm");
 
 function test() {
+  disableSpeculativeConnections();
   waitForExplicitFinish();
 
   const ENGINE_HTML_BASE = "http://mochi.test:8888/browser/browser/components/search/test/test.html";

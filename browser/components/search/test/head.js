@@ -105,3 +105,10 @@ function doOnloadOnce(aCallback) {
   gBrowser.addEventListener("load", doOnloadOnceListener, true);
   registerCleanupFunction(removeDoOnloadOnceListener);
 }
+
+function disableSpeculativeConnections() {
+  // Disable speculative connections so the test doesn't leak due to finishing before the connection
+  // closes on its own.
+  registerCleanupFunction(() => Services.prefs.clearUserPref("network.http.speculative-parallel-limit"));
+  Services.prefs.setIntPref("network.http.speculative-parallel-limit", 0);
+}
