@@ -14,8 +14,6 @@ let runtime = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime);
 const PC_PARAM_VALUE = runtime.isOfficialBranding ? "MOZI" : null;
 
 function test() {
-  disableSpeculativeConnections();
-
   let engine = Services.search.getEngineByName("Bing");
   ok(engine, "Bing is installed");
 

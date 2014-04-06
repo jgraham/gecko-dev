@@ -37,8 +37,6 @@ const GOOGLE_CLIENT = google_client;
 const MOZ_DISTRIBUTION_ID = runtime.distributionID;
 
 function test() {
-  disableSpeculativeConnections();
-
   let engine = Services.search.getEngineByName("Google");
   ok(engine, "Google is installed");
 

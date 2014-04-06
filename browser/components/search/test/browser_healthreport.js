@@ -4,7 +4,6 @@
 "use strict";
 
 function test() {
-  disableSpeculativeConnections();
   requestLongerTimeout(2);
   waitForExplicitFinish();
 
