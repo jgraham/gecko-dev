@@ -90,7 +90,7 @@ function test() {
                 // Re-add the listener, and perform a search
                 gBrowser.addProgressListener(listener);
                 doc.getElementById("searchText").value = "foo";
-                executeSoon(() => doc.getElementById("searchSubmit").click());
+                doc.getElementById("searchSubmit").click();
               }
             }
           });
