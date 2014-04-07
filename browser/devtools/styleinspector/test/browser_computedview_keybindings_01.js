@@ -20,19 +20,13 @@ let test = asyncTest(function*() {
   info("Selecting the test node");
   yield selectNode(".matches", inspector);
 
-  let searchbar = view.searchField;
   let propView = getFirstVisiblePropertyView(view);
   let rulesTable = propView.matchedSelectorsContainer;
   let matchedExpander = propView.element;
 
-  info("Focusing the search field");
-  let onSearchBarFocus = once(searchbar, "focus", true);
-  EventUtils.synthesizeMouseAtCenter(searchbar, {}, view.styleWindow);
-  yield onSearchBarFocus;
-
-  info("Shift-tabbing back to the property")
+  info("Focusing the property");
   let onMatchedExpanderFocus = once(matchedExpander, "focus", true);
-  EventUtils.synthesizeKey("VK_TAB", {shiftKey: true}, view.styleWindow);
+  EventUtils.synthesizeMouseAtCenter(matchedExpander, {}, view.styleWindow);
   yield onMatchedExpanderFocus;
 
   yield checkToggleKeyBinding(view.styleWindow, "VK_SPACE", rulesTable, inspector);
@@ -42,7 +36,7 @@ let test = asyncTest(function*() {
 
 function getFirstVisiblePropertyView(view) {
   let propView = null;
-  view.propertyViews.some(function(p) {
+  view.propertyViews.some(p => {
     if (p.visible) {
       propView = p;
       return true;
