@@ -305,9 +305,6 @@ class MochitestUtilsMixin(object):
         repeat -- How many times to repeat the test, ie: repeat=1 will run the test twice.
     """
 
-    if options.browserChrome:
-      options.chunkByDir = 4
-
     # allow relative paths for logFile
     if options.logFile:
       options.logFile = self.getLogFilePath(options.logFile)
