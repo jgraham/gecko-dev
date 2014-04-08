@@ -22,7 +22,7 @@ let test = asyncTest(function*() {
   inspector.sidebar.select("layoutview");
   yield inspector.sidebar.once("layoutview-ready");
   yield runTests();
-  yield gDevTools.closeToolbox(toolbox);
+  yield gDevTools.closeToolbox(target);
 });
 
 addTest("When all properties are set on the node editing one should work",
