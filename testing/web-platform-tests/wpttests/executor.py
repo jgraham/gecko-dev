@@ -7,6 +7,7 @@ import time
 import urlparse
 import threading
 import hashlib
+import traceback
 
 import marionette
 from mozprocess import ProcessHandler

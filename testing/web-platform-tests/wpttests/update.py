@@ -17,7 +17,7 @@ import vcs
 from vcs import git, hg
 manifest = None
 import metadata
-import wptrunner
+import wptcommandline
 
 base_path = os.path.abspath(os.path.split(__file__)[0])
 
@@ -383,7 +383,7 @@ def update_metadata(config, paths, local_tree, wpt, initial_rev, bug):
         pass#wpt.clean()
 
 
-def main(**kwargs):
+def run_update(**kwargs):
     config = read_config(kwargs)
 
     paths = {"sync": config["web-platform-tests"].get_path("sync_path"),
@@ -441,3 +441,9 @@ def main(**kwargs):
     else:
         #bug.comment("Not auto updating because of unexpected changes in the following files: ")
         pass
+
+def main():
+    parser = wptcommandline.create_parser_update()
+    args = parser.parse_args()
+    success = update.run_update(**vars(args))
+    sys.exit(0 if success else 1)

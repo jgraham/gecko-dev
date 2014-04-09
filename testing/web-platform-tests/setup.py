@@ -8,7 +8,7 @@ import shutil
 from setuptools import setup, find_packages
 
 PACKAGE_NAME = 'wptrunner'
-PACKAGE_VERSION = '0.1.6'
+PACKAGE_VERSION = '0.1.7'
 
 # dependencies
 with open('requirements.txt') as f:
@@ -31,7 +31,12 @@ try:
           author_email='tools@lists.mozilla.org',
           license='MPL 1.1/GPL 2.0/LGPL 2.1',
           packages=find_packages(exclude=["tests", "metadata", "prefs"]),
-          scripts=["runtests.py", "update.py"],
+          entry_points = {
+              'console_scripts': [
+                  'wptrunner = wpttests.wptrunner:main',
+                  'wptupdate = wpttests.update:main',
+              ]
+          },
           zip_safe=False,
           platforms =['Any'],
           classifiers=['Development Status :: 4 - Beta',

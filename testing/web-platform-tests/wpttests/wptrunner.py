@@ -429,8 +429,8 @@ def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
         with TestEnvironment(tests_root, env_options) as test_environment:
             base_server = "http://%s:%i" % (test_environment.config["host"],
                                             test_environment.config["ports"]["http"][0])
-            test_ids, test_queues = test_loader.queue_tests(test_types, include, chunk_type, total_chunks, this_chunk)
             for repeat_count in xrange(repeat):
+                test_ids, test_queues = test_loader.queue_tests(test_types, include, chunk_type, total_chunks, this_chunk)
                 logger.suite_start(test_ids, run_info)
                 for test_type in test_types:
                     tests_queue = test_queues[test_type]

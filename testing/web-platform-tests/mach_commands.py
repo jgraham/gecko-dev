@@ -99,7 +99,7 @@ class WebPlatformTestsUpdater(MozbuildObject):
         if kwargs["config"] is None:
             kwargs["config"] = os.path.join(self.topsrcdir, 'testing', 'web-platform-tests', 'config.ini')
 
-        update.main(**kwargs)
+        update.run_update(**kwargs)
 
 @CommandProvider
 class MachCommands(MachCommandBase):

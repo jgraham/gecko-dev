@@ -166,22 +166,32 @@ class B2GBrowser(Browser):
 
     def start(self):
         locations = ServerLocations(filename=os.path.join(here, "server-locations.txt"))
-        profile = FirefoxProfile(locations=locations, proxy={"remote": moznetwork.get_ip()})
 
-        profile.set_preferences({"dom.disable_open_during_load": False,
-                                 # "dom.max_script_run_time": 0,
-                                 # "browser.dom.window.dump.enabled": True,
+        preferences = self.load_prefs()
 
-                                 # # These ones are blindly copied from Mochitest
+        profile = FirefoxProfile(locations=locations, proxy={"remote": moznetwork.get_ip()},
+                                 preferences=preferences)
+
+        profile.set_preferences({# # These ones are blindly copied from Mochitest
                                  "dom.mozBrowserFramesEnabled": True,
                                  # "dom.ipc.tabs.disabled": False,
                                  # "dom.ipc.browser_frames.oop_by_default": False,
                                  # "marionette.force-local": True,
                                  # "dom.testing.datastore_enabled_for_hosted_apps": True
-                             })
+        })
 
-        self.runner = B2GRunner(profile, self.device, marionette_port=self.marionette_port, emulator=False)
+        self.runner = B2GRunner(profile, self.device, marionette_port=self.marionette_port)
         self.runner.start()
+
+    def load_prefs(self):
+        prefs_path = os.path.join(self.prefs_root, "prefs_general.js")
+        if os.path.exists(prefs_path):
+            preferences = Preferences.read_prefs(prefs_path)
+        else:
+            self.logger.warning("Failed to find base prefs file in %s" % prefs_path)
+            preferences = []
+
+        return preferences
 
     def stop(self):
         pass

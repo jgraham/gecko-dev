@@ -1,5 +1,5 @@
 mozinfo >= 0.7
-mozprocess >= 0.9
+mozprocess >= 0.19
 mozrunner >= 5.36
 mozdevice >= 0.22
 moznetwork >= 0.21
