@@ -5,28 +5,21 @@
 "use strict";
 
 const Cu = Components.utils;
+let {gDevTools} = Cu.import("resource:///modules/devtools/gDevTools.jsm", {});
 let {devtools} = Cu.import("resource://gre/modules/devtools/Loader.jsm", {});
 let TargetFactory = devtools.TargetFactory;
-let {console} = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {});
-let {Promise: promise} = Cu.import("resource://gre/modules/Promise.jsm", {});
 let {CssHtmlTree} = devtools.require("devtools/styleinspector/computed-view");
 let {CssRuleView, _ElementStyle} = devtools.require("devtools/styleinspector/rule-view");
 let {CssLogic, CssSelector} = devtools.require("devtools/styleinspector/css-logic");
+let {Promise: promise} = Cu.import("resource://gre/modules/Promise.jsm", {});
 let {editableField, getInplaceEditorForSpan: inplaceEditor} = devtools.require("devtools/shared/inplace-editor");
+let {console} = Components.utils.import("resource://gre/modules/devtools/Console.jsm", {});
 
 // All test are asynchronous
 waitForExplicitFinish();
 
-// Services.prefs.setBoolPref("devtools.dump.emit", true);
-
-// Set the testing flag on gDevTools and reset it when the test ends
-gDevTools.testing = true;
-registerCleanupFunction(() => gDevTools.testing = false);
-
-// Clear preferences that may be set during the course of tests.
-registerCleanupFunction(() => {
-  Services.prefs.clearUserPref("devtools.dump.emit");
-});
+const TEST_URL_ROOT = "http://example.com/browser/browser/devtools/styleinspector/test/";
+const TEST_URL_ROOT_SSL = "https://example.com/browser/browser/devtools/styleinspector/test/";
 
 // Auto clean-up when a test ends
 registerCleanupFunction(() => {
@@ -41,8 +34,10 @@ registerCleanupFunction(() => {
   }
 });
 
-const TEST_URL_ROOT = "http://example.com/browser/browser/devtools/styleinspector/test/";
-const TEST_URL_ROOT_SSL = "https://example.com/browser/browser/devtools/styleinspector/test/";
+// Services.prefs.setBoolPref("devtools.dump.emit", true);
+registerCleanupFunction(() => {
+  Services.prefs.clearUserPref("devtools.dump.emit");
+});
 
 /**
  * The functions found below are here to ease test development and maintenance.

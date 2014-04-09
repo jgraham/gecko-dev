@@ -1,145 +1,145 @@
-/* vim: set ts=2 et sw=2 tw=80: */
 /* Any copyright is dedicated to the Public Domain.
- http://creativecommons.org/publicdomain/zero/1.0/ */
+   http://creativecommons.org/publicdomain/zero/1.0/ */
 
-"use strict";
+function getStyle(node, property) {
+  return node.style.getPropertyValue(property);
+}
 
-// Test that the box-model values are editable and that keybindings work
+let doc;
+let inspector;
 
 let test = asyncTest(function*() {
   let style = "div { margin: 10px; padding: 3px } #div1 { margin-top: 5px } #div2 { border-bottom: 1em solid black; } #div3 { padding: 2em; }";
   let html = "<style>" + style + "</style><div id='div1'></div><div id='div2'></div><div id='div3'></div>"
-  yield addTab("data:text/html," + encodeURIComponent(html));
 
-  let {inspector, view} = yield openLayoutView();
-  let viewDoc = view.doc;
-  let viewWin = viewDoc.defaultView;
+  let content = yield loadTab("data:text/html," + encodeURIComponent(html));
+  doc = content.document;
 
-  yield testEditMarginAndCancel(inspector, viewDoc, viewWin);
-  yield testArrowKeyAndEnterToCommit(inspector, viewDoc, viewWin);
-  yield testDeleteValueAndUndoWithEscape(inspector, viewDoc, viewWin);
-  yield testDeleteValue(inspector, viewDoc, viewWin);
+  let target = TargetFactory.forTab(gBrowser.selectedTab);
+  let toolbox = yield gDevTools.showToolbox(target, "inspector");
+  inspector = toolbox.getCurrentPanel();
+
+  inspector.sidebar.select("layoutview");
+  yield inspector.sidebar.once("layoutview-ready");
+  yield runTests();
+  yield gDevTools.closeToolbox(toolbox);
 });
 
-function* testEditMarginAndCancel(inspector, viewDoc, viewWin) {
-  info("Test that editing margin dynamically updates the document, pressing escape cancels the changes");
-
-  let node = getNode("#div1");
+addTest("Test that editing margin dynamically updates the document, pressing escape cancels the changes",
+function*() {
+  let node = doc.getElementById("div1");
   is(getStyle(node, "margin-top"), "", "Should be no margin-top on the element.")
-  yield selectNode(node, inspector);
+  let view = yield selectNode(node);
 
-  let span = viewDoc.querySelector(".margin.top > span");
+  let span = view.document.querySelector(".margin.top > span");
   is(span.textContent, 5, "Should have the right value in the box model.");
 
-  EventUtils.synthesizeMouseAtCenter(span, {}, viewWin);
-  let editor = viewDoc.querySelector(".styleinspector-propertyeditor");
+  EventUtils.synthesizeMouseAtCenter(span, {}, view);
+  let editor = view.document.querySelector(".styleinspector-propertyeditor");
   ok(editor, "Should have opened the editor.");
   is(editor.value, "5px", "Should have the right value in the editor.");
 
-  EventUtils.synthesizeKey("3", {}, viewWin);
-  yield waitForUpdate(inspector);
+  EventUtils.synthesizeKey("3", {}, view);
+  yield waitForUpdate();
 
   is(getStyle(node, "margin-top"), "3px", "Should have updated the margin.");
 
-  EventUtils.synthesizeKey("VK_ESCAPE", {}, viewWin);
-  yield waitForUpdate(inspector);
+  EventUtils.synthesizeKey("VK_ESCAPE", {}, view);
+  yield waitForUpdate();
 
   is(getStyle(node, "margin-top"), "", "Should be no margin-top on the element.")
   is(span.textContent, 5, "Should have the right value in the box model.");
-}
+});
 
-function* testArrowKeyAndEnterToCommit(inspector, viewDoc, viewWin) {
-  info("Test that arrow keys work correctly and pressing enter commits the changes");
-
-  let node = getNode("#div1");
+addTest("Test that arrow keys work correctly and pressing enter commits the changes",
+function*() {
+  let node = doc.getElementById("div1");
   is(getStyle(node, "margin-left"), "", "Should be no margin-top on the element.")
-  yield selectNode(node, inspector);
+  let view = yield selectNode(node);
 
-  let span = viewDoc.querySelector(".margin.left > span");
+  let span = view.document.querySelector(".margin.left > span");
   is(span.textContent, 10, "Should have the right value in the box model.");
 
-  EventUtils.synthesizeMouseAtCenter(span, {}, viewWin);
-  let editor = viewDoc.querySelector(".styleinspector-propertyeditor");
+  EventUtils.synthesizeMouseAtCenter(span, {}, view);
+  let editor = view.document.querySelector(".styleinspector-propertyeditor");
   ok(editor, "Should have opened the editor.");
   is(editor.value, "10px", "Should have the right value in the editor.");
 
-  EventUtils.synthesizeKey("VK_UP", {}, viewWin);
-  yield waitForUpdate(inspector);
+  EventUtils.synthesizeKey("VK_UP", {}, view);
+  yield waitForUpdate();
 
   is(editor.value, "11px", "Should have the right value in the editor.");
   is(getStyle(node, "margin-left"), "11px", "Should have updated the margin.");
 
-  EventUtils.synthesizeKey("VK_DOWN", {}, viewWin);
-  yield waitForUpdate(inspector);
+  EventUtils.synthesizeKey("VK_DOWN", {}, view);
+  yield waitForUpdate();
 
   is(editor.value, "10px", "Should have the right value in the editor.");
   is(getStyle(node, "margin-left"), "10px", "Should have updated the margin.");
 
-  EventUtils.synthesizeKey("VK_UP", { shiftKey: true }, viewWin);
-  yield waitForUpdate(inspector);
+  EventUtils.synthesizeKey("VK_UP", { shiftKey: true }, view);
+  yield waitForUpdate();
 
   is(editor.value, "20px", "Should have the right value in the editor.");
   is(getStyle(node, "margin-left"), "20px", "Should have updated the margin.");
 
-  EventUtils.synthesizeKey("VK_RETURN", {}, viewWin);
-  yield waitForUpdate(inspector);
+  EventUtils.synthesizeKey("VK_RETURN", {}, view);
+  yield waitForUpdate();
 
   is(getStyle(node, "margin-left"), "20px", "Should be the right margin-top on the element.")
   is(span.textContent, 20, "Should have the right value in the box model.");
-}
+});
 
-function* testDeleteValueAndUndoWithEscape(inspector, viewDoc, viewWin) {
-  info("Test that deleting the value removes the property but escape undoes that");
-
-  let node = getNode("#div1");
+addTest("Test that deleting the value removes the property but escape undoes that",
+function*() {
+  let node = doc.getElementById("div1");
   is(getStyle(node, "margin-left"), "20px", "Should be the right margin-top on the element.")
-  yield selectNode(node, inspector);
+  let view = yield selectNode(node);
 
-  let span = viewDoc.querySelector(".margin.left > span");
+  let span = view.document.querySelector(".margin.left > span");
   is(span.textContent, 20, "Should have the right value in the box model.");
 
-  EventUtils.synthesizeMouseAtCenter(span, {}, viewWin);
-  let editor = viewDoc.querySelector(".styleinspector-propertyeditor");
+  EventUtils.synthesizeMouseAtCenter(span, {}, view);
+  let editor = view.document.querySelector(".styleinspector-propertyeditor");
   ok(editor, "Should have opened the editor.");
   is(editor.value, "20px", "Should have the right value in the editor.");
 
-  EventUtils.synthesizeKey("VK_DELETE", {}, viewWin);
-  yield waitForUpdate(inspector);
+  EventUtils.synthesizeKey("VK_DELETE", {}, view);
+  yield waitForUpdate();
 
   is(editor.value, "", "Should have the right value in the editor.");
   is(getStyle(node, "margin-left"), "", "Should have updated the margin.");
 
-  EventUtils.synthesizeKey("VK_ESCAPE", {}, viewWin);
-  yield waitForUpdate(inspector);
+  EventUtils.synthesizeKey("VK_ESCAPE", {}, view);
+  yield waitForUpdate();
 
   is(getStyle(node, "margin-left"), "20px", "Should be the right margin-top on the element.")
   is(span.textContent, 20, "Should have the right value in the box model.");
-}
+});
 
-function* testDeleteValue(inspector, viewDoc, viewWin) {
-  info("Test that deleting the value removes the property");
-
-  let node = getNode("#div1");
+addTest("Test that deleting the value removes the property",
+function*() {
+  let node = doc.getElementById("div1");
   node.style.marginRight = "15px";
-  yield selectNode(node, inspector);
+  let view = yield selectNode(node);
 
-  let span = viewDoc.querySelector(".margin.right > span");
+  let span = view.document.querySelector(".margin.right > span");
   is(span.textContent, 15, "Should have the right value in the box model.");
 
-  EventUtils.synthesizeMouseAtCenter(span, {}, viewWin);
-  let editor = viewDoc.querySelector(".styleinspector-propertyeditor");
+  EventUtils.synthesizeMouseAtCenter(span, {}, view);
+  let editor = view.document.querySelector(".styleinspector-propertyeditor");
   ok(editor, "Should have opened the editor.");
   is(editor.value, "15px", "Should have the right value in the editor.");
 
-  EventUtils.synthesizeKey("VK_DELETE", {}, viewWin);
-  yield waitForUpdate(inspector);
+  EventUtils.synthesizeKey("VK_DELETE", {}, view);
+  yield waitForUpdate();
 
   is(editor.value, "", "Should have the right value in the editor.");
   is(getStyle(node, "margin-right"), "", "Should have updated the margin.");
 
-  EventUtils.synthesizeKey("VK_RETURN", {}, viewWin);
-  yield waitForUpdate(inspector);
+  EventUtils.synthesizeKey("VK_RETURN", {}, view);
+  yield waitForUpdate();
 
   is(getStyle(node, "margin-right"), "", "Should be the right margin-top on the element.")
   is(span.textContent, 10, "Should have the right value in the box model.");
-}
+});
