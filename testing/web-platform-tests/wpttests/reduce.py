@@ -37,7 +37,7 @@ def next_power_of_two(num):
         rv = rv << 1
     return rv
 
-class Bisector(object):
+class Reducer(object):
     def __init__(self, target, **kwargs):
         self.target = target
 
@@ -182,9 +182,9 @@ class Bisector(object):
 
         return tests
 
-def do_bisect(**kwargs):
+def do_reduce(**kwargs):
     target = kwargs.pop("target")
-    bisector = Bisector(target, **kwargs)
+    reducer = Reducer(target, **kwargs)
 
-    unstable_set = bisector.run()
+    unstable_set = reducer.run()
     return unstable_set

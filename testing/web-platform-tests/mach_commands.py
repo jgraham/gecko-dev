@@ -101,9 +101,9 @@ class WebPlatformTestsUpdater(MozbuildObject):
 
         update.run_update(**kwargs)
 
-class WebPlatformTestsUnstableBisect(WebPlatformTestsRunner):
+class WebPlatformTestsReduce(WebPlatformTestsRunner):
 
-    def run_bisect(self, **kwargs):
+    def run_reduce(self, **kwargs):
         from wpttests import wptrunner
         from wpttests import unstable
 
@@ -114,7 +114,7 @@ class WebPlatformTestsUnstableBisect(WebPlatformTestsRunner):
         self.log_manager.register_structured_logger(unstable.logger)
         self.log_manager.add_terminal_logging()
 
-        tests = unstable.do_bisect(**kwargs)
+        tests = unstable.do_reduce(**kwargs)
 
         if not tests:
             logger.warning("Test was not unstable")
@@ -149,14 +149,11 @@ class MachCommands(MachCommandBase):
         self._activate_virtualenv()
         self.virtualenv_manager.install_pip_package('py==1.4.14')
 
-    @Command("web-platform-tests-unstable",
+    @Command("web-platform-tests-reduce",
              category="testing",
-             parser=wptcommandline.create_parser_unstable(False))
+             parser=wptcommandline.create_parser_reduce(False))
     def unstable_web_platform_tests(self, **params):
         self.setup()
-        wpt_unstable = self._spawn(WebPlatformTestsUnstableBisect)
-        return wpt_unstable.run_bisect(**params)
+        wpt_reduce = self._spawn(WebPlatformTestsReduce)
+        return wpt_reduce.run_reduce(**params)
 
-    def setup(self):
-        self._activate_virtualenv()
-        self.virtualenv_manager.install_pip_package('py==1.4.14')

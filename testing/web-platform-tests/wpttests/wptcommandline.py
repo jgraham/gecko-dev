@@ -93,7 +93,7 @@ def create_parser_update(allow_mandatory=True):
                         help="Log file from run of tests")
     return parser
 
-def create_parser_unstable(allow_mandatory=True):
+def create_parser_reduce(allow_mandatory=True):
     parser = create_parser(allow_mandatory)
     parser.add_argument("target", action="store", help="Test id that is unstable")
     return parser
