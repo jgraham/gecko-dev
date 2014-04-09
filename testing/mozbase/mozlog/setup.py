@@ -30,5 +30,4 @@ setup(name=PACKAGE_NAME,
           "console_scripts": [
               "structlog = mozlog.structured.scripts:main"
           ]}
-      """
      )
