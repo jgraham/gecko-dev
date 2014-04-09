@@ -1,56 +1,48 @@
+/* vim: set ts=2 et sw=2 tw=80: */
 /* Any copyright is dedicated to the Public Domain.
-   http://creativecommons.org/publicdomain/zero/1.0/ */
+ http://creativecommons.org/publicdomain/zero/1.0/ */
 
-function getStyle(node, property) {
-  return node.style.getPropertyValue(property);
-}
+"use strict";
 
-let doc;
-let inspector;
+// Test that editing the box model border region applies the border
 
 let test = asyncTest(function*() {
   let style = "div { margin: 10px; padding: 3px } #div1 { margin-top: 5px } #div2 { border-bottom: 1em solid black; } #div3 { padding: 2em; }";
   let html = "<style>" + style + "</style><div id='div1'></div><div id='div2'></div><div id='div3'></div>"
 
-  let content = yield loadTab("data:text/html," + encodeURIComponent(html));
-  doc = content.document;
+  yield addTab("data:text/html," + encodeURIComponent(html));
+  let {inspector, view} = yield openLayoutView();
 
-  let target = TargetFactory.forTab(gBrowser.selectedTab);
-  let toolbox = yield gDevTools.showToolbox(target, "inspector");
-  inspector = toolbox.getCurrentPanel();
+  let viewDoc = view.doc;
+  let viewWin = viewDoc.defaultView;
 
-  inspector.sidebar.select("layoutview");
-  yield inspector.sidebar.once("layoutview-ready");
-  yield runTests();
-  yield gDevTools.closeToolbox(toolbox);
-});
+  info("Test that adding a border applies a border style when necessary");
 
-addTest("Test that adding a border applies a border style when necessary",
-function*() {
-  let node = doc.getElementById("div1");
+  let node = getNode("#div1");
   is(getStyle(node, "border-top-width"), "", "Should have the right border");
   is(getStyle(node, "border-top-style"), "", "Should have the right border");
-  let view = yield selectNode(node);
+  yield selectNode(node, inspector);
 
-  let span = view.document.querySelector(".border.top > span");
+  let span = viewDoc.querySelector(".border.top > span");
   is(span.textContent, 0, "Should have the right value in the box model.");
 
-  EventUtils.synthesizeMouseAtCenter(span, {}, view);
-  let editor = view.document.querySelector(".styleinspector-propertyeditor");
+  EventUtils.synthesizeMouseAtCenter(span, {}, viewWin);
+  let editor = viewDoc.querySelector(".styleinspector-propertyeditor");
   ok(editor, "Should have opened the editor.");
   is(editor.value, "0", "Should have the right value in the editor.");
 
-  EventUtils.synthesizeKey("1", {}, view);
-  yield waitForUpdate();
+  EventUtils.synthesizeKey("1", {}, viewWin);
+  yield waitForUpdate(inspector);
 
   is(editor.value, "1", "Should have the right value in the editor.");
   is(getStyle(node, "border-top-width"), "1px", "Should have the right border");
   is(getStyle(node, "border-top-style"), "solid", "Should have the right border");
 
-  EventUtils.synthesizeKey("VK_ESCAPE", {}, view);
-  yield waitForUpdate();
+  EventUtils.synthesizeKey("VK_ESCAPE", {}, viewWin);
+  yield inspector.once("inspector-updated");
+  yield waitForUpdate(inspector);
 
-  is(getStyle(node, "border-top-width"), "", "Should be the right padding.")
+  is(getStyle(node, "border-top-width"), "", "Should be the right padding.");
   is(getStyle(node, "border-top-style"), "", "Should have the right border");
   is(span.textContent, 0, "Should have the right value in the box model.");
 });
