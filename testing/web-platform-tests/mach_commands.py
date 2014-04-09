@@ -42,14 +42,10 @@ class WebPlatformTestsRunner(MozbuildObject):
         self._logger = structuredlog.StructuredLogger("web-platform-tests.mach")
         MozbuildObject.__init__(self, topsrcdir, settings, log_manager, topobjdir)
 
-    def run_tests(self, **kwargs):
-        # TODO Bug 794506 remove once mach integrates with virtualenv.
-
+    def setup_kwargs(self, kwargs):
         build_path = os.path.join(self.topobjdir, 'build')
         if build_path not in sys.path:
             sys.path.append(build_path)
-
-        from wpttests import wptrunner
 
         if kwargs["binary"] is None:
             kwargs["binary"] = os.path.join(self.bindir, 'firefox')
@@ -63,14 +59,26 @@ class WebPlatformTestsRunner(MozbuildObject):
         if kwargs["prefs_root"] is None:
             kwargs["prefs_root"] = os.path.join(self.topobjdir, '_tests', 'web-platform-tests', "prefs")
 
-        kwargs["capture_stdio"] = True
+    def run_tests(self, **kwargs):
+        from wpttests import wptrunner
 
+        self.setup_kwargs(kwargs)
+
+        kwargs["capture_stdio"] = True
         logger = wptrunner.setup_logging(kwargs, {})
         self.log_manager.register_structured_logger(wptrunner.logger)
         self.log_manager.add_terminal_logging()
+
         result = wptrunner.run_tests(**kwargs)
 
         return int(not result)
+
+    def list_test_groups(self, **kwargs):
+        from wpttests import wptrunner
+
+        self.setup_kwargs(kwargs)
+
+        result = wptrunner.list_test_groups(**kwargs)
 
 class WebPlatformTestsUpdater(MozbuildObject):
     """Update web platform tests."""
@@ -101,7 +109,11 @@ class MachCommands(MachCommandBase):
     def run_web_platform_tests(self, **params):
         self.setup()
         wpt_runner = self._spawn(WebPlatformTestsRunner)
-        return wpt_runner.run_tests(**params)
+
+        if params["list_test_groups"]:
+            return wpt_runner.list_test_groups(**params)
+        else:
+            return wpt_runner.run_tests(**params)
 
     @Command("web-platform-tests-update",
              category="testing",

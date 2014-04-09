@@ -258,39 +258,63 @@ class ManifestFilter(object):
             if include_tests:
                 yield test_path, include_tests
 
-def queue_tests(test_root, metadata_root, test_types, run_info, include_filters,
-                chunk_type, total_chunks, chunk_number):
-    """Read in the tests from the manifest file and add them to a queue"""
-    test_ids = []
-    tests_by_type = defaultdict(Queue)
+class TestLoader(object):
+    def __init__(self, tests_root, metadata_root, run_info):
+        self.tests_root = tests_root
+        self.metadata_root = metadata_root
+        self.run_info = run_info
+        self.manifest = self.load_manifest()
 
-    metadata.do_test_relative_imports(test_root)
-    manifest = metadata.manifest.load(os.path.join(metadata_root, "MANIFEST.json"))
+    def load_manifest(self):
+        metadata.do_test_relative_imports(self.tests_root)
+        return metadata.manifest.load(os.path.join(self.metadata_root, "MANIFEST.json"))
 
-    manifest_filter = ManifestFilter(include=include_filters)
-    manifest_items = manifest_filter(manifest.itertypes(*test_types))
+    def get_test(self, manifest_test, expected_file):
+        if expected_file is not None:
+            expected = expected_file.get_test(manifest_test.id)
+        else:
+            expected = None
+        return wpttest.from_manifest(manifest_test, expected)
 
-    chunker = {"none": Unchunked,
-               "hash": HashChunker,
-               "equal_time": EqualTimeChunker}[chunk_type](total_chunks,
-                                                           chunk_number)
+    def load_expected_manifest(self, test_path):
+        return manifestexpected.get_manifest(self.metadata_root, test_path, self.run_info)
 
-    #TODO need to do the filtering of types before the chunker runs
-    for test_path, tests in chunker(manifest_items):
-        expected_file = manifestexpected.get_manifest(metadata_root, test_path, run_info)
-        for manifest_test in tests:
-            test_type = manifest_test.item_type
-            if expected_file is not None:
-                expected = expected_file.get_test(manifest_test.id)
-            else:
-                expected = None
-            test = wpttest.from_manifest(manifest_test, expected)
-            if not test.disabled():
-                tests_by_type[test_type].put(test)
-                test_ids.append(test.id)
+    def get_groups(self, test_types):
+        groups = set()
 
+        for test_path, tests in self.manifest.itertypes(*test_types):
+            expected_file = self.load_expected_manifest(test_path)
+            for manifest_test in tests:
+                test = self.get_test(manifest_test, expected_file)
+                if not test.disabled():
+                    group = test.url.split("/")[1]
+                    groups.add(group)
 
-    return test_ids, tests_by_type
+        return groups
+
+    def queue_tests(self, test_types, include_filters, chunk_type, total_chunks, chunk_number):
+        """Read in the tests from the manifest file and add them to a queue"""
+        test_ids = []
+        tests_by_type = defaultdict(Queue)
+
+        manifest_filter = ManifestFilter(include=include_filters)
+        manifest_items = manifest_filter(self.manifest.itertypes(*test_types))
+
+        chunker = {"none": Unchunked,
+                   "hash": HashChunker,
+                   "equal_time": EqualTimeChunker}[chunk_type](total_chunks,
+                                                               chunk_number)
+
+        for test_path, tests in chunker(manifest_items):
+            expected_file = self.load_expected_manifest(test_path)
+            for manifest_test in tests:
+                test = self.get_test(manifest_test, expected_file)
+                test_type = manifest_test.item_type
+                if not test.disabled():
+                    tests_by_type[test_type].put(test)
+                    test_ids.append(test.id)
+
+        return test_ids, tests_by_type
 
 
 class LogThread(threading.Thread):
@@ -366,10 +390,17 @@ def get_executor(product, test_type, http_server_url, timeout_multiplier):
 
     return executor_cls, executor_kwargs
 
+def list_test_groups(tests_root, metadata_root, test_types, product, **kwargs):
+    run_info = wpttest.get_run_info(product, debug=False)
+    test_loader = TestLoader(tests_root, metadata_root, run_info)
+
+    for item in sorted(test_loader.get_groups(test_types)):
+        print item
+
 def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
               processes=1, include=None, capture_stdio=True, product="firefox",
               chunk_type="none", total_chunks=1, this_chunk=1, timeout_multiplier=1,
-              repeat=1):
+              repeat=1, **kwargs):
     logging_queue = None
     original_stdio = (sys.stdout, sys.stderr)
     test_queues = None
@@ -393,12 +424,12 @@ def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
 
         unexpected_count = 0
 
+        test_loader = TestLoader(tests_root, metadata_root, run_info)
+
         with TestEnvironment(tests_root, env_options) as test_environment:
             base_server = "http://%s:%i" % (test_environment.config["host"],
                                             test_environment.config["ports"]["http"][0])
-            test_ids, test_queues = queue_tests(tests_root, metadata_root,
-                                                test_types, run_info, include,
-                                                chunk_type, total_chunks, this_chunk)
+            test_ids, test_queues = test_loader.queue_tests(test_types, include, chunk_type, total_chunks, this_chunk)
             for repeat_count in xrange(repeat):
                 logger.suite_start(test_ids, run_info)
                 for test_type in test_types:
@@ -472,4 +503,7 @@ def main():
 
     setup_logging(kwargs, {"raw": sys.stdout})
 
-    return run_tests(**kwargs)
+    if args.list_test_groups:
+        list_test_groups(**kwargs)
+    else:
+        return run_tests(**kwargs)

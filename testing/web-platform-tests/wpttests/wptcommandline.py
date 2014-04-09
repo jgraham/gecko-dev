@@ -14,6 +14,10 @@ root = os.path.join(os.path.split(__file__)[0])
 def abs_path(path):
     return os.path.abspath(path)
 
+def slash_prefixed(url):
+    if not url.startswith("/"):
+        url = "/" + url
+    return url
 
 def create_parser(allow_mandatory=True):
     if not allow_mandatory:
@@ -39,7 +43,8 @@ def create_parser(allow_mandatory=True):
                         help="Test types to run")
     parser.add_argument("--processes", action="store", type=int, default=1,
                         help="Number of simultaneous processes to use")
-    parser.add_argument("--include", action="append", help="URL prefix to include")
+    parser.add_argument("--include", action="append", type=slash_prefixed,
+                        help="URL prefix to include")
 
     parser.add_argument("--total-chunks", action="store", type=int, default=1,
                         help="Total number of chunks to use")
@@ -47,6 +52,11 @@ def create_parser(allow_mandatory=True):
                         help="Chunk number to run")
     parser.add_argument("--chunk-type", action="store", choices=["none", "equal_time", "hash"],
                         default="none", help="Chunking type to use")
+
+    parser.add_argument("--list-test-groups", action="store_true",
+                        default=False,
+                        help="List the top level directories containing tests that will run.")
+
     parser.add_argument("--timeout-multiplier", action="store", type=float, default=1,
                         help="Multiplier relative to standard test timeout to use")
     parser.add_argument("--repeat", action="store", type=int, default=1,
@@ -57,9 +67,8 @@ def create_parser(allow_mandatory=True):
     parser.add_argument("-o", dest="output_file", action="store", type=abs_path)
     parser.add_argument("--log-stdout", action="store_true")
 
-    if allow_mandatory:
-        parser.add_argument("--product", action="store", choices=["firefox", "servo", "b2g"],
-                            default="firefox")
+    parser.add_argument("--product", action="store", choices=["firefox", "servo", "b2g"],
+                        default="firefox")
     commandline.add_logging_group(parser)
     return parser
 
