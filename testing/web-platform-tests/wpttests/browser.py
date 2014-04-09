@@ -6,6 +6,8 @@ import os
 import socket
 import sys
 import time
+import tempfile
+import shutil
 
 import mozprocess
 from mozprofile import FirefoxProfile, Preferences
@@ -43,10 +45,14 @@ class Browser(object):
         self.logger = logger
 
     def __enter__(self):
+        self.setup()
         return self
 
     def __exit__(self, *args, **kwargs):
         self.cleanup()
+
+    def setup(self):
+        pass
 
     def start(self):
         raise NotImplementedError
@@ -164,15 +170,27 @@ class B2GBrowser(Browser):
         self.runner = None
         self.prefs_root = prefs_root
 
+        self.backup_path = None
+        self.backup_dirs = []
+
+    def setup(self):
+        self.backup_path = tempfile.mkdtemp()
+
+        self.backup_dirs = [("/data/local", os.path.join(self.backup_path, "local")),
+                            ("/data/b2g/mozilla", os.path.join(self.backup_path, "profile"))]
+
+        for remote, local in self.backup_dirs:
+            self.device.getDirectory(remote, local)
+
     def start(self):
         locations = ServerLocations(filename=os.path.join(here, "server-locations.txt"))
 
         preferences = self.load_prefs()
-
         profile = FirefoxProfile(locations=locations, proxy={"remote": moznetwork.get_ip()},
                                  preferences=preferences)
 
-        profile.set_preferences({# # These ones are blindly copied from Mochitest
+        profile.set_preferences({#
+                                 "dom.disable_open_during_load": False,
                                  "dom.mozBrowserFramesEnabled": True,
                                  # "dom.ipc.tabs.disabled": False,
                                  # "dom.ipc.browser_frames.oop_by_default": False,
@@ -201,6 +219,12 @@ class B2GBrowser(Browser):
         self.logger.debug("Running browser cleanup steps")
         if self.runner is not None:
             self.runner.cleanup()
+
+        for remote, local in self.backup_dirs:
+            self.device.removeDir(remote)
+            self.device.pushDir(local, remote)
+        shutil.rmtree(self.backup_path)
+        self.device.reboot()
 
     def pid(self):
         return "Remote"
