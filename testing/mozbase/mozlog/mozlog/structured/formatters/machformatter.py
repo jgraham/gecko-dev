@@ -55,6 +55,10 @@ class BaseMachFormatter(base.BaseFormatter):
         subtests = self._get_subtest_data(data)
         unexpected = subtests["unexpected"] + (1 if "expected" in data else 0)
 
+        #Reset the counts to 0
+        test = self._get_test_id(data)
+        self.status_buffer[test] = {"count": 0, "unexpected": 0, "pass": 0}
+
         return "Harness status %s%s. Subtests passed %i/%i. Unexpected %i" % (
             data["status"], expected_str, subtests["pass"],
             subtests["count"], unexpected)
