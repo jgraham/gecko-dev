@@ -53,10 +53,10 @@ class ManifestSerializer(NodeVisitor):
         return ["if %s: %s" % tuple(self.visit(item)[0] for item in node.children)]
 
     def visit_StringNode(self, node):
-        rv = "\"%s\"" % node.data
+        rv = ["\"%s\"" % node.data]
         for child in node.children:
-            rv += self.visit(value)
-        return [rv]
+            rv[0] += self.visit(child)[0]
+        return rv
 
     def visit_NumberNode(self, node):
         return [node.data]

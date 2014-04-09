@@ -5,8 +5,8 @@ import os
 sys.path.insert(0, os.path.abspath(".."))
 from cStringIO import StringIO
 
-import parser
-from parser import token_types
+from .. import parser
+from ..parser import token_types
 
 class TokenizerTest(unittest.TestCase):
     def setUp(self):
@@ -20,74 +20,74 @@ class TokenizerTest(unittest.TestCase):
                 break
         return rv
 
-    def run_test(self, input_text, expected):
+    def compare(self, input_text, expected):
         expected = expected + [(token_types.eof, None)]
         actual = self.tokenize(input_text)
         self.assertEquals(actual, expected)
 
     def test_heading_0(self):
-        self.run_test("""[Heading text]""",
-                      [(token_types.paren, "["),
-                       (token_types.string, "Heading text"),
-                       (token_types.paren, "]")])
+        self.compare("""[Heading text]""",
+                     [(token_types.paren, "["),
+                      (token_types.string, "Heading text"),
+                      (token_types.paren, "]")])
 
     def test_heading_1(self):
-        self.run_test("""[Heading [text\]]""",
-                      [(token_types.paren, "["),
-                       (token_types.string, "Heading [text]"),
-                       (token_types.paren, "]")])
+        self.compare("""[Heading [text\]]""",
+                     [(token_types.paren, "["),
+                      (token_types.string, "Heading [text]"),
+                      (token_types.paren, "]")])
 
     def test_heading_2(self):
-        self.run_test("""[Heading #text]""",
-                      [(token_types.paren, "["),
-                       (token_types.string, "Heading #text"),
-                       (token_types.paren, "]")])
+        self.compare("""[Heading #text]""",
+                     [(token_types.paren, "["),
+                      (token_types.string, "Heading #text"),
+                      (token_types.paren, "]")])
 
     def test_heading_3(self):
-        self.run_test("""[Heading [\]text]""",
-                      [(token_types.paren, "["),
-                       (token_types.string, "Heading []text"),
-                       (token_types.paren, "]")])
+        self.compare("""[Heading [\]text]""",
+                     [(token_types.paren, "["),
+                      (token_types.string, "Heading []text"),
+                      (token_types.paren, "]")])
 
     def test_heading_4(self):
         with self.assertRaises(parser.ParseError):
             self.tokenize("[Heading")
 
     def test_heading_5(self):
-        self.run_test("""[Heading [\]text] #comment""",
-                      [(token_types.paren, "["),
-                       (token_types.string, "Heading []text"),
-                       (token_types.paren, "]")])
+        self.compare("""[Heading [\]text] #comment""",
+                     [(token_types.paren, "["),
+                      (token_types.string, "Heading []text"),
+                      (token_types.paren, "]")])
 
     def test_heading_3(self):
-        self.run_test("""[Heading \\ttext]""",
-                      [(token_types.paren, "["),
-                       (token_types.string, "Heading \ttext"),
-                       (token_types.paren, "]")])
+        self.compare("""[Heading \\ttext]""",
+                     [(token_types.paren, "["),
+                      (token_types.string, "Heading \ttext"),
+                      (token_types.paren, "]")])
 
     def test_key_0(self):
-        self.run_test("""key:value""",
-                      [(token_types.string, "key"),
-                       (token_types.separator, ":"),
-                        (token_types.string, "value")])
+        self.compare("""key:value""",
+                     [(token_types.string, "key"),
+                      (token_types.separator, ":"),
+                      (token_types.string, "value")])
 
     def test_key_1(self):
-        self.run_test("""key  :  value""",
-                      [(token_types.string, "key"),
-                       (token_types.separator, ":"),
-                        (token_types.string, "value")])
+        self.compare("""key  :  value""",
+                     [(token_types.string, "key"),
+                      (token_types.separator, ":"),
+                      (token_types.string, "value")])
 
     def test_key_2(self):
-        self.run_test("""key  :  val ue""",
-                      [(token_types.string, "key"),
-                       (token_types.separator, ":"),
-                        (token_types.string, "val ue")])
+        self.compare("""key  :  val ue""",
+                     [(token_types.string, "key"),
+                      (token_types.separator, ":"),
+                      (token_types.string, "val ue")])
 
     def test_key_3(self):
-        self.run_test("""key: value#comment""",
-                      [(token_types.string, "key"),
-                       (token_types.separator, ":"),
-                        (token_types.string, "value")])
+        self.compare("""key: value#comment""",
+                     [(token_types.string, "key"),
+                      (token_types.separator, ":"),
+                      (token_types.string, "value")])
 
     def test_key_4(self):
         with self.assertRaises(parser.ParseError):
@@ -99,28 +99,28 @@ class TokenizerTest(unittest.TestCase):
             self.tokenize("""key""")
 
     def test_key_6(self):
-        self.run_test("""key: "value\"""",
-                      [(token_types.string, "key"),
-                       (token_types.separator, ":"),
-                        (token_types.string, "value")])
+        self.compare("""key: "value\"""",
+                     [(token_types.string, "key"),
+                      (token_types.separator, ":"),
+                      (token_types.string, "value")])
 
     def test_key_7(self):
-        self.run_test("""key: 'value'""",
-                      [(token_types.string, "key"),
-                       (token_types.separator, ":"),
-                        (token_types.string, "value")])
+        self.compare("""key: 'value'""",
+                     [(token_types.string, "key"),
+                      (token_types.separator, ":"),
+                      (token_types.string, "value")])
 
     def test_key_8(self):
-        self.run_test("""key: "#value\"""",
-                      [(token_types.string, "key"),
-                       (token_types.separator, ":"),
-                        (token_types.string, "#value")])
+        self.compare("""key: "#value\"""",
+                     [(token_types.string, "key"),
+                      (token_types.separator, ":"),
+                      (token_types.string, "#value")])
 
     def test_key_9(self):
-        self.run_test("""key: '#value\'""",
-                      [(token_types.string, "key"),
-                       (token_types.separator, ":"),
-                        (token_types.string, "#value")])
+        self.compare("""key: '#value\'""",
+                     [(token_types.string, "key"),
+                      (token_types.separator, ":"),
+                      (token_types.string, "#value")])
 
     def test_key_10(self):
         with self.assertRaises(parser.ParseError):
@@ -139,7 +139,7 @@ class TokenizerTest(unittest.TestCase):
             self.tokenize("""key: 'value' abc""")
 
     def test_expr_0(self):
-        self.run_test(
+        self.compare(
 """
 key:
   if cond == 1: value""",
@@ -154,7 +154,7 @@ key:
              (token_types.string, "value")])
 
     def test_expr_1(self):
-        self.run_test(
+        self.compare(
 """
 key:
   if cond == 1: value1
@@ -171,7 +171,7 @@ key:
              (token_types.string, "value2")])
 
     def test_expr_2(self):
-        self.run_test(
+        self.compare(
 """
 key:
   if cond=="1": value""",
@@ -186,7 +186,7 @@ key:
              (token_types.string, "value")])
 
     def test_expr_3(self):
-        self.run_test(
+        self.compare(
 """
 key:
   if cond==1.1: value""",
@@ -201,7 +201,7 @@ key:
              (token_types.string, "value")])
 
     def test_expr_4(self):
-        self.run_test(
+        self.compare(
 """
 key:
   if cond==1.1 and cond2 == "a": value""",
@@ -220,7 +220,7 @@ key:
              (token_types.string, "value")])
 
     def test_expr_5(self):
-        self.run_test(
+        self.compare(
 """
 key:
   if (cond==1.1 ): value""",
@@ -237,7 +237,7 @@ key:
              (token_types.string, "value")])
 
     def test_expr_6(self):
-        self.run_test(
+        self.compare(
 """
 key:
   if "\\ttest": value""",
@@ -271,7 +271,7 @@ key:
   if 1.1.1: value""")
 
     def test_expr_10(self):
-        self.run_test(
+        self.compare(
 """
 key:
   if 1.: value""",

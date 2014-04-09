@@ -2,10 +2,9 @@ import unittest
 
 import sys
 import os
-sys.path.insert(0, os.path.abspath(".."))
 from cStringIO import StringIO
 
-import parser
+from .. import parser
 
 class TestExpression(unittest.TestCase):
     def setUp(self):
@@ -14,7 +13,7 @@ class TestExpression(unittest.TestCase):
     def parse(self, input_str):
         return self.parser.parse(StringIO(input_str))
 
-    def run_test(self, input_text, expected):
+    def compare(self, input_text, expected):
         actual = self.parse(input_text)
         self.match(expected, actual)
 
@@ -26,7 +25,7 @@ class TestExpression(unittest.TestCase):
             self.match(expected_child, actual_child)
 
     def test_expr_0(self):
-        self.run_test(
+        self.compare(
 """
 key:
   if x == 1 : value""",
@@ -43,7 +42,7 @@ key:
 )
 
     def test_expr_1(self):
-        self.run_test(
+        self.compare(
 """
 key:
   if not x and y : value""",
