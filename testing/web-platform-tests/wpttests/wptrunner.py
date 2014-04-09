@@ -264,6 +264,7 @@ class TestLoader(object):
         self.metadata_root = metadata_root
         self.run_info = run_info
         self.manifest = self.load_manifest()
+        self._tests = None
 
     def load_manifest(self):
         metadata.do_test_relative_imports(self.tests_root)
@@ -279,6 +280,11 @@ class TestLoader(object):
     def load_expected_manifest(self, test_path):
         return manifestexpected.get_manifest(self.metadata_root, test_path, self.run_info)
 
+    @property
+    def tests(self):
+        if self._tests is None:
+            self._tests = 
+
     def get_groups(self, test_types):
         groups = set()
 
@@ -292,9 +298,9 @@ class TestLoader(object):
 
         return groups
 
-    def queue_tests(self, test_types, include_filters, chunk_type, total_chunks, chunk_number):
+    def load_tests(self, test_types, include_filters, chunk_type, total_chunks, chunk_number):
         """Read in the tests from the manifest file and add them to a queue"""
-        test_ids = []
+        tests = []
         tests_by_type = defaultdict(Queue)
 
         manifest_filter = ManifestFilter(include=include_filters)
@@ -311,6 +317,11 @@ class TestLoader(object):
                 test = self.get_test(manifest_test, expected_file)
                 test_type = manifest_test.item_type
                 if not test.disabled():
+                    tests.append(test)
+
+        return tests
+
+    def queue_tests(self, test_types, include_filters, chunk_type, total_chunks, chunk_number):
                     tests_by_type[test_type].put(test)
                     test_ids.append(test.id)
 
