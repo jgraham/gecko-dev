@@ -31,6 +31,12 @@ def group(items, size):
 
     return rv
 
+def next_power_of_two(num):
+    rv = 1
+    while rv < num:
+        rv = rv << 1
+    return rv
+
 class Bisector(object):
     def __init__(self, target, **kwargs):
         self.target = target
@@ -59,7 +65,7 @@ class Bisector(object):
         if not self.unstable(all_tests):
             return []
 
-        chunk_size = int(len(tests) / 2)
+        chunk_size = next_power_of_two(int(len(tests) / 2))
         logger.debug("Using chunk size %i" % chunk_size)
 
         while chunk_size >= 1:
