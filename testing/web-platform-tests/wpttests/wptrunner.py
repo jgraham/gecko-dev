@@ -264,7 +264,7 @@ class TestLoader(object):
         self.metadata_root = metadata_root
         self.run_info = run_info
         self.manifest = self.load_manifest()
-        self._tests = None
+        self.tests = None
 
     def load_manifest(self):
         metadata.do_test_relative_imports(self.tests_root)
@@ -280,28 +280,9 @@ class TestLoader(object):
     def load_expected_manifest(self, test_path):
         return manifestexpected.get_manifest(self.metadata_root, test_path, self.run_info)
 
-    @property
-    def tests(self):
-        if self._tests is None:
-            self._tests = 
-
-    def get_groups(self, test_types):
-        groups = set()
-
-        for test_path, tests in self.manifest.itertypes(*test_types):
-            expected_file = self.load_expected_manifest(test_path)
-            for manifest_test in tests:
-                test = self.get_test(manifest_test, expected_file)
-                if not test.disabled():
-                    group = test.url.split("/")[1]
-                    groups.add(group)
-
-        return groups
-
     def load_tests(self, test_types, include_filters, chunk_type, total_chunks, chunk_number):
         """Read in the tests from the manifest file and add them to a queue"""
-        tests = []
-        tests_by_type = defaultdict(Queue)
+        rv = defaultdict(list)
 
         manifest_filter = ManifestFilter(include=include_filters)
         manifest_items = manifest_filter(self.manifest.itertypes(*test_types))
@@ -317,16 +298,36 @@ class TestLoader(object):
                 test = self.get_test(manifest_test, expected_file)
                 test_type = manifest_test.item_type
                 if not test.disabled():
-                    tests.append(test)
+                    rv[test_type].append(test)
 
-        return tests
+        return rv
+
+    def get_groups(self, test_types, include_filters=None, chunk_type="none", total_chunks=1, chunk_number=1):
+        if self.tests is None:
+            self.tests = self.load_tests(test_types, include_filters, chunk_type, total_chunks, chunk_number)
+
+        groups = set()
+
+        for test_type in test_types:
+            for test in self.tests[test_type]:
+                group = test.url.split("/")[1]
+                groups.add(group)
+
+        return groups
 
     def queue_tests(self, test_types, include_filters, chunk_type, total_chunks, chunk_number):
-                    tests_by_type[test_type].put(test)
-                    test_ids.append(test.id)
+        if self.tests is None:
+            self.tests = self.load_tests(test_types, include_filters, chunk_type, total_chunks, chunk_number)
 
-        return test_ids, tests_by_type
+        tests_queue = defaultdict(Queue)
+        test_ids = []
 
+        for test_type in test_types:
+            for test in self.tests[test_type]:
+                tests_queue[test_type].put(test)
+                test_ids.append(test.id)
+                    
+        return test_ids, tests_queue
 
 class LogThread(threading.Thread):
     def __init__(self, queue, logger, level):
@@ -435,7 +436,10 @@ def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
 
         unexpected_count = 0
 
-        test_loader = TestLoader(tests_root, metadata_root, run_info)
+        if "test_loader" in kwargs:
+            test_loader = kwargs["test_loader"]
+        else:
+            test_loader = TestLoader(tests_root, metadata_root, run_info)
 
         with TestEnvironment(tests_root, env_options) as test_environment:
             base_server = "http://%s:%i" % (test_environment.config["host"],

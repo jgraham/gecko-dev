@@ -101,6 +101,27 @@ class WebPlatformTestsUpdater(MozbuildObject):
 
         update.run_update(**kwargs)
 
+class WebPlatformTestsUnstableBisect(WebPlatformTestsRunner):
+
+    def run_bisect(self, **kwargs):
+        from wpttests import wptrunner
+        from wpttests import unstable
+
+        self.setup_kwargs(kwargs)
+
+        kwargs["capture_stdio"] = True
+        logger = unstable.setup_logging(kwargs, {})
+        self.log_manager.register_structured_logger(unstable.logger)
+        self.log_manager.add_terminal_logging()
+
+        tests = unstable.do_bisect(**kwargs)
+
+        if not tests:
+            logger.warning("Test was not unstable")
+
+        for item in tests:
+            logger.info(item.id)
+
 @CommandProvider
 class MachCommands(MachCommandBase):
     @Command("web-platform-tests",
@@ -123,6 +144,18 @@ class MachCommands(MachCommandBase):
         self.virtualenv_manager.install_pip_package('html5lib==0.99')
         wpt_updater = self._spawn(WebPlatformTestsUpdater)
         return wpt_updater.run_update(**params)
+
+    def setup(self):
+        self._activate_virtualenv()
+        self.virtualenv_manager.install_pip_package('py==1.4.14')
+
+    @Command("web-platform-tests-unstable",
+             category="testing",
+             parser=wptcommandline.create_parser_unstable(False))
+    def unstable_web_platform_tests(self, **params):
+        self.setup()
+        wpt_unstable = self._spawn(WebPlatformTestsUnstableBisect)
+        return wpt_unstable.run_bisect(**params)
 
     def setup(self):
         self._activate_virtualenv()

@@ -62,11 +62,6 @@ def create_parser(allow_mandatory=True):
     parser.add_argument("--repeat", action="store", type=int, default=1,
                         help="Number of times to run the tests")
 
-
-    #Legacy options until mozharness is updated
-    parser.add_argument("-o", dest="output_file", action="store", type=abs_path)
-    parser.add_argument("--log-stdout", action="store_true")
-
     parser.add_argument("--product", action="store", choices=["firefox", "servo", "b2g"],
                         default="firefox")
     commandline.add_logging_group(parser)
@@ -96,6 +91,11 @@ def create_parser_update(allow_mandatory=True):
     #Should make this required iff run=logfile
     parser.add_argument("--run-log", action="append", type=abs_path,
                         help="Log file from run of tests")
+    return parser
+
+def create_parser_unstable(allow_mandatory=True):
+    parser = create_parser(allow_mandatory)
+    parser.add_argument("target", action="store", help="Test id that is unstable")
     return parser
 
 def parse_args():
