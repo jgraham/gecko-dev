@@ -326,7 +326,7 @@ class TestLoader(object):
             for test in self.tests[test_type]:
                 tests_queue[test_type].put(test)
                 test_ids.append(test.id)
-                    
+
         return test_ids, tests_queue
 
 class LogThread(threading.Thread):
@@ -434,7 +434,7 @@ def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
         browser_cls, browser_kwargs = get_browser(product, binary, prefs_root)
         env_options = get_options(product)
 
-        unexpected_count = 0
+        unexpected_total = 0
 
         if "test_loader" in kwargs:
             test_loader = kwargs["test_loader"]
@@ -445,7 +445,10 @@ def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
             base_server = "http://%s:%i" % (test_environment.config["host"],
                                             test_environment.config["ports"]["http"][0])
             for repeat_count in xrange(repeat):
+                if repeat > 1:
+                    logger.info("Repetition %i / %i" % (repeat_count + 1, repeat))
                 test_ids, test_queues = test_loader.queue_tests(test_types, include, chunk_type, total_chunks, this_chunk)
+                unexpected_count = 0
                 logger.suite_start(test_ids, run_info)
                 for test_type in test_types:
                     tests_queue = test_queues[test_type]
@@ -472,6 +475,7 @@ def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
                         manager_group.wait()
                     unexpected_count += manager_group.unexpected_count()
 
+                unexpected_total += unexpected_count
                 logger.info("Got %i unexpected results" % unexpected_count)
                 logger.suite_end()
     except KeyboardInterrupt:
