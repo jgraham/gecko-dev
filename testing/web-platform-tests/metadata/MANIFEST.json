@@ -5146,8 +5146,72 @@
         "path": "IndexedDB/idb_webworkers.htm"
       }, 
       {
+        "url": "/IndexedDB/idbcursor-advance-continue-async.htm", 
+        "path": "IndexedDB/idbcursor-advance-continue-async.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor-advance-invalid.htm", 
+        "path": "IndexedDB/idbcursor-advance-invalid.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor-advance.htm", 
+        "path": "IndexedDB/idbcursor-advance.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor-continue.htm", 
+        "path": "IndexedDB/idbcursor-continue.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor-direction-index-keyrange.htm", 
+        "path": "IndexedDB/idbcursor-direction-index-keyrange.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor-direction-index.htm", 
+        "path": "IndexedDB/idbcursor-direction-index.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor-direction-objectstore-keyrange.htm", 
+        "path": "IndexedDB/idbcursor-direction-objectstore-keyrange.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor-direction-objectstore.htm", 
+        "path": "IndexedDB/idbcursor-direction-objectstore.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor-direction.htm", 
+        "path": "IndexedDB/idbcursor-direction.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor-key.htm", 
+        "path": "IndexedDB/idbcursor-key.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor-primarykey.htm", 
+        "path": "IndexedDB/idbcursor-primarykey.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor-reused.htm", 
+        "path": "IndexedDB/idbcursor-reused.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor-source.htm", 
+        "path": "IndexedDB/idbcursor-source.htm"
+      }, 
+      {
         "url": "/IndexedDB/idbcursor_advance_index.htm", 
         "path": "IndexedDB/idbcursor_advance_index.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor_advance_index2.htm", 
+        "path": "IndexedDB/idbcursor_advance_index2.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor_advance_index3.htm", 
+        "path": "IndexedDB/idbcursor_advance_index3.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor_advance_index5.htm", 
+        "path": "IndexedDB/idbcursor_advance_index5.htm"
       }, 
       {
         "url": "/IndexedDB/idbcursor_advance_objectstore.htm", 
@@ -5168,6 +5232,18 @@
       {
         "url": "/IndexedDB/idbcursor_continue_index4.htm", 
         "path": "IndexedDB/idbcursor_continue_index4.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor_continue_index5.htm", 
+        "path": "IndexedDB/idbcursor_continue_index5.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor_continue_index6.htm", 
+        "path": "IndexedDB/idbcursor_continue_index6.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor_continue_invalid.htm", 
+        "path": "IndexedDB/idbcursor_continue_invalid.htm"
       }, 
       {
         "url": "/IndexedDB/idbcursor_continue_objectstore.htm", 
@@ -5210,6 +5286,26 @@
         "path": "IndexedDB/idbcursor_delete_objectstore3.htm"
       }, 
       {
+        "url": "/IndexedDB/idbcursor_iterating.htm", 
+        "path": "IndexedDB/idbcursor_iterating.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor_iterating_index.htm", 
+        "path": "IndexedDB/idbcursor_iterating_index.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor_iterating_index2.htm", 
+        "path": "IndexedDB/idbcursor_iterating_index2.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor_iterating_objectstore.htm", 
+        "path": "IndexedDB/idbcursor_iterating_objectstore.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbcursor_iterating_objectstore2.htm", 
+        "path": "IndexedDB/idbcursor_iterating_objectstore2.htm"
+      }, 
+      {
         "url": "/IndexedDB/idbcursor_update_index.htm", 
         "path": "IndexedDB/idbcursor_update_index.htm"
       }, 
@@ -5234,12 +5330,20 @@
         "path": "IndexedDB/idbcursor_update_objectstore3.htm"
       }, 
       {
+        "url": "/IndexedDB/idbcursor_update_objectstore4.htm", 
+        "path": "IndexedDB/idbcursor_update_objectstore4.htm"
+      }, 
+      {
         "url": "/IndexedDB/idbdatabase_close.htm", 
         "path": "IndexedDB/idbdatabase_close.htm"
       }, 
       {
         "url": "/IndexedDB/idbdatabase_close2.htm", 
         "path": "IndexedDB/idbdatabase_close2.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbdatabase_createObjectStore-createIndex-emptyname.htm", 
+        "path": "IndexedDB/idbdatabase_createObjectStore-createIndex-emptyname.htm"
       }, 
       {
         "url": "/IndexedDB/idbdatabase_createObjectStore.htm", 
@@ -5249,6 +5353,10 @@
         "url": "/IndexedDB/idbdatabase_createObjectStore10-1000ends.htm", 
         "path": "IndexedDB/idbdatabase_createObjectStore10-1000ends.htm", 
         "timeout": "long"
+      }, 
+      {
+        "url": "/IndexedDB/idbdatabase_createObjectStore10-emptyname.htm", 
+        "path": "IndexedDB/idbdatabase_createObjectStore10-emptyname.htm"
       }, 
       {
         "url": "/IndexedDB/idbdatabase_createObjectStore2.htm", 
@@ -5271,6 +5379,18 @@
         "path": "IndexedDB/idbdatabase_createObjectStore6.htm"
       }, 
       {
+        "url": "/IndexedDB/idbdatabase_createObjectStore7.htm", 
+        "path": "IndexedDB/idbdatabase_createObjectStore7.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbdatabase_createObjectStore8-parameters.htm", 
+        "path": "IndexedDB/idbdatabase_createObjectStore8-parameters.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbdatabase_createObjectStore9-invalidparameters.htm", 
+        "path": "IndexedDB/idbdatabase_createObjectStore9-invalidparameters.htm"
+      }, 
+      {
         "url": "/IndexedDB/idbdatabase_deleteObjectStore.htm", 
         "path": "IndexedDB/idbdatabase_deleteObjectStore.htm"
       }, 
@@ -5281,6 +5401,10 @@
       {
         "url": "/IndexedDB/idbdatabase_deleteObjectStore3.htm", 
         "path": "IndexedDB/idbdatabase_deleteObjectStore3.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbdatabase_deleteObjectStore4-not_reused.htm", 
+        "path": "IndexedDB/idbdatabase_deleteObjectStore4-not_reused.htm"
       }, 
       {
         "url": "/IndexedDB/idbdatabase_transaction.htm", 
@@ -5295,6 +5419,10 @@
         "path": "IndexedDB/idbdatabase_transaction3.htm"
       }, 
       {
+        "url": "/IndexedDB/idbdatabase_transaction4.htm", 
+        "path": "IndexedDB/idbdatabase_transaction4.htm"
+      }, 
+      {
         "url": "/IndexedDB/idbfactory_cmp.htm", 
         "path": "IndexedDB/idbfactory_cmp.htm"
       }, 
@@ -5307,8 +5435,28 @@
         "path": "IndexedDB/idbfactory_deleteDatabase2.htm"
       }, 
       {
+        "url": "/IndexedDB/idbfactory_deleteDatabase3.htm", 
+        "path": "IndexedDB/idbfactory_deleteDatabase3.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbfactory_deleteDatabase4.htm", 
+        "path": "IndexedDB/idbfactory_deleteDatabase4.htm"
+      }, 
+      {
         "url": "/IndexedDB/idbfactory_open.htm", 
         "path": "IndexedDB/idbfactory_open.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbfactory_open10.htm", 
+        "path": "IndexedDB/idbfactory_open10.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbfactory_open11.htm", 
+        "path": "IndexedDB/idbfactory_open11.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbfactory_open12.htm", 
+        "path": "IndexedDB/idbfactory_open12.htm"
       }, 
       {
         "url": "/IndexedDB/idbfactory_open2.htm", 
@@ -5343,12 +5491,28 @@
         "path": "IndexedDB/idbfactory_open9.htm"
       }, 
       {
+        "url": "/IndexedDB/idbindex-multientry-arraykeypath.htm", 
+        "path": "IndexedDB/idbindex-multientry-arraykeypath.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbindex-multientry-big.htm", 
+        "path": "IndexedDB/idbindex-multientry-big.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbindex-multientry.htm", 
+        "path": "IndexedDB/idbindex-multientry.htm"
+      }, 
+      {
         "url": "/IndexedDB/idbindex_count.htm", 
         "path": "IndexedDB/idbindex_count.htm"
       }, 
       {
         "url": "/IndexedDB/idbindex_count2.htm", 
         "path": "IndexedDB/idbindex_count2.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbindex_count3.htm", 
+        "path": "IndexedDB/idbindex_count3.htm"
       }, 
       {
         "url": "/IndexedDB/idbindex_get.htm", 
@@ -5381,6 +5545,10 @@
       {
         "url": "/IndexedDB/idbindex_getKey4.htm", 
         "path": "IndexedDB/idbindex_getKey4.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbindex_indexNames.htm", 
+        "path": "IndexedDB/idbindex_indexNames.htm"
       }, 
       {
         "url": "/IndexedDB/idbkeyrange.htm", 
@@ -5463,12 +5631,46 @@
         "path": "IndexedDB/idbobjectstore_count2.htm"
       }, 
       {
+        "url": "/IndexedDB/idbobjectstore_count3.htm", 
+        "path": "IndexedDB/idbobjectstore_count3.htm"
+      }, 
+      {
         "url": "/IndexedDB/idbobjectstore_createIndex.htm", 
         "path": "IndexedDB/idbobjectstore_createIndex.htm"
       }, 
       {
         "url": "/IndexedDB/idbobjectstore_createIndex2.htm", 
         "path": "IndexedDB/idbobjectstore_createIndex2.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbobjectstore_createIndex3-usable-right-away.htm", 
+        "path": "IndexedDB/idbobjectstore_createIndex3-usable-right-away.htm", 
+        "timeout": "long"
+      }, 
+      {
+        "url": "/IndexedDB/idbobjectstore_createIndex4-deleteIndex-event_order.htm", 
+        "path": "IndexedDB/idbobjectstore_createIndex4-deleteIndex-event_order.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbobjectstore_createIndex5-emptykeypath.htm", 
+        "path": "IndexedDB/idbobjectstore_createIndex5-emptykeypath.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbobjectstore_createIndex6-event_order.htm", 
+        "path": "IndexedDB/idbobjectstore_createIndex6-event_order.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbobjectstore_createIndex7-event_order.htm", 
+        "path": "IndexedDB/idbobjectstore_createIndex7-event_order.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbobjectstore_createIndex8-valid_keys.htm", 
+        "path": "IndexedDB/idbobjectstore_createIndex8-valid_keys.htm", 
+        "timeout": "long"
+      }, 
+      {
+        "url": "/IndexedDB/idbobjectstore_createIndex9-emptyname.htm", 
+        "path": "IndexedDB/idbobjectstore_createIndex9-emptyname.htm"
       }, 
       {
         "url": "/IndexedDB/idbobjectstore_delete.htm", 
@@ -5495,6 +5697,10 @@
         "path": "IndexedDB/idbobjectstore_deleteIndex.htm"
       }, 
       {
+        "url": "/IndexedDB/idbobjectstore_deleted.htm", 
+        "path": "IndexedDB/idbobjectstore_deleted.htm"
+      }, 
+      {
         "url": "/IndexedDB/idbobjectstore_get.htm", 
         "path": "IndexedDB/idbobjectstore_get.htm"
       }, 
@@ -5517,6 +5723,14 @@
       {
         "url": "/IndexedDB/idbobjectstore_index.htm", 
         "path": "IndexedDB/idbobjectstore_index.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbobjectstore_openCursor.htm", 
+        "path": "IndexedDB/idbobjectstore_openCursor.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbobjectstore_openCursor_invalid.htm", 
+        "path": "IndexedDB/idbobjectstore_openCursor_invalid.htm"
       }, 
       {
         "url": "/IndexedDB/idbobjectstore_put.htm", 
@@ -5575,6 +5789,22 @@
         "path": "IndexedDB/idbobjectstore_put9.htm"
       }, 
       {
+        "url": "/IndexedDB/idbtransaction-oncomplete.htm", 
+        "path": "IndexedDB/idbtransaction-oncomplete.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbtransaction.htm", 
+        "path": "IndexedDB/idbtransaction.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbtransaction_abort.htm", 
+        "path": "IndexedDB/idbtransaction_abort.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbversionchangeevent.htm", 
+        "path": "IndexedDB/idbversionchangeevent.htm"
+      }, 
+      {
         "url": "/IndexedDB/index_sort_order.htm", 
         "path": "IndexedDB/index_sort_order.htm"
       }, 
@@ -5583,12 +5813,28 @@
         "path": "IndexedDB/interfaces.htm"
       }, 
       {
+        "url": "/IndexedDB/interfaces.html", 
+        "path": "IndexedDB/interfaces.html"
+      }, 
+      {
         "url": "/IndexedDB/key_invalid.htm", 
         "path": "IndexedDB/key_invalid.htm"
       }, 
       {
         "url": "/IndexedDB/key_valid.html", 
         "path": "IndexedDB/key_valid.html"
+      }, 
+      {
+        "url": "/IndexedDB/keygenerator-constrainterror.htm", 
+        "path": "IndexedDB/keygenerator-constrainterror.htm"
+      }, 
+      {
+        "url": "/IndexedDB/keygenerator-overflow.htm", 
+        "path": "IndexedDB/keygenerator-overflow.htm"
+      }, 
+      {
+        "url": "/IndexedDB/keygenerator.htm", 
+        "path": "IndexedDB/keygenerator.htm"
       }, 
       {
         "url": "/IndexedDB/keyorder.htm", 
@@ -5603,342 +5849,57 @@
         "path": "IndexedDB/keypath_invalid.htm"
       }, 
       {
+        "url": "/IndexedDB/keypath_maxsize.htm", 
+        "path": "IndexedDB/keypath_maxsize.htm", 
+        "timeout": "long"
+      }, 
+      {
+        "url": "/IndexedDB/list_ordering.htm", 
+        "path": "IndexedDB/list_ordering.htm"
+      }, 
+      {
         "url": "/IndexedDB/objectstore_keyorder.htm", 
         "path": "IndexedDB/objectstore_keyorder.htm"
+      }, 
+      {
+        "url": "/IndexedDB/request_bubble-and-capture.htm", 
+        "path": "IndexedDB/request_bubble-and-capture.htm"
       }, 
       {
         "url": "/IndexedDB/string-list-ordering.htm", 
         "path": "IndexedDB/string-list-ordering.htm"
       }, 
       {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-advance-continue-async.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-advance-continue-async.htm"
+        "url": "/IndexedDB/transaction-create_in_versionchange.htm", 
+        "path": "IndexedDB/transaction-create_in_versionchange.htm"
       }, 
       {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-advance-invalid.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-advance-invalid.htm"
+        "url": "/IndexedDB/transaction-lifetime-blocked.htm", 
+        "path": "IndexedDB/transaction-lifetime-blocked.htm"
       }, 
       {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-advance.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-advance.htm"
+        "url": "/IndexedDB/transaction-lifetime.htm", 
+        "path": "IndexedDB/transaction-lifetime.htm"
       }, 
       {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-continue.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-continue.htm"
+        "url": "/IndexedDB/transaction-requestqueue.htm", 
+        "path": "IndexedDB/transaction-requestqueue.htm"
       }, 
       {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-direction-index-keyrange.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-direction-index-keyrange.htm"
+        "url": "/IndexedDB/transaction_bubble-and-capture.htm", 
+        "path": "IndexedDB/transaction_bubble-and-capture.htm"
       }, 
       {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-direction-index.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-direction-index.htm"
+        "url": "/IndexedDB/value.htm", 
+        "path": "IndexedDB/value.htm"
       }, 
       {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-direction-objectstore-keyrange.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-direction-objectstore-keyrange.htm"
+        "url": "/IndexedDB/value_recursive.htm", 
+        "path": "IndexedDB/value_recursive.htm"
       }, 
       {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-direction-objectstore.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-direction-objectstore.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-direction.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-direction.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-key.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-key.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-primarykey.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-primarykey.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-reused.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-reused.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor-source.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor-source.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_advance_index.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_advance_index.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_advance_index2.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_advance_index2.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_advance_index3.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_advance_index3.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_advance_index4.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_advance_index4.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_continue_index5.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_continue_index5.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_continue_index6.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_continue_index6.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_continue_invalid.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_continue_invalid.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_iterating.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_iterating.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_iterating_index.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_iterating_index.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_iterating_index2.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_iterating_index2.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_iterating_objectstore.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_iterating_objectstore.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_iterating_objectstore2.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_iterating_objectstore2.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbcursor_update_objectstore4.htm", 
-        "path": "IndexedDB/submissions/Opera/idbcursor_update_objectstore4.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbdatabase_createObjectStore-createIndex-emptyname.htm", 
-        "path": "IndexedDB/submissions/Opera/idbdatabase_createObjectStore-createIndex-emptyname.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbdatabase_createObjectStore10-emptyname.htm", 
-        "path": "IndexedDB/submissions/Opera/idbdatabase_createObjectStore10-emptyname.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbdatabase_createObjectStore7.htm", 
-        "path": "IndexedDB/submissions/Opera/idbdatabase_createObjectStore7.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbdatabase_createObjectStore8-parameters.htm", 
-        "path": "IndexedDB/submissions/Opera/idbdatabase_createObjectStore8-parameters.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbdatabase_createObjectStore9-invalidparameters.htm", 
-        "path": "IndexedDB/submissions/Opera/idbdatabase_createObjectStore9-invalidparameters.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbdatabase_deleteObjectStore4-not_reused.htm", 
-        "path": "IndexedDB/submissions/Opera/idbdatabase_deleteObjectStore4-not_reused.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbdatabase_transaction4.htm", 
-        "path": "IndexedDB/submissions/Opera/idbdatabase_transaction4.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbfactory_deleteDatabase3.htm", 
-        "path": "IndexedDB/submissions/Opera/idbfactory_deleteDatabase3.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbfactory_deleteDatabase4.htm", 
-        "path": "IndexedDB/submissions/Opera/idbfactory_deleteDatabase4.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbfactory_open10.htm", 
-        "path": "IndexedDB/submissions/Opera/idbfactory_open10.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbfactory_open11.htm", 
-        "path": "IndexedDB/submissions/Opera/idbfactory_open11.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbfactory_open9.htm", 
-        "path": "IndexedDB/submissions/Opera/idbfactory_open9.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbindex-multientry-arraykeypath.htm", 
-        "path": "IndexedDB/submissions/Opera/idbindex-multientry-arraykeypath.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbindex-multientry-big.htm", 
-        "path": "IndexedDB/submissions/Opera/idbindex-multientry-big.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbindex-multientry.htm", 
-        "path": "IndexedDB/submissions/Opera/idbindex-multientry.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbindex_count3.htm", 
-        "path": "IndexedDB/submissions/Opera/idbindex_count3.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbindex_indexNames.htm", 
-        "path": "IndexedDB/submissions/Opera/idbindex_indexNames.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbobjectstore_count3.htm", 
-        "path": "IndexedDB/submissions/Opera/idbobjectstore_count3.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbobjectstore_createIndex3-usable-right-away.htm", 
-        "path": "IndexedDB/submissions/Opera/idbobjectstore_createIndex3-usable-right-away.htm", 
-        "timeout": "long"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbobjectstore_createIndex4-deleteIndex-event_order.htm", 
-        "path": "IndexedDB/submissions/Opera/idbobjectstore_createIndex4-deleteIndex-event_order.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbobjectstore_createIndex5-emptykeypath.htm", 
-        "path": "IndexedDB/submissions/Opera/idbobjectstore_createIndex5-emptykeypath.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbobjectstore_createIndex6-event_order.htm", 
-        "path": "IndexedDB/submissions/Opera/idbobjectstore_createIndex6-event_order.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbobjectstore_createIndex7-event_order.htm", 
-        "path": "IndexedDB/submissions/Opera/idbobjectstore_createIndex7-event_order.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbobjectstore_createIndex8-valid_keys.htm", 
-        "path": "IndexedDB/submissions/Opera/idbobjectstore_createIndex8-valid_keys.htm", 
-        "timeout": "long"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbobjectstore_createIndex9-emptyname.htm", 
-        "path": "IndexedDB/submissions/Opera/idbobjectstore_createIndex9-emptyname.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbobjectstore_deleted.htm", 
-        "path": "IndexedDB/submissions/Opera/idbobjectstore_deleted.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbobjectstore_openCursor.htm", 
-        "path": "IndexedDB/submissions/Opera/idbobjectstore_openCursor.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbobjectstore_openCursor_invalid.htm", 
-        "path": "IndexedDB/submissions/Opera/idbobjectstore_openCursor_invalid.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbtransaction-oncomplete.htm", 
-        "path": "IndexedDB/submissions/Opera/idbtransaction-oncomplete.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbtransaction.htm", 
-        "path": "IndexedDB/submissions/Opera/idbtransaction.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbtransaction_abort.htm", 
-        "path": "IndexedDB/submissions/Opera/idbtransaction_abort.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/idbversionchangeevent.htm", 
-        "path": "IndexedDB/submissions/Opera/idbversionchangeevent.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/key_invalid.htm", 
-        "path": "IndexedDB/submissions/Opera/key_invalid.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/key_valid.htm", 
-        "path": "IndexedDB/submissions/Opera/key_valid.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/keygenerator-constrainterror.htm", 
-        "path": "IndexedDB/submissions/Opera/keygenerator-constrainterror.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/keygenerator-overflow.htm", 
-        "path": "IndexedDB/submissions/Opera/keygenerator-overflow.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/keygenerator.htm", 
-        "path": "IndexedDB/submissions/Opera/keygenerator.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/keyorder.htm", 
-        "path": "IndexedDB/submissions/Opera/keyorder.htm", 
-        "timeout": "long"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/keypath.htm", 
-        "path": "IndexedDB/submissions/Opera/keypath.htm", 
-        "timeout": "long"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/keypath_invalid.htm", 
-        "path": "IndexedDB/submissions/Opera/keypath_invalid.htm", 
-        "timeout": "long"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/list_ordering.htm", 
-        "path": "IndexedDB/submissions/Opera/list_ordering.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/non-finished/interfaces.html", 
-        "path": "IndexedDB/submissions/Opera/non-finished/interfaces.html"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/non-finished/keypath_length.htm", 
-        "path": "IndexedDB/submissions/Opera/non-finished/keypath_length.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/non-finished/keypath_maxsize.htm", 
-        "path": "IndexedDB/submissions/Opera/non-finished/keypath_maxsize.htm", 
-        "timeout": "long"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/non-finished/manual.htm", 
-        "path": "IndexedDB/submissions/Opera/non-finished/manual.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/non-finished/save_data.htm", 
-        "path": "IndexedDB/submissions/Opera/non-finished/save_data.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/request_bubble-and-capture.htm", 
-        "path": "IndexedDB/submissions/Opera/request_bubble-and-capture.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/transaction-create_in_versionchange.htm", 
-        "path": "IndexedDB/submissions/Opera/transaction-create_in_versionchange.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/transaction-lifetime-blocked.htm", 
-        "path": "IndexedDB/submissions/Opera/transaction-lifetime-blocked.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/transaction-lifetime.htm", 
-        "path": "IndexedDB/submissions/Opera/transaction-lifetime.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/transaction-requestqueue.htm", 
-        "path": "IndexedDB/submissions/Opera/transaction-requestqueue.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/transaction_bubble-and-capture.htm", 
-        "path": "IndexedDB/submissions/Opera/transaction_bubble-and-capture.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/value.htm", 
-        "path": "IndexedDB/submissions/Opera/value.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/value_recursive.htm", 
-        "path": "IndexedDB/submissions/Opera/value_recursive.htm"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/writer-starvation.htm", 
-        "path": "IndexedDB/submissions/Opera/writer-starvation.htm", 
+        "url": "/IndexedDB/writer-starvation.htm", 
+        "path": "IndexedDB/writer-starvation.htm", 
         "timeout": "long"
       }, 
       {
@@ -6737,6 +6698,30 @@
       {
         "url": "/custom-elements/creating-and-passing-registries/share-registry-import-document.html", 
         "path": "custom-elements/creating-and-passing-registries/share-registry-import-document.html"
+      }, 
+      {
+        "url": "/custom-elements/custom-element-lifecycle/enqueuing-and-invoking-callbacks/invoke-callbacks.html", 
+        "path": "custom-elements/custom-element-lifecycle/enqueuing-and-invoking-callbacks/invoke-callbacks.html"
+      }, 
+      {
+        "url": "/custom-elements/custom-element-lifecycle/types-of-callbacks/attached-callback-move-element-test.html", 
+        "path": "custom-elements/custom-element-lifecycle/types-of-callbacks/attached-callback-move-element-test.html"
+      }, 
+      {
+        "url": "/custom-elements/custom-element-lifecycle/types-of-callbacks/attached-callback-test.html", 
+        "path": "custom-elements/custom-element-lifecycle/types-of-callbacks/attached-callback-test.html"
+      }, 
+      {
+        "url": "/custom-elements/custom-element-lifecycle/types-of-callbacks/attribute-changed-callback-change-attribute-test.html", 
+        "path": "custom-elements/custom-element-lifecycle/types-of-callbacks/attribute-changed-callback-change-attribute-test.html"
+      }, 
+      {
+        "url": "/custom-elements/custom-element-lifecycle/types-of-callbacks/attribute-changed-callback-remove-attribute-test.html", 
+        "path": "custom-elements/custom-element-lifecycle/types-of-callbacks/attribute-changed-callback-remove-attribute-test.html"
+      }, 
+      {
+        "url": "/custom-elements/custom-element-lifecycle/types-of-callbacks/attribute-changed-callback-set-attribute-test.html", 
+        "path": "custom-elements/custom-element-lifecycle/types-of-callbacks/attribute-changed-callback-set-attribute-test.html"
       }, 
       {
         "url": "/dom/collections/HTMLCollection-empty-name.html", 
@@ -7845,6 +7830,10 @@
         "path": "html/browsers/the-window-object/window-prototype-chain.html"
       }, 
       {
+        "url": "/html/browsers/windows/browsing-context-first-created.xhtml", 
+        "path": "html/browsers/windows/browsing-context-first-created.xhtml"
+      }, 
+      {
         "url": "/html/browsers/windows/browsing-context-names/browsing-context-choose-existing.html", 
         "path": "html/browsers/windows/browsing-context-names/browsing-context-choose-existing.html"
       }, 
@@ -7863,6 +7852,10 @@
       {
         "url": "/html/browsers/windows/browsing-context-names/browsing-context-default-name.html", 
         "path": "html/browsers/windows/browsing-context-names/browsing-context-default-name.html"
+      }, 
+      {
+        "url": "/html/browsers/windows/nested-browsing-contexts/frameElement.sub.html", 
+        "path": "html/browsers/windows/nested-browsing-contexts/frameElement.sub.html"
       }, 
       {
         "url": "/html/dom/documents/dom-tree-accessors/Document.getElementsByClassName-null-undef.html", 
@@ -10069,8 +10062,24 @@
         "path": "html/semantics/forms/resetting-a-form/reset-form.html"
       }, 
       {
+        "url": "/html/semantics/forms/textfieldselection/select-event.html", 
+        "path": "html/semantics/forms/textfieldselection/select-event.html"
+      }, 
+      {
+        "url": "/html/semantics/forms/textfieldselection/selection-not-application-textarea.html", 
+        "path": "html/semantics/forms/textfieldselection/selection-not-application-textarea.html"
+      }, 
+      {
+        "url": "/html/semantics/forms/textfieldselection/selection-not-application.html", 
+        "path": "html/semantics/forms/textfieldselection/selection-not-application.html"
+      }, 
+      {
         "url": "/html/semantics/forms/textfieldselection/selection.html", 
         "path": "html/semantics/forms/textfieldselection/selection.html"
+      }, 
+      {
+        "url": "/html/semantics/forms/textfieldselection/textfieldselection-setRangeText.html", 
+        "path": "html/semantics/forms/textfieldselection/textfieldselection-setRangeText.html"
       }, 
       {
         "url": "/html/semantics/forms/textfieldselection/textfieldselection-setSelectionRange.html", 
@@ -13141,6 +13150,10 @@
         "path": "shadow-dom/user-interaction/ranges-and-selections/test-002.html"
       }, 
       {
+        "url": "/touch-events/create-touch-touchlist.html", 
+        "path": "touch-events/create-touch-touchlist.html"
+      }, 
+      {
         "url": "/typedarrays/constructors.html", 
         "path": "typedarrays/constructors.html"
       }, 
@@ -15763,6 +15776,18 @@
         "path": "page-visibility/test_tab_state_change-manual.html"
       }, 
       {
+        "url": "/touch-events/multi-touch-interactions-manual.html", 
+        "path": "touch-events/multi-touch-interactions-manual.html"
+      }, 
+      {
+        "url": "/touch-events/multi-touch-interfaces-manual.html", 
+        "path": "touch-events/multi-touch-interfaces-manual.html"
+      }, 
+      {
+        "url": "/touch-events/single-touch-manual.html", 
+        "path": "touch-events/single-touch-manual.html"
+      }, 
+      {
         "url": "/vibration/cancel-with-0-manual.html", 
         "path": "vibration/cancel-with-0-manual.html"
       }, 
@@ -16459,22 +16484,6 @@
       {
         "url": "/IndexedDB/idbworker.js", 
         "path": "IndexedDB/idbworker.js"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/TODO", 
-        "path": "IndexedDB/submissions/Opera/TODO"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/checkpatch.sh", 
-        "path": "IndexedDB/submissions/Opera/checkpatch.sh"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/non-finished/support.js", 
-        "path": "IndexedDB/submissions/Opera/non-finished/support.js"
-      }, 
-      {
-        "url": "/IndexedDB/submissions/Opera/support.js", 
-        "path": "IndexedDB/submissions/Opera/support.js"
       }, 
       {
         "url": "/IndexedDB/support.js", 
@@ -19277,6 +19286,10 @@
         "path": "shadow-dom/testcommon.js"
       }, 
       {
+        "url": "/touch-events/multi-touch-interactions.js", 
+        "path": "touch-events/multi-touch-interactions.js"
+      }, 
+      {
         "url": "/url/README.md", 
         "path": "url/README.md"
       }, 
@@ -21015,5 +21028,5 @@
     ]
   }, 
   "local_changes": [], 
-  "rev": "33981005e05f700651262c1d769db24c9195709d"
+  "rev": "1384b533acd8b9e5720562bca49d0f11071f88f0"
 }
