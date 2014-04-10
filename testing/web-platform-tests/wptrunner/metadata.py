@@ -176,10 +176,7 @@ class ExpectedUpdater(object):
     def update_from_log(self, log_file):
         self.run_info = None
         log_reader = reader.read(log_file)
-        for map_value in reader.map_action(log_reader,
-                                           self.action_map):
-            # Ignore the return value
-            pass
+        reader.each_log(log_reader, self.action_map)
 
     def suite_start(self, data):
         self.run_info = data["run_info"]
