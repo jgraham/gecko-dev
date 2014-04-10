@@ -484,8 +484,6 @@ Tester.prototype = {
         });
 
         return;
-      } else {
-        SpecialPowers.DOMWindowUtils.garbageCollect();
       }
 
       this.currentTestIndex++;

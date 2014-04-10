@@ -2944,7 +2944,7 @@
         <body><![CDATA[
           event.stopPropagation();
           var tab = document.tooltipNode;
-          if (!tab || tab.localName != "tab") {
+          if (tab.localName != "tab") {
             event.preventDefault();
             return;
           }
