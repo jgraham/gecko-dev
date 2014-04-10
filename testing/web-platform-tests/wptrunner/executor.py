@@ -8,6 +8,7 @@ import urlparse
 import threading
 import hashlib
 import traceback
+import json
 
 import marionette
 from mozprocess import ProcessHandler
@@ -294,7 +295,7 @@ class ProcessTestExecutor(TestExecutor):
 
 
 class ServoTestharnessExecutor(ProcessTestExecutor):
-    result_converter = testharness_result_converter
+    convert_result = testharness_result_converter
 
     def __init__(self, *args, **kwargs):
         ProcessTestExecutor.__init__(self, *args, **kwargs)
@@ -317,6 +318,7 @@ class ServoTestharnessExecutor(ProcessTestExecutor):
 
         if self.result_flag.is_set():
             assert self.result_data is not None
+            self.result_data["test"] = test.url
             result = self.convert_result(test, self.result_data)
             proc.kill()
         else:
