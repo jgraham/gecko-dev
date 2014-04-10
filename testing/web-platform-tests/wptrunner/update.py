@@ -335,7 +335,7 @@ def sync_tests(config, paths, local_tree, wpt, bug):
         #bug.comment("Updating to %s" % wpt.rev)
         initial_manifest = metadata.load_test_manifest(paths["sync"], paths["metadata"])
         wpt.copy_work_tree(paths["test"])
-        new_manifest= metadata.update_manifest(paths["sync"], paths["metadata"])
+        new_manifest = metadata.update_manifest(paths["sync"], paths["metadata"])
 
         local_tree.create_patch("web-platform-tests_update_%s"  % wpt.rev,
                                   "Bug %i - Update web-platform-tests to revision %s" % (

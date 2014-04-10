@@ -81,6 +81,12 @@ class TokenizerTest(unittest.TestCase):
   other_key:
     if (a or b) and c: other_value
     fallback_value
+""",
+"""key: value
+[Heading 1]
+  other_key:
+    if a or b and c: other_value
+    fallback_value
 """)
 
     def test_8(self):
@@ -89,20 +95,22 @@ class TokenizerTest(unittest.TestCase):
   other_key:
     if a or (b and c): other_value
     fallback_value
-""",
-"""key: value
-[Heading 1]
-  other_key:
-    if a or b and c: other_value
-    fallback_value
-"""
-)
+""")
 
-    def test_8(self):
+    def test_9(self):
         self.compare("""key: value
 [Heading 1]
   other_key:
     if not (a and b): other_value
     fallback_value
+""")
+
+    def test_10(self):
+        self.compare("""key: value
+[Heading 1]
+  some_key: some_value
+
+[Heading 2]
+  other_key: other_value
 """
 )

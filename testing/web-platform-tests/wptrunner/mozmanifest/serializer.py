@@ -1,5 +1,5 @@
-from node import NodeVisitor, ValueNode
-
+from node import NodeVisitor, ValueNode, BinaryExpressionNode
+from parser import precedence
 
 def escape(string, extras=""):
     rv = string.encode("utf8").encode("string_escape")
@@ -72,13 +72,25 @@ class ManifestSerializer(NodeVisitor):
         return ["[%s]" % self.visit(node.children[0])[0]]
 
     def visit_UnaryExpressionNode(self, node):
-        return [" ".join(self.visit(item)[0] for item in node.children)]
+        children = []
+        for child in node.children:
+            child_str = self.visit(child)[0]
+            if isinstance(child, BinaryExpressionNode):
+                child_str = "(%s)" % child_str
+            children.append(child_str)
+        return [" ".join(children)]
 
     def visit_BinaryExpressionNode(self, node):
         assert len(node.children) == 3
-        return ["%s %s %s" % (self.visit(node.children[1])[0],
-                              self.visit(node.children[0])[0],
-                              self.visit(node.children[2])[0])]
+        children = []
+        for child_index in [1, 0, 2]:
+            child = node.children[child_index]
+            child_str = self.visit(child)[0]
+            if (isinstance(child, BinaryExpressionNode) and
+                precedence(node.children[0]) <= precedence(child.children[0])):
+                child_str = "(%s)" % child_str
+            children.append(child_str)
+        return [" ".join(children)]
 
     def visit_UnaryOperatorNode(self, node):
         return [node.data]

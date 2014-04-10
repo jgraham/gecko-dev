@@ -42,6 +42,9 @@ operators = ["==", "!=", "not", "and", "or"]
 def decode(byte_str):
     return byte_str.decode("string_escape").decode("utf8")
 
+def precedence(operator_node):
+    return len(operators) - operators.index(operator_node.data)
+
 class TokenTypes(object):
     def __init__(self):
         for type in ["group_start", "group_end", "paren", "separator", "ident", "string", "number", "eof"]:
@@ -460,10 +463,10 @@ class Parser(object):
     def expr_operand(self):
         if self.token == (token_types.paren, "("):
             self.consume()
-            self.expr_builder.push_operator(None)
+            self.expr_builder.left_paren()
             self.expr()
             self.expect(token_types.paren, ")")
-            self.expr_builder.pop_operator()
+            self.expr_builder.right_paren()
         elif self.token[0] == token_types.ident and self.token[1] in unary_operators:
             self.expr_unary_op()
             self.expr_operand()
@@ -530,7 +533,19 @@ class ExpressionBuilder(object):
         assert self.is_empty()
         return rv
 
+    def left_paren(self):
+        self.operators.append(None)
+
+    def right_paren(self):
+        while self.operators[-1] is not None:
+            self.pop_operator()
+            if not self.operators:
+                raise ParseError("Unbalanced parens")
+
+        assert self.operators.pop() is None
+
     def push_operator(self, operator):
+        assert operator is not None
         while self.precedence(self.operators[-1]) > self.precedence(operator):
             self.pop_operator()
 
@@ -558,7 +573,7 @@ class ExpressionBuilder(object):
     def precedence(self, operator):
         if operator is None:
             return 0
-        return len(operators) - operators.index(operator.data)
+        return precedence(operator)
 
 def parse(stream):
     p = Parser()
