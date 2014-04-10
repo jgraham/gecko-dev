@@ -6,6 +6,9 @@ from cStringIO import StringIO
 
 from .. import parser
 
+# There aren't many tests here because it turns out to be way more convenient to
+# use test_serializer for the majority of cases
+
 class TestExpression(unittest.TestCase):
     def setUp(self):
         self.parser = parser.Parser()

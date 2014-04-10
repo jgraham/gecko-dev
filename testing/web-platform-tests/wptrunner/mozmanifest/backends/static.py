@@ -145,13 +145,6 @@ class ManifestItem(object):
     def set(self, name, value):
         self._data[name] = value
 
-    def append(self, child):
-        self.children.append(child)
-        child.parent = self
-        if child.node.parent != self.node:
-            self.node.append(child.node)
-        return child
-
     def remove(self):
         if self.parent:
             self.parent._remove_child(self)
@@ -163,7 +156,7 @@ class ManifestItem(object):
     def iterchildren(self, name=None):
         for item in self.children:
             if item.name == name or name is None:
-                yield name
+                yield item
 
     def _flatten(self):
         rv = {}
