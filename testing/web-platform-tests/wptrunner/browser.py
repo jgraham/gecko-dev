@@ -233,20 +233,20 @@ class B2GBrowser(Browser):
     # The following methods are called from a different process
 
     def after_connect(self, executor):
-        executor.runner.send_message("log", "debug", "Running browser.after_connect steps")
+        executor.logger.debug("Running browser.after_connect steps")
         self.install_cert_app(executor)
         self.use_cert_app(executor)
 
     def install_cert_app(self, executor):
         marionette = executor.marionette
         if self.device.dirExists("/data/local/webapps/certtest-app"):
-            executor.runner.send_message("log", "info", "certtest_app is already installed")
+            executor.logger.info("certtest_app is already installed")
             return
-        executor.runner.send_message("log", "info", "Copying certtest_app")
+        executor.logger.info("Copying certtest_app")
         self.device.pushFile(os.path.join(here, "device_setup", "certtest_app.zip"),
                              "/data/local/certtest_app.zip")
 
-        executor.runner.send_message("log", "info", "Installing certtest_app")
+        executor.logger.info("Installing certtest_app")
         with open(os.path.join(here, "device_setup", "app_install.js"), "r") as f:
             script = f.read()
 

@@ -29,8 +29,7 @@ class MessageLogger(object):
 
 def _log_func(level_name):
     def log(self, message):
-        data = {"level": level_name, "message": message}
-        self._log_data("log", data)
+        self._log_data(level_name.lower(), message)
     log.__doc__ = """Log a message with level %s
 
 :param message: The string message to log
@@ -133,7 +132,7 @@ def start_runner(test_queue, runner_command_queue, runner_result_queue,
             except KeyboardInterrupt:
                 stop_flag.set()
     except Exception as e:
-        runner_result_queue.put(("log", "critical", traceback.format_exc()))
+        runner_result_queue.put(("log", ("critical", traceback.format_exc())))
         stop_flag.set()
     finally:
         runner_command_queue = None

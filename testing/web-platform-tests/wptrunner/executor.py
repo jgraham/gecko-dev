@@ -52,7 +52,7 @@ class TestExecutor(object):
 
     @property
     def logger(self):
-        if runner is not None:
+        if self.runner is not None:
             return self.runner.logger
 
     def setup(self, runner):
@@ -68,6 +68,7 @@ class MarionetteTestExecutor(TestExecutor):
     def __init__(self, browser, http_server_url, timeout_multiplier=1):
         TestExecutor.__init__(self, browser, http_server_url, timeout_multiplier)
         self.marionette_port = browser.marionette_port
+        self.marionette = None
 
         self.timer = None
         self.window_id = str(uuid.uuid4())
@@ -104,7 +105,7 @@ class MarionetteTestExecutor(TestExecutor):
                 self.after_connect()
             except Exception as e:
                 print >> sys.stderr, traceback.format_exc()
-                self.runner.send_message("log", "warning", "Failed to connect to navigate initial page")
+                self.logger.warning("Failed to connect to navigate initial page")
                 self.runner.send_message("init_failed")
             else:
                 self.runner.send_message("init_succeeded")
@@ -125,7 +126,7 @@ class MarionetteTestExecutor(TestExecutor):
         return True
 
     def after_connect(self):
-        self.runner.send_message("log", "debug", urlparse.urljoin(self.http_server_url, "/gecko_runner.html"))
+        self.logger.debug(urlparse.urljoin(self.http_server_url, "/gecko_runner.html"))
         self.marionette.navigate(urlparse.urljoin(self.http_server_url, "/gecko_runner.html"))
         self.marionette.execute_script("document.title = '%s'" % threading.current_thread().name)
 
@@ -158,7 +159,7 @@ class MarionetteTestExecutor(TestExecutor):
         try:
             self.marionette.set_script_timeout((timeout + 5) * 1000)
         except marionette.errors.InvalidResponseException:
-            self.runner.send_message("log", "error", "Lost marionette connection")
+            self.logger.error("Lost marionette connection")
             self.runner.send_message("restart_test", test)
             return Stop
 
@@ -269,9 +270,8 @@ class MarionetteReftestExecutor(MarionetteTestExecutor):
         count = 0
         for hash_val, urls in self.ref_urls_by_hash.iteritems():
             if len(urls) > 1:
-                self.runner.send_message("log", "info",
-                                         "The following %i reference urls appear to be equivalent:\n %s" %
-                                         (len(urls), "\n  ".join(urls)))
+                self.logger.info("The following %i reference urls appear to be equivalent:\n %s" %
+                                 (len(urls), "\n  ".join(urls)))
                 count += len(urls) - 1
         MarionetteTestExecutor.teardown(self)
 
