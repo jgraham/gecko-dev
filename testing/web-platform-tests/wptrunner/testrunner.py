@@ -20,6 +20,28 @@ from mozlog.structured import structuredlog
 # Special value used as a sentinal in various commands
 Stop = object()
 
+class MessageLogger(object):
+    def __init__(self, message_func):
+        self.send_message = message_func
+
+    def _log_data(self, level, message):
+        self.send_message("log", level, message)
+
+def _log_func(level_name):
+    def log(self, message):
+        data = {"level": level_name, "message": message}
+        self._log_data("log", data)
+    log.__doc__ = """Log a message with level %s
+
+:param message: The string message to log
+""" % level_name
+    log.__name__ = str(level_name).lower()
+    return log
+
+# Create all the methods on StructuredLog for debug levels
+for level_name in structuredlog.log_levels:
+    setattr(MessageLogger, level_name.lower(), _log_func(level_name))
+
 class TestRunner(object):
     def __init__(self, test_queue, command_queue, result_queue, executor):
         """Class implementing the main loop for running tests.
@@ -40,6 +62,7 @@ class TestRunner(object):
 
         self.executor = executor
         self.name = current_process().name
+        self.logger = MessageLogger(self.send_message)
 
     def __enter__(self):
         return self
@@ -86,14 +109,14 @@ class TestRunner(object):
             # Need to block here just to allow for contention with other processes
             test = self.test_queue.get(block=True, timeout=1)
         except Empty:
-            self.send_message("log", "info", "No more tests")
+            self.logger.info("No more tests")
             return Stop
         else:
             self.send_message("test_start", test)
         try:
             return self.executor.run_test(test)
         except Exception as e:
-            self.send_message("log", ("critical", traceback.format_exc()))
+            self.logger.critical(traceback.format_exc())
             raise
 
     def send_message(self, command, *args):

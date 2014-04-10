@@ -24,7 +24,7 @@ from mach.decorators import (
     Command,
 )
 
-from wpttests import wptcommandline
+from wptrunner import wptcommandline
 
 # This should probably be consolidated with similar classes in other test
 # runners.
@@ -35,7 +35,7 @@ class WebPlatformTestsRunner(MozbuildObject):
     """Run web platform tests."""
 
     def __init__(self, topsrcdir, settings, log_manager, topobjdir=None):
-        from wpttests import machlogging
+        from wptrunner import machlogging
         from mozlog.structured import structuredlog
 
         log_manager = machlogging.StructuredLoggingManager()
@@ -60,7 +60,7 @@ class WebPlatformTestsRunner(MozbuildObject):
             kwargs["prefs_root"] = os.path.join(self.topobjdir, '_tests', 'web-platform-tests', "prefs")
 
     def run_tests(self, **kwargs):
-        from wpttests import wptrunner
+        from wptrunner import wptrunner
 
         self.setup_kwargs(kwargs)
 
@@ -74,7 +74,7 @@ class WebPlatformTestsRunner(MozbuildObject):
         return int(not result)
 
     def list_test_groups(self, **kwargs):
-        from wpttests import wptrunner
+        from wptrunner import wptrunner
 
         self.setup_kwargs(kwargs)
 
@@ -83,7 +83,7 @@ class WebPlatformTestsRunner(MozbuildObject):
 class WebPlatformTestsUpdater(MozbuildObject):
     """Update web platform tests."""
     def __init__(self, topsrcdir, settings, log_manager, topobjdir=None):
-        from wpttests import machlogging
+        from wptrunner import machlogging
         from mozlog.structured import structuredlog
 
         log_manager = machlogging.StructuredLoggingManager()
@@ -91,7 +91,7 @@ class WebPlatformTestsUpdater(MozbuildObject):
         MozbuildObject.__init__(self, topsrcdir, settings, log_manager, topobjdir)
 
     def run_update(self, **kwargs):
-        from wpttests import update
+        from wptrunner import update
 
         if kwargs["data_root"] is None:
             kwargs["data_root"] = os.path.join(self.topsrcdir, 'testing', 'web-platform-tests')
@@ -104,8 +104,8 @@ class WebPlatformTestsUpdater(MozbuildObject):
 class WebPlatformTestsReduce(WebPlatformTestsRunner):
 
     def run_reduce(self, **kwargs):
-        from wpttests import wptrunner
-        from wpttests import unstable
+        from wptrunner import wptrunner
+        from wptrunner import unstable
 
         self.setup_kwargs(kwargs)
 

@@ -189,8 +189,7 @@ class B2GBrowser(Browser):
         profile = FirefoxProfile(locations=locations, proxy={"remote": moznetwork.get_ip()},
                                  preferences=preferences)
 
-        profile.set_preferences({#
-                                 "dom.disable_open_during_load": False,
+        profile.set_preferences({"dom.disable_open_during_load": False,
                                  "dom.mozBrowserFramesEnabled": True,
                                  # "dom.ipc.tabs.disabled": False,
                                  # "dom.ipc.browser_frames.oop_by_default": False,
@@ -215,7 +214,6 @@ class B2GBrowser(Browser):
         pass
 
     def cleanup(self):
-        # Might want to move this to a cleanup method
         self.logger.debug("Running browser cleanup steps")
         if self.runner is not None:
             self.runner.cleanup()

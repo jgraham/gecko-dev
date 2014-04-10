@@ -2,7 +2,7 @@
 import os
 import sys
 
-from wpttests import wptrunner
+from wptrunner import wptrunner
 
 deps = ['marionette',
         'mozprocess',

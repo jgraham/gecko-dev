@@ -50,6 +50,11 @@ class TestExecutor(object):
         self.http_server_url = http_server_url
         self.timeout_multiplier = timeout_multiplier
 
+    @property
+    def logger(self):
+        if runner is not None:
+            return self.runner.logger
+
     def setup(self, runner):
         raise NotImplementedError
 
@@ -71,28 +76,28 @@ class MarionetteTestExecutor(TestExecutor):
         """Connect to browser via marionette"""
         self.runner = runner
 
-        self.runner.send_message("log", "debug", "Connecting to marionette on port %i" % self.marionette_port)
+        self.logger.debug("Connecting to marionette on port %i" % self.marionette_port)
         self.marionette = marionette.Marionette(host='localhost', port=self.marionette_port)
         #XXX Move this timeout somewhere
-        self.runner.send_message("log", "debug", "Waiting for marionette connection")
+        self.logger.debug("Waiting for marionette connection")
         success = self.marionette.wait_for_port(60)
         session_started = False
         if success:
             for i in xrange(5):
                 try:
-                    self.runner.send_message("log", "debug", "Starting marionette session attempt %i" % i)
+                    self.logger.debug("Starting marionette session attempt %i" % i)
                     self.marionette.start_session()
                 except:
-                    self.runner.send_message("log", "warning", "Starting marionette session failed")
+                    self.logger.warning("Starting marionette session failed")
                     time.sleep(1)
                     break
                 else:
-                    self.runner.send_message("log", "debug", "Marionette session started")
+                    self.logger.debug("Marionette session started")
                     session_started = True
                     break
 
         if not success or not session_started:
-            self.runner.send_message("log", "warning", "Failed to connect to marionette")
+            self.logger.warning("Failed to connect to marionette")
             self.runner.send_message("init_failed")
         else:
             try:

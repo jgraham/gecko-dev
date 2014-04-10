@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 
-from wpttests import update, wptcommandline
+from wptrunner import update, wptcommandline
 
 if __name__ == "__main__":
     parser = wptcommandline.create_parser_update()

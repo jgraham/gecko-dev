@@ -7,7 +7,7 @@ include $(topsrcdir)/config/rules.mk
 ifneq ($(OS_ARCH),WINNT)
 
 WPT_HARNESS = \
-  wpttests \
+  wptrunner \
   runtests.py \
   $(NULL)
 
