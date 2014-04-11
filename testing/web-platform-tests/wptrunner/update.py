@@ -445,5 +445,5 @@ def run_update(**kwargs):
 def main():
     parser = wptcommandline.create_parser_update()
     args = parser.parse_args()
-    success = update.run_update(**vars(args))
+    success = run_update(**vars(args))
     sys.exit(0 if success else 1)
