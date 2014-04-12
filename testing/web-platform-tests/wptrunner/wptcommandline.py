@@ -9,6 +9,8 @@ from multiprocessing import cpu_count
 
 from mozlog.structured import commandline
 
+import products
+
 root = os.path.join(os.path.split(__file__)[0])
 
 def abs_path(path):
@@ -62,7 +64,7 @@ def create_parser(allow_mandatory=True):
     parser.add_argument("--repeat", action="store", type=int, default=1,
                         help="Number of times to run the tests")
 
-    parser.add_argument("--product", action="store", choices=["firefox", "servo", "b2g"],
+    parser.add_argument("--product", action="store", choices=[item[0] for item in products.iter_products()],
                         default="firefox")
     commandline.add_logging_group(parser)
     return parser

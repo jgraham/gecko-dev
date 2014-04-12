@@ -29,6 +29,7 @@ import metadata
 import manifestexpected
 import wpttest
 import wptcommandline
+import products
 
 here = os.path.split(__file__)[0]
 
@@ -368,40 +369,6 @@ class LoggingWrapper(StringIO):
     def flush(self):
         pass
 
-
-def get_browser(product, binary, prefs_root):
-    browser_classes = {"firefox": browser.FirefoxBrowser,
-                       "servo": browser.ServoBrowser,
-                       "b2g": browser.B2GBrowser}
-
-    browser_cls = browser_classes[product]
-
-    browser_kwargs = {"binary": binary} if product in ("firefox", "servo") else {}
-    if product in ("firefox", "b2g"):
-        browser_kwargs["prefs_root"] = prefs_root
-
-    return browser_cls, browser_kwargs
-
-def get_options(product):
-    return {"firefox": {"host": "localhost"},
-            "servo": {"host": "localhost"},
-            "b2g": {"host": moznetwork.get_ip()}}[product]
-
-def get_executor(product, test_type, http_server_url, timeout_multiplier):
-    executor_classes = {"firefox": {"reftest": MarionetteReftestExecutor,
-                                    "testharness": MarionetteTestharnessExecutor},
-                        "servo": {"testharness": ServoTestharnessExecutor},
-                        "b2g": {"testharness": B2GMarionetteTestharnessExecutor}}
-
-    executor_cls = executor_classes[product].get(test_type)
-    if not executor_cls:
-        return None, None
-
-    executor_kwargs = {"http_server_url": http_server_url,
-                       "timeout_multiplier":timeout_multiplier}
-
-    return executor_cls, executor_kwargs
-
 def list_test_groups(tests_root, metadata_root, test_types, product, **kwargs):
     run_info = wpttest.get_run_info(product, debug=False)
     test_loader = TestLoader(tests_root, metadata_root, run_info)
@@ -431,8 +398,12 @@ def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
 
         logger.info("Using %i client processes" % processes)
 
-        browser_cls, browser_kwargs = get_browser(product, binary, prefs_root)
-        env_options = get_options(product)
+        browser_classes, get_browser_kwargs, executor_classes, get_env_options = products.load_products()
+
+        browser_cls = browser_classes[product]
+        browser_kwargs = get_browser_kwargs[product](product, binary, prefs_root)
+        executor_classes = executor_classes[product]
+        env_options = get_env_options[product]()
 
         unexpected_total = 0
 
@@ -453,8 +424,8 @@ def run_tests(tests_root, metadata_root, prefs_root, test_types, binary=None,
                 for test_type in test_types:
                     tests_queue = test_queues[test_type]
 
-                    executor_cls, executor_kwargs = get_executor(product, test_type, base_server,
-                                                                 timeout_multiplier)
+                    executor_cls = executor_classes.get(test_type)
+                    executor_kwargs = products.get_executor_kwargs(base_server, timeout_multiplier)
 
                     if executor_cls is None:
                         logger.error("Unsupported test type %s for product %s" % (test_type, product))

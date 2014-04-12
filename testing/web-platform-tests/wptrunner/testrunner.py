@@ -133,6 +133,7 @@ def start_runner(test_queue, runner_command_queue, runner_result_queue,
                 stop_flag.set()
     except Exception as e:
         runner_result_queue.put(("log", ("critical", traceback.format_exc())))
+        print >> sys.stderr, traceback.format_exc()
         stop_flag.set()
     finally:
         runner_command_queue = None
