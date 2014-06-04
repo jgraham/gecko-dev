@@ -2207,9 +2207,23 @@ MarionetteServerConnection.prototype = {
             FileUtils.MODE_WRONLY | FileUtils.MODE_CREATE);
         this.importedScripts.permissions = parseInt("0666", 8); //actually set permissions
       }
-      file.write(aRequest.parameters.script, aRequest.parameters.script.length);
-      file.close();
-      this.sendOk(command_id);
+
+      var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
+                      createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+      converter.charset = "UTF-8";
+      var istream = converter.convertToInputStream(aRequest.parameters.script);
+
+      let that = this;
+      NetUtil.asyncCopy(istream, file, function(status) {
+        if (!Components.isSuccessCode(status)) {
+          that.sendError("Error writing file " + this.importedScripts.path + ": " + status, 
+             500, null, command_id);
+        }
+        else {
+          that.sendOk(command_id);
+        }
+      });
+
     }
     else {
       this.sendAsync("importScript",
