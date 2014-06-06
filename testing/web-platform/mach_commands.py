@@ -61,6 +61,8 @@ class WebPlatformTestsRunner(MozbuildObject):
         if kwargs["prefs_root"] is None:
             kwargs["prefs_root"] = os.path.join(self.topobjdir, '_tests', 'web-platform', "prefs")
 
+        kwargs = wptcommandline.check_args(kwargs)
+
     def run_tests(self, **kwargs):
         from wptrunner import wptrunner
 
