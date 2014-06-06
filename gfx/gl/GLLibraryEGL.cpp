@@ -160,6 +160,7 @@ GLLibraryEGL::EnsureInitialized()
     // the APITrace lib, libEGL.so, and libEGL.so.1 in that order.
 
 #if defined(ANDROID)
+//could call gfxPlatform::GetPlatform() here
     if (!mEGLLibrary)
         mEGLLibrary = LoadApitraceLibrary();
 #endif
