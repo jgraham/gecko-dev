@@ -70,3 +70,6 @@ GTAGS
 GRTAGS
 GSYMS
 GPATH
+
+#Ignore staging area for updating web-platform-tests
+^testing/web-platform-tests/sync/
