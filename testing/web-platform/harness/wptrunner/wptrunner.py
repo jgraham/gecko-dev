@@ -63,7 +63,6 @@ logger = None
 
 def setup_logging(args, defaults):
     global logger
-    setup_compat_args(args)
     logger = commandline.setup_logging("web-platform-tests", args, defaults)
     setup_stdlib_logger()
 
@@ -98,6 +97,7 @@ class TestEnvironment(object):
         self.test_path = test_path
         self.server = None
         self.config = None
+        self.test_server_port = options.pop("test_server_port", True)
         self.options = options if options is not None else {}
         self.files_to_restore = []
 
@@ -148,13 +148,14 @@ class TestEnvironment(object):
         time.sleep(2)
         for scheme, servers in self.servers.iteritems():
             for port, server in servers:
-                s = socket.socket()
-                try:
-                    s.connect((self.config["host"], port))
-                except socket.error:
-                    raise EnvironmentError("%s server on port %d failed to start" % (scheme, port))
-                finally:
-                    s.close()
+                if self.test_server_port:
+                    s = socket.socket()
+                    try:
+                        s.connect((self.config["host"], port))
+                    except socket.error:
+                        raise EnvironmentError("%s server on port %d failed to start" % (scheme, port))
+                    finally:
+                        s.close()
 
                 if not server.is_alive():
                     raise EnvironmentError("%s server on port %d failed to start" % (scheme, port))
@@ -194,7 +195,7 @@ class EqualTimeChunker(TestChunker):
     """Chunker that uses the test timeout as a proxy for the running time of the test"""
 
     def _get_chunk(self, manifest_items):
-        # For each directory containing tests, calculate the mzximum execution time after running all
+        # For each directory containing tests, calculate the maximum execution time after running all
         # the tests in that directory. Then work out the index into the manifest corresponding to the
         # directories at fractions of m/N of the running time where m=1..N-1 and N is the total number
         # of chunks. Return an array of these indicies
@@ -214,11 +215,13 @@ class EqualTimeChunker(TestChunker):
                 by_dir[test_dir] = PathData()
 
             data = by_dir[test_dir]
-            time = sum(test.timeout for test in tests)
+            time = sum(wpttest.DEFAULT_TIMEOUT if test.timeout != "long" else wpttest.LONG_TIMEOUT for test in tests)
             data.time += time
             data.tests.append((test_path, tests))
 
             total_time += time
+
+        full_total_time = total_time
 
         if len(by_dir) < self.total_chunks:
             raise ValueError("Tried to split into %i chunks, but only %i subdirectories included" % (self.total_chunks, len(by_dir)))
@@ -228,7 +231,7 @@ class EqualTimeChunker(TestChunker):
 
         chunks = []
 
-        # Put any individual dirs with a time greater than the timeout into their own
+        # Put any individual dirs with a time greater than the time_per_chunk into their own
         # chunk
         while True:
             to_remove = []
@@ -237,7 +240,7 @@ class EqualTimeChunker(TestChunker):
                     to_remove.append((path, data))
             if to_remove:
                 for path, data in to_remove:
-                    chunks.append(([path], data.tests))
+                    chunks.append([[path], data.tests, data.time])
                     del by_dir[path]
 
                 n_chunks -= len(to_remove)
@@ -246,31 +249,37 @@ class EqualTimeChunker(TestChunker):
             else:
                 break
 
-        chunk_time = 0
+        start_new = True
         for i, (path, data) in enumerate(by_dir.iteritems()):
-            if i == 0:
+            if start_new:
                 # Always start a new chunk the first time
-                chunks.append(([path], data.tests))
-                chunk_time = data.time
-            elif chunk_time + data.time > time_per_chunk:
-                if (abs(time_per_chunk - chunk_time) <=
-                    abs(time_per_chunk - (chunk_time + data.time))):
+                chunks.append([[path], data.tests, data.time])
+                start_new = False
+            elif chunks[-1][2] + data.time > time_per_chunk:
+                if ((abs(time_per_chunk - chunks[-1][2]) <=
+                     abs(time_per_chunk - (chunks[-1][2] + data.time))) and
+                    i < n_chunks - 1):
                     # Add a new chunk
-                    chunks.append(([path], data.tests))
-                    chunk_time = data.time
+                    chunks.append([[path], data.tests, data.time])
                 else:
                     # Add this to the end of the previous chunk but
                     # start a new chunk next time
                     chunks[-1][0].append(path)
                     chunks[-1][1].extend(data.tests)
-                    chunk_time += data.time
+                    chunks[-1][2] += data.time
+                    start_new = True
+
+                chunk_time = 0
             else:
                 # Append this to the previous chunk
                 chunks[-1][0].append(path)
                 chunks[-1][1].extend(data.tests)
-                chunk_time += data.time
+                chunks[-1][2] += data.time
+
 
         assert len(chunks) == self.total_chunks, len(chunks)
+        assert sum(item[2] for item in chunks) == full_total_time
+
         chunks = sorted(chunks)
 
         return chunks[self.chunk_number - 1][1]
@@ -342,6 +351,9 @@ class TestLoader(object):
 
     def iter_tests(self, test_types, chunker=None):
         manifest_items = self.test_filter(self.manifest.itertypes(*test_types))
+
+        if chunker is not None:
+            manifest_items = chunker(manifest_items)
 
         for test_path, tests in manifest_items:
             expected_file = self.load_expected_manifest(test_path)
@@ -447,8 +459,12 @@ class LoggingWrapper(StringIO):
         pass
 
 def list_test_groups(tests_root, metadata_root, test_types, product, **kwargs):
+    do_test_relative_imports(tests_root)
+
     run_info = wpttest.get_run_info(product, debug=False)
-    test_loader = TestLoader(tests_root, metadata_root, TestFilter(), run_info)
+    test_filter = TestFilter(include=kwargs["include"], exclude=kwargs["exclude"],
+                             manifest_path=kwargs["include_manifest"])
+    test_loader = TestLoader(tests_root, metadata_root, test_filter, run_info)
 
     for item in sorted(test_loader.get_groups(test_types)):
         print item
@@ -570,35 +586,18 @@ def run_tests(tests_root, metadata_root, product, **kwargs):
     return manager_group.unexpected_count() == 0
 
 
-def setup_compat_args(kwargs):
-    if not "log_raw" in kwargs or kwargs["log_raw"] is None:
-        kwargs["log_raw"] = []
-
-    if "output_file" in kwargs:
-        path = kwargs.pop("output_file")
-        if path is not None:
-            output_dir = os.path.split(path)[0]
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            kwargs["log_raw"].append(open(path, "w"))
-
-    if "log_stdout" in kwargs:
-        if kwargs.pop("log_stdout"):
-            kwargs["log_raw"].append(sys.stdout)
-
 def main():
     """Main entry point when calling from the command line"""
-    args = wptcommandline.parse_args()
-    kwargs = vars(args)
+    kwargs = wptcommandline.parse_args()
 
     if kwargs["prefs_root"] is None:
         kwargs["prefs_root"] = os.path.abspath(os.path.join(here, "prefs"))
 
     setup_logging(kwargs, {"raw": sys.stdout})
 
-    if args.list_test_groups:
+    if kwargs["list_test_groups"]:
         list_test_groups(**kwargs)
-    elif args.list_disabled:
+    elif kwargs["list_disabled"]:
         list_disabled(**kwargs)
     else:
         return run_tests(**kwargs)
