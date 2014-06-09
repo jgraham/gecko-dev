@@ -2104,35 +2104,21 @@ function emulatorCmdResult(msg) {
 function importScript(msg) {
   let command_id = msg.json.command_id;
   let file;
-
-  if (this.importedScripts.exists()) {
-    file = FileUtils.openFileOutputStream(this.importedScripts,
+  if (importedScripts.exists()) {
+    file = FileUtils.openFileOutputStream(importedScripts,
         FileUtils.MODE_APPEND | FileUtils.MODE_WRONLY);
   }
   else {
     //Note: The permission bits here don't actually get set (bug 804563)
-    this.importedScripts.createUnique(
-        Components.interfaces.nsIFile.NORMAL_FILE_TYPE, parseInt("0666", 8));
-    file = FileUtils.openFileOutputStream(this.importedScripts,
-        FileUtils.MODE_WRONLY | FileUtils.MODE_CREATE);
-    this.importedScripts.permissions = parseInt("0666", 8); //actually set permissions
+    importedScripts.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE,
+                                 parseInt("0666", 8));
+    file = FileUtils.openFileOutputStream(importedScripts,
+                                          FileUtils.MODE_WRONLY | FileUtils.MODE_CREATE);
+    importedScripts.permissions = parseInt("0666", 8); //actually set permissions
   }
-
-  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
-                  createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-  converter.charset = "UTF-8";
-  var istream = converter.convertToInputStream(msg.json.script);
-
-  NetUtil.asyncCopy(istream, file, function(status) {
-    if (!Components.isSuccessCode(status)) {
-      sendError("Error writing file " + this.importedScripts.path + ": " + status, 
-         500, null, command_id);
-    }
-    else {
-      sendOk(command_id);
-    }
-  });
-
+  file.write(msg.json.script, msg.json.script.length);
+  file.close();
+  sendOk(command_id);
 }
 
 /**
