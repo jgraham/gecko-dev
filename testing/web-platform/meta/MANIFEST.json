@@ -10644,6 +10644,10 @@
         "path": "html/semantics/forms/the-input-element/checkbox.html"
       }, 
       {
+        "url": "/html/semantics/forms/the-input-element/checked.xhtml", 
+        "path": "html/semantics/forms/the-input-element/checked.xhtml"
+      }, 
+      {
         "url": "/html/semantics/forms/the-input-element/color.html", 
         "path": "html/semantics/forms/the-input-element/color.html"
       }, 
@@ -21114,5 +21118,5 @@
     ]
   }, 
   "local_changes": [], 
-  "rev": "a3d9d8ef2bd878cb710a2f845258be4a40da2cc1"
+  "rev": "ea3bd306f635c847c6643d474a1ac7cc91510b67"
 }
