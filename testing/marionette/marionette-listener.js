@@ -106,8 +106,9 @@ function registerSelf() {
     if (register[0][1] == true) {
       addMessageListener("MarionetteMainListener:emitTouchEvent", emitTouchEventForIFrame);
     }
-    importedScripts = FileUtils.getDir('TmpD', [], false);
-    importedScripts.append('marionetteContentScripts');
+    let importedScriptsDir = FileUtils.getDir('TmpD', ['marionettescripts'], true, true);
+    importedScripts = importedScriptsDir.clone();
+    importedScripts.append('content');
     startListeners();
   }
 }
@@ -2103,22 +2104,26 @@ function emulatorCmdResult(msg) {
 
 function importScript(msg) {
   let command_id = msg.json.command_id;
-  let file;
-  if (importedScripts.exists()) {
-    file = FileUtils.openFileOutputStream(importedScripts,
-        FileUtils.MODE_APPEND | FileUtils.MODE_WRONLY);
-  }
-  else {
-    //Note: The permission bits here don't actually get set (bug 804563)
-    importedScripts.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE,
-                                 parseInt("0666", 8));
-    file = FileUtils.openFileOutputStream(importedScripts,
-                                          FileUtils.MODE_WRONLY | FileUtils.MODE_CREATE);
-    importedScripts.permissions = parseInt("0666", 8); //actually set permissions
-  }
-  file.write(msg.json.script, msg.json.script.length);
-  file.close();
-  sendOk(command_id);
+
+  let ostream = FileUtils.openFileOutputStream(importedScripts,
+    FileUtils.MODE_WRONLY | FileUtils.MODE_CREATE | FileUtils.MODE_APPEND);
+
+  // Obtain a converter to convert our data to a UTF-8 encoded input stream.
+  let converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                  .createInstance(Ci.nsIScriptableUnicodeConverter);
+  converter.charset = "UTF-8";
+
+  // Asynchronously copy the data to the file.
+  let istream = converter.convertToInputStream(msg.json.script);
+  NetUtil.asyncCopy(istream, ostream, function(status) {
+    ostream.close();
+    if (!Components.isSuccessCode(status)) {
+      sendError("Could not write imported scripts", 500, "status: " + status, command_id);
+    }
+    else {
+      sendOk(command_id);
+    }
+  });
 }
 
 /**

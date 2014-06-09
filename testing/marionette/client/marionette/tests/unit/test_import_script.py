@@ -18,14 +18,14 @@ class TestImportScript(MarionetteTestCase):
     def check_file_exists(self):
         return self.marionette.execute_script("""
           let FileUtils = SpecialPowers.Cu.import("resource://gre/modules/FileUtils.jsm", {}).FileUtils;
-          let importedScripts = FileUtils.getFile('TmpD', ['marionetteContentScripts']); 
+          let importedScripts = FileUtils.getFile('TmpD', ['marionettescripts', 'content']); 
           return importedScripts.exists();
         """, special_powers=True)
 
     def get_file_size(self):
         return self.marionette.execute_script("""
           let FileUtils = SpecialPowers.Cu.import("resource://gre/modules/FileUtils.jsm", {}).FileUtils;
-          let importedScripts = FileUtils.getFile('TmpD', ['marionetteContentScripts']); 
+          let importedScripts = FileUtils.getFile('TmpD', ['marionettescripts', 'content']); 
           return importedScripts.fileSize;
         """, special_powers=True)
 
@@ -129,14 +129,14 @@ class TestImportScriptChrome(TestImportScript):
     def check_file_exists(self):
         return self.marionette.execute_async_script("""
           let FileUtils = Components.utils.import("resource://gre/modules/FileUtils.jsm", {}).FileUtils;
-          let importedScripts = FileUtils.getFile('TmpD', ['marionetteChromeScripts']); 
+          let importedScripts = FileUtils.getFile('TmpD', ['marionettescripts', 'chrome']); 
           marionetteScriptFinished(importedScripts.exists());
         """)
 
     def get_file_size(self):
         return self.marionette.execute_async_script("""
           let FileUtils = Components.utils.import("resource://gre/modules/FileUtils.jsm", {}).FileUtils;
-          let importedScripts = FileUtils.getFile('TmpD', ['marionetteChromeScripts']); 
-          marionetteScriptFinished(importedScripts.fileSize);
+          let importedScripts = FileUtils.getFile('TmpD', ['marionettescripts', 'chrome']); 
+           marionetteScriptFinished(importedScripts.fileSize);
         """)
 

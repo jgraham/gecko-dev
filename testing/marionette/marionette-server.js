@@ -133,7 +133,13 @@ function MarionetteServerConnection(aPrefix, aTransport, aServer)
   this.mainFrame = null; //topmost chrome frame
   this.curFrame = null; // chrome iframe that currently has focus
   this.mainContentFrameId = null;
-  this.importedScripts = FileUtils.getFile('TmpD', ['marionetteChromeScripts']);
+  this.importedScriptsDir = FileUtils.getDir('TmpD', ['marionettescripts'], true, true);
+  this.importedScripts = this.importedScriptsDir.clone();
+  this.importedScripts.append('chrome');
+  this.deleteFile(this.importedScripts);
+  this.importedContentScripts = this.importedScriptsDir.clone();
+  this.importedContentScripts.append('content');
+  this.deleteFile(this.importedContentScripts);
   this.importedScriptHashes = {"chrome" : [], "content": []};
   this.currentFrameElement = null;
   this.testName = null;
@@ -466,12 +472,11 @@ MarionetteServerConnection.prototype = {
   },
 
   /**
-    * Given a file name, this will delete the file from the temp directory if it exists
+    * Given an nsIFile, this will delete the file if it exists
     */
-  deleteFile: function(filename) {
-    let file = FileUtils.getFile('TmpD', [filename.toString()]);
+  deleteFile: function(file) {
     if (file.exists()) {
-      file.remove(true);
+      file.remove(false);
     }
   },
 
@@ -2098,8 +2103,8 @@ MarionetteServerConnection.prototype = {
     if (this.mainFrame) {
       this.mainFrame.focus();
     }
-    this.deleteFile('marionetteChromeScripts');
-    this.deleteFile('marionetteContentScripts');
+    this.deleteFile(this.importedScripts);
+    this.deleteFile(this.importedContentScripts);
   },
 
   /**
@@ -2194,22 +2199,28 @@ MarionetteServerConnection.prototype = {
     }
     this.importedScriptHashes[this.context].push(hash);
     if (this.context == "chrome") {
-      let file;
-      if (this.importedScripts.exists()) {
-        file = FileUtils.openFileOutputStream(this.importedScripts,
-            FileUtils.MODE_APPEND | FileUtils.MODE_WRONLY);
-      }
-      else {
-        //Note: The permission bits here don't actually get set (bug 804563)
-        this.importedScripts.createUnique(
-            Components.interfaces.nsIFile.NORMAL_FILE_TYPE, parseInt("0666", 8));
-        file = FileUtils.openFileOutputStream(this.importedScripts,
-            FileUtils.MODE_WRONLY | FileUtils.MODE_CREATE);
-        this.importedScripts.permissions = parseInt("0666", 8); //actually set permissions
-      }
-      file.write(aRequest.parameters.script, aRequest.parameters.script.length);
-      file.close();
-      this.sendOk(command_id);
+
+      let ostream = FileUtils.openFileOutputStream(this.importedScripts,
+        FileUtils.MODE_WRONLY | FileUtils.MODE_CREATE | FileUtils.MODE_APPEND);
+
+      // Obtain a converter to convert our data to a UTF-8 encoded input stream.
+      let converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                      .createInstance(Ci.nsIScriptableUnicodeConverter);
+      converter.charset = "UTF-8";
+
+      // Asynchronously copy the data to the file.
+      let that = this;
+      let istream = converter.convertToInputStream(aRequest.parameters.script);
+      NetUtil.asyncCopy(istream, ostream, function(status) {
+        ostream.close();
+        if (!Components.isSuccessCode(status)) {
+          that.sendError("Could not write imported scripts", 500, "status: " + status, command_id);
+        }
+        else {
+          that.sendOk(command_id);
+        }
+      });
+
     }
     else {
       this.sendAsync("importScript",
@@ -2222,10 +2233,10 @@ MarionetteServerConnection.prototype = {
     let command_id = this.command_id = this.getCommandId();
     try {
       if (this.context == "chrome") {
-        this.deleteFile('marionetteChromeScripts');
+        this.deleteFile(this.importedScripts);
       }
       else {
-        this.deleteFile('marionetteContentScripts');
+        this.deleteFile(this.importedContentScripts);
       }
     }
     catch (e) {
