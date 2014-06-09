@@ -6782,14 +6782,6 @@
         "path": "animation-timing/idlharness.html"
       }, 
       {
-        "url": "/battery-status/battery-created.html", 
-        "path": "battery-status/battery-created.html"
-      }, 
-      {
-        "url": "/battery-status/battery-full.html", 
-        "path": "battery-status/battery-full.html"
-      }, 
-      {
         "url": "/battery-status/battery-interface-idlharness.html", 
         "path": "battery-status/battery-interface-idlharness.html"
       }, 
@@ -6855,7 +6847,8 @@
       }, 
       {
         "url": "/cors/status-async.htm", 
-        "path": "cors/status-async.htm"
+        "path": "cors/status-async.htm", 
+        "timeout": "long"
       }, 
       {
         "url": "/cors/status-preflight.htm", 
@@ -7207,7 +7200,8 @@
       }, 
       {
         "url": "/dom/nodes/Document-characterSet-normalization.html", 
-        "path": "dom/nodes/Document-characterSet-normalization.html"
+        "path": "dom/nodes/Document-characterSet-normalization.html", 
+        "timeout": "long"
       }, 
       {
         "url": "/dom/nodes/Document-contentType/contentType/contenttype_bmp.html", 
@@ -8016,7 +8010,8 @@
       }, 
       {
         "url": "/eventsource/shared-worker/eventsource-constructor-non-same-origin.htm", 
-        "path": "eventsource/shared-worker/eventsource-constructor-non-same-origin.htm"
+        "path": "eventsource/shared-worker/eventsource-constructor-non-same-origin.htm", 
+        "timeout": "long"
       }, 
       {
         "url": "/eventsource/shared-worker/eventsource-constructor-url-bogus.htm", 
@@ -10969,6 +10964,10 @@
         "path": "html/semantics/scripting-1/the-script-element/script-text.html"
       }, 
       {
+        "url": "/html/semantics/scripting-1/the-script-element/script-text.xhtml", 
+        "path": "html/semantics/scripting-1/the-script-element/script-text.xhtml"
+      }, 
+      {
         "url": "/html/semantics/scripting-1/the-template-element/additions-to-parsing-xhtml-documents/node-document.html", 
         "path": "html/semantics/scripting-1/the-template-element/additions-to-parsing-xhtml-documents/node-document.html"
       }, 
@@ -12703,6 +12702,10 @@
       {
         "url": "/quirks-mode/unitless-length.html", 
         "path": "quirks-mode/unitless-length.html"
+      }, 
+      {
+        "url": "/resource-timing/test_resource_timing.html", 
+        "path": "resource-timing/test_resource_timing.html"
       }, 
       {
         "url": "/selectors-api/level1-additional.html", 
@@ -15527,8 +15530,16 @@
         "path": "battery-status/battery-charging-manual.html"
       }, 
       {
+        "url": "/battery-status/battery-created-manual.html", 
+        "path": "battery-status/battery-created-manual.html"
+      }, 
+      {
         "url": "/battery-status/battery-discharging-manual.html", 
         "path": "battery-status/battery-discharging-manual.html"
+      }, 
+      {
+        "url": "/battery-status/battery-full-manual.html", 
+        "path": "battery-status/battery-full-manual.html"
       }, 
       {
         "url": "/battery-status/battery-plugged-in-manual.html", 
@@ -18641,10 +18652,6 @@
         "path": "html/semantics/scripting-1/the-script-element/log.py"
       }, 
       {
-        "url": "/html/semantics/scripting-1/the-script-element/script-text.xhtml", 
-        "path": "html/semantics/scripting-1/the-script-element/script-text.xhtml"
-      }, 
-      {
         "url": "html/semantics/scripting-1/the-template-element/additions-to-the-css-user-agent-style-sheet/css-user-agent-style-sheet-test-001-ref.html", 
         "path": "html/semantics/scripting-1/the-template-element/additions-to-the-css-user-agent-style-sheet/css-user-agent-style-sheet-test-001-ref.html"
       }, 
@@ -19263,6 +19270,26 @@
       {
         "url": "quirks-mode/font-element-text-decoration-color/001-ref.html", 
         "path": "quirks-mode/font-element-text-decoration-color/001-ref.html"
+      }, 
+      {
+        "url": "/resource-timing/resources/resource_timing_test0.css", 
+        "path": "resource-timing/resources/resource_timing_test0.css"
+      }, 
+      {
+        "url": "/resource-timing/resources/resource_timing_test0.js", 
+        "path": "resource-timing/resources/resource_timing_test0.js"
+      }, 
+      {
+        "url": "/resource-timing/resources/resource_timing_test0.png", 
+        "path": "resource-timing/resources/resource_timing_test0.png"
+      }, 
+      {
+        "url": "/resource-timing/resources/resource_timing_test0.xml", 
+        "path": "resource-timing/resources/resource_timing_test0.xml"
+      }, 
+      {
+        "url": "/resource-timing/resources/webperftestharness.js", 
+        "path": "resource-timing/resources/webperftestharness.js"
       }, 
       {
         "url": "/selectors-api/level1-lib.js", 
@@ -21087,5 +21114,5 @@
     ]
   }, 
   "local_changes": [], 
-  "rev": "c56cac68fd2b4b6834c1c6a45cac4463a08d5626"
+  "rev": "a3d9d8ef2bd878cb710a2f845258be4a40da2cc1"
 }
