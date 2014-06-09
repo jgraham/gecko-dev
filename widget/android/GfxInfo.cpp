@@ -151,7 +151,7 @@ GfxInfo::EnsureInitialized()
 
   mGLStrings->EnsureInitialized();
 
-  //MOZ_ASSERT(mozilla::AndroidBridge::Bridge());
+  MOZ_ASSERT(mozilla::AndroidBridge::Bridge());
 
   if (mozilla::AndroidBridge::Bridge()->GetStaticStringField("android/os/Build", "MODEL", mModel)) {
     mAdapterDescription.AppendPrintf("Model: %s",  NS_LossyConvertUTF16toASCII(mModel).get());

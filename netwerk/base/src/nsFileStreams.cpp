@@ -933,8 +933,7 @@ nsAtomicFileOutputStream::Finish()
 #ifdef DEBUG
             bool equal;
             if (NS_FAILED(mTargetFile->Equals(mTempFile, &equal)) || !equal)
-                printf_stderr("GYB: mTempFile not equal to mTargetFile");
-            //    NS_ERROR("mTempFile not equal to mTargetFile");
+                NS_ERROR("mTempFile not equal to mTargetFile");
 #endif
         }
         else {
