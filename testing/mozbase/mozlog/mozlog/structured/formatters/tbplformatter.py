@@ -18,9 +18,9 @@ class TbplFormatter(BaseMachFormatter):
 
     def log(self, data):
         if data.get('component'):
-            return "%s %s\n" % (data["component"], data["message"])
+            return "%s | %s | %s\n" % (data["level"], data["component"], data["message"])
 
-        return "%s\n" % (data["message"])
+        return "%s | %s\n" % (data[""level] | data["message"])
 
     def process_output(self, data):
         return "PROCESS | %(process)s | %(data)s\n" % data
@@ -48,11 +48,11 @@ class TbplFormatter(BaseMachFormatter):
         time = data["time"] - start_time
 
         if "expected" in data:
-            return "TEST-END UNEXPECTED-%s | %s | expected %s | %s | took %ims\n" % (
+            return """TEST-END | TEST-UNEXPECTED-%s | %s | expected %s | %s | took %ims\n""" % (
                 data["status"], self.id_str(data["test"]), data["expected"],
                 data.get("message", ""), time)
         else:
-            return "TEST-END %s | %s | took %ims\n" % (
+            return "TEST-END | TEST-%s | %s | took %ims\n" % (
                 data["status"], self.id_str(data["test"]), time)
 
     def suite_end(self, data):
