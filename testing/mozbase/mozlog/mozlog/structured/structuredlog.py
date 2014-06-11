@@ -85,6 +85,9 @@ log_levels = dict((k.upper(), v) for v, k in
                   enumerate(["critical", "error", "warning", "info", "debug"]))
 
 
+def get_default_logger(component=None):
+    return None
+
 class StructuredLogger(object):
     _lock = Lock()
     _handlers = defaultdict(list)
@@ -216,6 +219,30 @@ class StructuredLogger(object):
             data["command"] = command
         self._log_data("process_output", data)
 
+    def crash(self, process=None, test=None, top_frame=None,
+              minidump_path=None, minidump_extra=None,
+              stackwalk_retcode=None, stackwalk_stdout=None,
+              stackwalk_stderr=None, errors=None):
+        data = {"process": process,
+                "top_frame": top_frame,
+                "errors": [] if errors is None else errors}
+
+        if test is not None:
+            data["test"] = test
+        if minidump_path is not None:
+            data["minidump_path"] = minidump_path
+        if minidump_extra is not None:
+            data["minidump_extra"] = minidump_extra
+        if stackwalk_retcode is not None:
+            data["stackwalk_retcode"] = stackwalk_retcode
+        if stackwalk_stdout is not None:
+            data["stackwalk_stdout"] = stackwalk_stdout
+        if stackwalk_stderr is not None:
+            data["stackwalk_stderr"] = stackwalk_stderr
+        if errors is not None:
+            data["stackwalk_errors"] = errors
+
+        self._log_data("crash", data)
 
 def _log_func(level_name):
     def log(self, message):
