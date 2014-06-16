@@ -24,7 +24,9 @@ from mach.decorators import (
     Command,
 )
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.split(__file__)[0], "harness")))
+here = os.path.abspath(os.path.split(__file__)[0])
+sys.path.insert(0, os.path.join(here, "harness"))
+sys.path.insert(0, here)
 
 from wptrunner import wptcommandline
 
@@ -37,7 +39,7 @@ class WebPlatformTestsRunner(MozbuildObject):
     """Run web platform tests."""
 
     def __init__(self, topsrcdir, settings, log_manager, topobjdir=None):
-        from wptrunner import machlogging
+        import machlogging
         from mozlog.structured import structuredlog
 
         log_manager = machlogging.StructuredLoggingManager()
@@ -87,7 +89,7 @@ class WebPlatformTestsRunner(MozbuildObject):
 class WebPlatformTestsUpdater(MozbuildObject):
     """Update web platform tests."""
     def __init__(self, topsrcdir, settings, log_manager, topobjdir=None):
-        from wptrunner import machlogging
+        import machlogging
         from mozlog.structured import structuredlog
 
         log_manager = machlogging.StructuredLoggingManager()
