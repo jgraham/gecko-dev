@@ -82,6 +82,16 @@ class BaseMachFormatter(base.BaseFormatter):
                                              data["process"],
                                              data["command"])
 
+    def crash(self, data):
+        test = self._get_test_id(data)
+        if data.get("stackwalk_returncode", 0) != 0 and not data.get("stackwalk_stderr"):
+            success = True
+        else:
+            success = False
+
+        return ("Process crashed pid:%s. Test:%s. Minidump anaylsed:%s. Top frame:[%s] " %
+                (data.get("pid", None), test, success, data["top_frame"]))
+
     def log(self, data):
         return "%s %s" % (data["level"], data["message"])
 
