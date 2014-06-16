@@ -15,7 +15,7 @@ import products
 root = os.path.join(os.path.split(__file__)[0])
 
 def abs_path(path):
-    return os.path.abspath(path)
+    return os.path.abspath(os.path.expanduser(path))
 
 def slash_prefixed(url):
     if not url.startswith("/"):
@@ -75,7 +75,7 @@ def create_parser(allow_mandatory=True):
                         default=False,
                         help="List the tests that are disabled on the current platform")
 
-    parser.add_argument("--timeout-multiplier", action="store", type=float, default=1,
+    parser.add_argument("--timeout-multiplier", action="store", type=float, default=None,
                         help="Multiplier relative to standard test timeout to use")
     parser.add_argument("--repeat", action="store", type=int, default=1,
                         help="Number of times to run the tests")
@@ -85,6 +85,11 @@ def create_parser(allow_mandatory=True):
 
     parser.add_argument("--product", action="store", choices=[item[0] for item in products.iter_products()],
                         default="firefox")
+
+    parser.add_argument("--symbols-path", action="store", type=abs_path,
+                        help="Path to symbols file used to analyse crash minidumps.")
+    parser.add_argument("--stackwalk-binary", action="store", type=abs_path,
+                        help="Path to stackwalker program used to analyse minidumps.")
 
     parser.add_argument("--b2g-no-backup", action="store_true", default=False,
                         help="Don't backup device before testrun with --product=b2g")
@@ -123,7 +128,7 @@ def create_parser_update(allow_mandatory=True):
                         choices=["none", "try", "logfile"],
                         default="none", help="Process to use for updating the expectation data")
     #Should make this required iff run=logfile
-    parser.add_argument("--run-log", action="append", type=abs_path,
+    parser.add_argument("run_log", nargs="*", type=abs_path,
                         help="Log file from run of tests")
     return parser
 

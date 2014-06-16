@@ -103,6 +103,10 @@ class Browser(object):
         with which it should be instantiated"""
         return ExecutorBrowser, {}
 
+    def get_crash_data(self):
+        """Return a list of dictionaries containing information about crashes that happend
+        in the browser, or an empty list if no crashes occurred"""
+
 class NullBrowser(Browser):
     def start(self):
         """No-op browser to use in scenarios where the TestRunnerManager shouldn't

@@ -182,6 +182,9 @@ class TestRunnerManager(threading.Thread):
         self.executor_cls = executor_cls
         self.executor_kwargs = executor_kwargs
 
+        self.browser = None
+        self.browser_pid = None
+
         # Flags used to shut down this thread if we get a sigint
         self.parent_stop_flag = stop_flag
         self.child_stop_flag = multiprocessing.Event()
@@ -313,6 +316,7 @@ class TestRunnerManager(threading.Thread):
                 self.init_timer.start()
 
                 self.browser.start()
+                self.browser_pid = self.browser.pid()
                 self.start_test_runner()
             except:
                 self.init_timer.cancel()
@@ -463,6 +467,16 @@ class TestRunnerManager(threading.Thread):
         if is_unexpected:
             self.unexpected_count += 1
             self.logger.debug("Unexpected count in this thread %i" % self.unexpected_count)
+        if status == "CRASH":
+            crash_data = self.browser.get_crash_info()
+            print "Found %i crashes" % len(crash_data)
+            if crash_data:
+                for data in crash_data:
+                    self.logger.crash(process=self.browser_pid, test=test.id,
+                                      **data)
+            else:
+                self.logger.crash(process=self.browser_pid, test=test.id)
+
         self.logger.test_end(test.id,
                              status,
                              message=file_result.message,

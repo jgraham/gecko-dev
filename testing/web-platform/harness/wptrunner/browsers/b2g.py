@@ -10,7 +10,6 @@ import mozdevice
 import moznetwork
 
 from .base import get_free_port, BrowserError, Browser, ExecutorBrowser
-from ..executors import get_executor_kwargs
 from ..executors.executormarionette import MarionetteTestharnessExecutor
 
 here = os.path.split(__file__)[0]
@@ -29,6 +28,18 @@ def check_args(**kwargs):
 def browser_kwargs(**kwargs):
     return {"prefs_root": kwargs["prefs_root"],
             "no_backup": kwargs.get("b2g_no_backup", False)}
+
+
+def get_executor_kwargs(http_server_url, **kwargs):
+    timeout_multiplier = kwargs["timeout_multiplier"]
+    if timeout_multiplier is None:
+        timeout_multiplier = 2
+
+    executor_kwargs = {"http_server_url": http_server_url,
+                       "timeout_multiplier":timeout_multiplier,
+                       "close_after_done": False}
+    return executor_kwargs
+
 
 def env_options():
     return {"host": "web-platform.test",
@@ -256,7 +267,11 @@ class B2GExecutorBrowser(ExecutorBrowser):
         marionette.set_context(marionette.CONTEXT_CONTENT)
         marionette.execute_async_script("""
 let manager = window.wrappedJSObject.AppWindowManager || window.wrappedJSObject.WindowManager;
-let app = ('getActiveApp' in manager) ? manager.getActiveApp() : manager.getCurrentDisplayedApp();
+log(manager);
+let app = null;
+if (manager) {
+  app = ('getActiveApp' in manager) ? manager.getActiveApp() : manager.getCurrentDisplayedApp();
+}
 log(app);
 if (app) {
   log('Already loaded home screen');
@@ -267,8 +282,6 @@ if (app) {
     log('received mozbrowserloadend for ' + aEvent.target.src);
     if (aEvent.target.src.indexOf('ftu') != -1 || aEvent.target.src.indexOf('homescreen') != -1) {
       window.removeEventListener('mozbrowserloadend', loaded);
-      let app = ('getActiveApp' in manager) ? manager.getActiveApp() : manager.getCurrentDisplayedApp();
-      log(app);
       marionetteScriptFinished();
     }
   });
