@@ -1,22 +1,11 @@
 import os
 import platform
-import shutil
 import socket
-import subprocess
-import sys
-import tempfile
-import time
-
-import mozprocess
-from mozprofile import FirefoxProfile, Preferences
-from mozprofile.permissions import ServerLocations
-from mozrunner import FirefoxRunner, B2GRunner
-import mozdevice
-import moznetwork
 
 from ..wptcommandline import require_arg
 
 here = os.path.split(__file__)[0]
+
 
 def cmd_arg(name, value=None):
     prefix = "-" if platform.system() == "Windows" else "--"
@@ -24,6 +13,7 @@ def cmd_arg(name, value=None):
     if value is not None:
         rv += "=" + value
     return rv
+
 
 def get_free_port(start_port, exclude=None):
     """Get the first port number after start_port (inclusive) that is
@@ -103,9 +93,6 @@ class Browser(object):
         with which it should be instantiated"""
         return ExecutorBrowser, {}
 
-    def get_crash_data(self):
-        """Return a list of dictionaries containing information about crashes that happend
-        in the browser, or an empty list if no crashes occurred"""
 
 class NullBrowser(Browser):
     def start(self):
@@ -119,6 +106,7 @@ class NullBrowser(Browser):
 
     def is_alive(self):
         return True
+
 
 class ExecutorBrowser(object):
     def __init__(self, **kwargs):

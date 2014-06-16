@@ -15,9 +15,15 @@ here = os.path.join(os.path.split(__file__)[0])
 from .base import TestExecutor, testharness_result_converter, reftest_result_converter
 from ..testrunner import Stop
 
+
+required_files = [("testharness_runner.html", "", False),
+                  ("testharnessreport.js", "resources/", True)]
+
+
 def do_delayed_imports():
     global marionette
     import marionette
+
 
 class MarionetteTestExecutor(TestExecutor):
     def __init__(self, browser, http_server_url, timeout_multiplier=1, close_after_done=True):
@@ -36,7 +42,7 @@ class MarionetteTestExecutor(TestExecutor):
 
         self.logger.debug("Connecting to marionette on port %i" % self.marionette_port)
         self.marionette = marionette.Marionette(host='localhost', port=self.marionette_port)
-        #XXX Move this timeout somewhere
+        # XXX Move this timeout somewhere
         self.logger.debug("Waiting for marionette connection")
         success = self.marionette.wait_for_port(60)
         session_started = False
@@ -76,7 +82,7 @@ class MarionetteTestExecutor(TestExecutor):
 
     def is_alive(self):
         try:
-            #Get a simple property over the connection
+            # Get a simple property over the connection
             self.marionette.current_window_handle
         except (socket.timeout, marionette.errors.InvalidResponseException):
             return False
@@ -85,9 +91,11 @@ class MarionetteTestExecutor(TestExecutor):
     def after_connect(self):
         self.logger.debug(urlparse.urljoin(self.http_server_url, "/testharness_runner.html"))
         try:
-            self.marionette.navigate(urlparse.urljoin(self.http_server_url, "/testharness_runner.html"))
+            self.marionette.navigate(
+                urlparse.urljoin(self.http_server_url, "/testharness_runner.html"))
         except:
-            self.logger.critical("Loading initial page %s failed. Ensure that the there are no other programs bound to this port and that your firewall rules or network setup does not prevent access.")
+            self.logger.critical(
+                "Loading initial page %s failed. Ensure that the there are no other programs bound to this port and that your firewall rules or network setup does not prevent access.")
             raise
         self.marionette.execute_script("document.title = '%s'" % threading.current_thread().name)
 
@@ -97,10 +105,10 @@ class MarionetteTestExecutor(TestExecutor):
         This method is independent of the test type, and calls
         do_test to implement the type-sepcific testing functionality.
         """
-        #Lock to prevent races between timeouts and other results
-        #This might not be strictly necessary if we need to deal
-        #with the result changing post-hoc anyway (e.g. due to detecting
-        #a crash after we get the data back from marionette)
+        # Lock to prevent races between timeouts and other results
+        # This might not be strictly necessary if we need to deal
+        # with the result changing post-hoc anyway (e.g. due to detecting
+        # a crash after we get the data back from marionette)
         result = None
         result_flag = threading.Event()
         result_lock = threading.Lock()
@@ -176,8 +184,12 @@ class MarionetteTestharnessExecutor(MarionetteTestExecutor):
                            "url": test.url,
                            "window_id": self.window_id,
                            "timeout_multiplier": self.timeout_multiplier,
-                           "close_after_done": "true" if self.close_after_done else "false",
                            "timeout": timeout * 1000}, new_sandbox=False)
+
+    def after_result(self):
+        if self.close_after_done:
+            self.logger.info("closing window")
+            self.marionette.execute_script("window.wrappedJSObject.win.close()")
 
 
 class MarionetteReftestExecutor(MarionetteTestExecutor):
@@ -200,18 +212,18 @@ class MarionetteReftestExecutor(MarionetteTestExecutor):
         self.marionette.switch_to_window(self.marionette.window_handles[-1])
         for url_type, url in [("test", test_url), ("ref", ref_url)]:
             if hashes[url_type] is None:
-                #Would like to do this in a new tab each time, but that isn't
-                #easy with the current state of marionette
+                # Would like to do this in a new tab each time, but that isn't
+                # easy with the current state of marionette
                 full_url = urlparse.urljoin(self.http_server_url, url)
                 try:
                     self.marionette.navigate(full_url)
                 except marionette.errors.MarionetteException:
-                    return {"status":"ERROR",
-                            "message":"Failed to load url %s" % (full_url,)}
+                    return {"status": "ERROR",
+                            "message": "Failed to load url %s" % (full_url,)}
                 if url_type == "test":
                     self.wait()
                 screenshot = self.marionette.screenshot()
-                #strip off the data:img/png, part of the url
+                # strip off the data:img/png, part of the url
                 if screenshot.startswith("data:image/png;base64,"):
                     screenshot = screenshot.split(",", 1)[1]
                 hashes[url_type] = hashlib.sha1(screenshot).hexdigest()
@@ -226,7 +238,7 @@ class MarionetteReftestExecutor(MarionetteTestExecutor):
         else:
             raise ValueError
 
-        return {"status":"PASS" if passed else "FAIL",
+        return {"status": "PASS" if passed else "FAIL",
                 "message": None}
 
     def wait(self):

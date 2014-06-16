@@ -1,16 +1,9 @@
 import os
-import socket
-import sys
-import uuid
-import traceback
-import urlparse
-import time
-import threading
 
 import mozprocess
 
 from .base import get_free_port, Browser, ExecutorBrowser, require_arg, cmd_arg
-from ..executors.executorwebdriver import WebdriverTestharnessExecutor
+from ..executors.executorwebdriver import WebdriverTestharnessExecutor, required_files
 
 here = os.path.split(__file__)[0]
 
@@ -22,21 +15,27 @@ __wptrunner__ = {"product": "chrome",
                  "executor_kwargs": "executor_kwargs",
                  "env_options": "env_options"}
 
+
 def check_args(**kwargs):
     require_arg(kwargs, "binary")
+
 
 def browser_kwargs(**kwargs):
     return {"binary": kwargs["binary"]}
 
+
 def executor_kwargs(http_server_url, **kwargs):
     from selenium import webdriver
     return {"http_server_url": http_server_url,
-            "timeout_multiplier":kwargs["timeout_multiplier"],
+            "timeout_multiplier": kwargs["timeout_multiplier"],
             "capabilities": webdriver.DesiredCapabilities.CHROME}
+
 
 def env_options():
     return {"host": "localhost",
-            "bind_hostname": "true"}
+            "bind_hostname": "true",
+            "required_files": required_files}
+
 
 class ChromeBrowser(Browser):
     used_ports = set()

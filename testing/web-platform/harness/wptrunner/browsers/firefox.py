@@ -8,12 +8,10 @@ from mozprocess import ProcessHandler
 from mozprofile import FirefoxProfile, Preferences
 from mozprofile.permissions import ServerLocations
 from mozrunner import FirefoxRunner
-import mozcrash
-from mozcrash import mozcrash
 
 from .base import get_free_port, Browser, ExecutorBrowser, require_arg, cmd_arg
 from ..executors import get_executor_kwargs as base_executor_kwargs
-from ..executors.executormarionette import MarionetteTestharnessExecutor, MarionetteReftestExecutor
+from ..executors.executormarionette import MarionetteTestharnessExecutor, MarionetteReftestExecutor, required_files
 
 here = os.path.join(os.path.split(__file__)[0])
 
@@ -26,39 +24,38 @@ __wptrunner__ = {"product": "firefox",
                  "executor_kwargs": "get_executor_kwargs",
                  "env_options": "env_options"}
 
+
 def check_args(**kwargs):
     require_arg(kwargs, "binary")
 
+
 def browser_kwargs(**kwargs):
-    print "stackwalk_binary %s" % kwargs["stackwalk_binary"]
     return {"binary": kwargs["binary"],
-            "prefs_root": kwargs["prefs_root"],
-            "symbols_path":kwargs["symbols_path"],
-            "stackwalk_binary":kwargs["stackwalk_binary"]}
+            "prefs_root": kwargs["prefs_root"]}
+
 
 def get_executor_kwargs(http_server_url, **kwargs):
-
     executor_kwargs = base_executor_kwargs(http_server_url, **kwargs)
     executor_kwargs["close_after_done"] = True
     return executor_kwargs
 
+
 def env_options():
     return {"host": "localhost",
-            "bind_hostname": "true"}
+            "bind_hostname": "true",
+            "required_files": required_files}
+
 
 class FirefoxBrowser(Browser):
     used_ports = set()
 
-    def __init__(self, logger, binary, prefs_root, symbols_path=None, stackwalk_binary=None):
+    def __init__(self, logger, binary, prefs_root):
         Browser.__init__(self, logger)
         self.binary = binary
         self.prefs_root = prefs_root
         self.marionette_port = get_free_port(2828, exclude=self.used_ports)
         self.used_ports.add(self.marionette_port)
         self.runner = None
-        self.profile = None
-        self.symbols_path = symbols_path
-        self.stackwalk_binary = stackwalk_binary
 
     def start(self):
         env = os.environ.copy()
@@ -68,12 +65,12 @@ class FirefoxBrowser(Browser):
 
         preferences = self.load_prefs()
 
-        self.profile = FirefoxProfile(locations=locations, proxy=True, preferences=preferences)
-        self.profile.set_preferences({"marionette.defaultPrefs.enabled": True,
-                                      "marionette.defaultPrefs.port": self.marionette_port,
-                                      "dom.disable_open_during_load": False})
+        profile = FirefoxProfile(locations=locations, proxy=True, preferences=preferences)
+        profile.set_preferences({"marionette.defaultPrefs.enabled": True,
+                                 "marionette.defaultPrefs.port": self.marionette_port,
+                                 "dom.disable_open_during_load": False})
 
-        self.runner = FirefoxRunner(self.profile,
+        self.runner = FirefoxRunner(profile,
                                     self.binary,
                                     cmdargs=[cmd_arg("marionette"), "about:blank"],
                                     env=env,
@@ -127,13 +124,3 @@ class FirefoxBrowser(Browser):
 
     def executor_browser(self):
         return ExecutorBrowser, {"marionette_port": self.marionette_port}
-
-    def get_crash_info(self):
-        """Return a list of dictionaries containing information about crashes that happend
-        in the browser, or an empty list if no crashes occurred"""
-        data = []
-        dump_dir = os.path.join(self.profile.profile, "minidumps")
-        with mozcrash.CrashInfo(dump_dir, self.symbols_path, self.stackwalk_binary) as crash_info:
-            for crash in crash_info:
-                data.append(crash)
-        return data

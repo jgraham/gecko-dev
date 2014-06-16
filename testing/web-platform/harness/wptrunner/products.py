@@ -1,9 +1,8 @@
 import os
 import importlib
 
-import moznetwork
-
 here = os.path.join(os.path.split(__file__)[0])
+
 
 def iter_products():
     product_dir = os.path.join(here, "browsers")
