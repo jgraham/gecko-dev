@@ -5,7 +5,7 @@
 import argparse
 import sys
 
-from structuredlog import StructuredLogger
+from structuredlog import StructuredLogger, set_default_loggger
 import handlers
 import formatters
 
@@ -16,6 +16,7 @@ log_formatters = {
     'html': (formatters.HTMLFormatter, "HTML report"),
     'mach': (formatters.MachFormatter, "Uncolored mach-like output"),
     'mach_terminal': (formatters.MachTerminalFormatter, "Colored mach-like output for use in a tty"),
+    'tbpl': (formatters.TbplFormatter, "TBPL-compatible human readable output"),
 }
 
 
@@ -88,5 +89,7 @@ def setup_logging(suite, args, defaults):
                 formatter_cls = log_formatters[name][0]
                 logger.add_handler(handlers.StreamHandler(stream=value,
                                                           formatter=formatter_cls()))
+
+    set_default_loggger(logger)
 
     return logger

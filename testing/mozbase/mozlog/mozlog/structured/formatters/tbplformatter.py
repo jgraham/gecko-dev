@@ -23,13 +23,16 @@ class TbplFormatter(BaseMachFormatter):
         return "PROCESS | %(process)s | %(data)s\n" % data
 
     def crash(self, data):
-        id = self.id_str(data["test"]) if test in data else "pid: " % data["process"]
+        id = self.id_str(data["test"]) if "test" in data else "pid: " % data["process"]
 
         rv = ["PROCESS-CRASH | %s | application crashed [%s]" % (id,
                                                                  data["top_frame"])]
+        rv.append("Crash dump filename: %s" % data["minidump_path"])
         if data.get("stackwalk_stderr"):
             rv.append("stderr from minidump_stackwalk:")
             rv.append(data["stackwalk_stderr"])
+        else:
+            rv.append(data["stackwalk_stdout"])
         if data.get("stackwalk_returncode", 0) != 0:
             rv.append("minidump_stackwalk exited with return code %d" %
                       data["stackwalk_returncode"])

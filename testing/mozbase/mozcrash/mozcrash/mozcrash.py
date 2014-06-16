@@ -74,10 +74,12 @@ def check_for_crashes(dump_directory, symbols_path,
 
         for dump in crash_info:
             if not quiet:
-                stackwalk_output = ["Crash dump filename: %s" % dump["path"]]
+                stackwalk_output = ["Crash dump filename: %s" % dump["minidump_path"]]
                 if dump["stackwalk_stderr"]:
                     stackwalk_output.append("stderr from minidump_stackwalk:")
                     stackwalk_output.append(dump["stackwalk_stderr"])
+                else:
+                    stackwalk_output.append["stackwalk_stdout"]
                 if dump["stackwalk_returncode"] != 0:
                     stackwalk_output.append("minidump_stackwalk exited with return code %d" % dump["stackwalk_returncode"])
                 top_frame = dump.get("top_frame", "unknown top frame")
@@ -87,7 +89,7 @@ def check_for_crashes(dump_directory, symbols_path,
                 print '\n'.join(dump["errors"])
 
             if dump_save_path:
-                save_dump_file(dump_save_path, dump["path"], dump["extra"])
+                save_dump_file(dump_save_path, dump["minidump_path"], dump["minidump_extra"])
 
     return True
 
@@ -181,7 +183,7 @@ class CrashInfo(object):
     def __iter__(self):
         for path, extra in self.dump_files:
             rv = self.process_dump_file(path)
-            rv["extra"] = extra
+            rv["minidump_extra"] = extra
             yield rv
 
     def process_dump_file(self, path):
@@ -190,7 +192,7 @@ class CrashInfo(object):
 
         :param path: Path to the minidump file to analyse
         :return: A dictionary of the form::
-                   path: Path of the dump file
+                   minidump_path: Path of the dump file
                    top_frame: The top frame of the stack trace, or None if it
                               could not be determined.
                    stackwalk_stdout: String of stdout data from stackwalk
@@ -203,12 +205,16 @@ class CrashInfo(object):
         errors = []
         top_frame = None
         include_stderr = False
+        out = None
+        err = None
+        retcode = None
         if self.symbols_path and self.stackwalk_binary and os.path.exists(self.stackwalk_binary):
             # run minidump_stackwalk
             p = subprocess.Popen([self.stackwalk_binary, path, self.symbols_path],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
             (out, err) = p.communicate()
+            retcode = p.returncode
             if len(out) > 3:
                 # minidump_stackwalk is chatty,
                 # so ignore stderr when it succeeds.
@@ -235,12 +241,14 @@ class CrashInfo(object):
             elif self.stackwalk_binary and not os.path.exists(self.stackwalk_binary):
                 errors.append("MINIDUMP_STACKWALK binary not found: %s" % self.stackwalk_binary)
 
-        return {"path":path,
-                "top_frame":top_frame,
-                "stackwalk_stdout":out,
-                "stackwalk_stderr":err if include_stderr else None,
-                "stackwalk_retcode":p.returncode,
-                "errors":errors}
+        rv = {"minidump_path":path,
+              "top_frame":top_frame,
+              "stackwalk_stdout":out,
+              "stackwalk_stderr":err if include_stderr else None,
+              "stackwalk_retcode":retcode,
+              "errors":errors}
+
+        return rv
 
     def __exit__(self, *args, **kwargs):
         for path, extra in self.dump_files:

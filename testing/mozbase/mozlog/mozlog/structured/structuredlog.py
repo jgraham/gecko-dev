@@ -58,9 +58,15 @@ Subfields for all messages:
 log_levels = dict((k.upper(), v) for v, k in
                   enumerate(["critical", "error", "warning", "info", "debug"]))
 
+_default_logger_name = None
 
 def get_default_logger(component=None):
-    return None
+    if _default_logger_name is not None:
+        return StructuredLogger(_default_logger_name, component)
+
+def set_default_loggger(logger):
+    global _default_logger_name
+    _default_logger_name = logger.name
 
 class StructuredLogger(object):
     _lock = Lock()
@@ -70,8 +76,9 @@ class StructuredLogger(object):
     :param name: The name of the logger.
     """
 
-    def __init__(self, name):
+    def __init__(self, name, component=None):
         self.name = name
+        self.component = component
 
     def add_handler(self, handler):
         """Add a handler to the current logger"""
@@ -104,6 +111,8 @@ class StructuredLogger(object):
                     "thread": current_thread().name,
                     "pid": current_process().pid,
                     "source": self.name}
+        if self.component is not None:
+            all_data["component"] = self.component
         all_data.update(data)
         return all_data
 
@@ -190,21 +199,28 @@ class StructuredLogger(object):
             data["command"] = command
         self._log_data("process_output", data)
 
-    def log_crash(self, process=None, test=None, top_frame=None,
-                  stackwalk_retcode=None, stackwalk_stderr=None,
-                  stackwalk_errors=None):
+    def crash(self, process=None, test=None, top_frame=None,
+              minidump_path=None, minidump_extra=None,
+              stackwalk_retcode=None, stackwalk_stdout=None,
+              stackwalk_stderr=None, errors=None):
         data = {"process": process,
                 "top_frame": top_frame,
                 "errors": [] if errors is None else errors}
 
         if test is not None:
             data["test"] = test
+        if minidump_path is not None:
+            data["minidump_path"] = minidump_path
+        if minidump_extra is not None:
+            data["minidump_extra"] = minidump_extra
         if stackwalk_retcode is not None:
             data["stackwalk_retcode"] = stackwalk_retcode
+        if stackwalk_stdout is not None:
+            data["stackwalk_stdout"] = stackwalk_stdout
         if stackwalk_stderr is not None:
             data["stackwalk_stderr"] = stackwalk_stderr
-        if stackwalk_errors is not None:
-            data["stackwalk_errors"] = stackwalk_errors
+        if errors is not None:
+            data["stackwalk_errors"] = errors
 
         self._log_data("crash", data)
 
