@@ -28,6 +28,7 @@
 #include "nsISSLSocketControl.h"
 #include "nsISSLStatus.h"
 #include "nsISSLStatusProvider.h"
+#include "nsISupportsPriority.h"
 #include "prprf.h"
 #include "prnetdb.h"
 #include "sslt.h"
@@ -935,8 +936,22 @@ Http2Session::CleanupStream(Http2Stream *aStream, nsresult aResult,
   uint32_t id = aStream->StreamID();
   if (id > 0) {
     mStreamIDHash.Remove(id);
-    if (!(id & 1))
+    if (!(id & 1)) {
       mPushedStreams.RemoveElement(aStream);
+      Http2PushedStream *pushStream = static_cast<Http2PushedStream *>(aStream);
+      nsAutoCString hashKey;
+      pushStream->GetHashKey(hashKey);
+      nsILoadGroupConnectionInfo *loadGroupCI = aStream->LoadGroupConnectionInfo();
+      if (loadGroupCI) {
+        SpdyPushCache *cache = nullptr;
+        loadGroupCI->GetSpdyPushCache(&cache);
+        if (cache) {
+          Http2PushedStream *trash = cache->RemovePushedStreamHttp2(hashKey);
+          LOG3(("Http2Session::CleanupStream %p aStream=%p pushStream=%p trash=%p",
+                this, aStream, pushStream, trash));
+        }
+      }
+    }
   }
 
   RemoveStreamFromQueues(aStream);
@@ -2874,7 +2889,7 @@ Http2Session::DispatchOnTunnel(nsAHttpTransaction *aHttpTransaction,
     nsRefPtr<SpdyConnectTransaction> connectTrans =
       new SpdyConnectTransaction(ci, aCallbacks,
                                  trans->Caps(), trans, this);
-    AddStream(connectTrans, trans->Priority(),
+    AddStream(connectTrans, nsISupportsPriority::PRIORITY_NORMAL,
               false, nullptr);
     Http2Stream *tunnel = mStreamTransactionHash.Get(connectTrans);
     MOZ_ASSERT(tunnel);

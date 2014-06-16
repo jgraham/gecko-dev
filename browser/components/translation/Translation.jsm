@@ -20,9 +20,18 @@ Cu.import("resource://gre/modules/Task.jsm", this);
 
 const DAILY_COUNTER_FIELD = {type: Metrics.Storage.FIELD_DAILY_COUNTER};
 const DAILY_LAST_TEXT_FIELD = {type: Metrics.Storage.FIELD_DAILY_LAST_TEXT};
+const DAILY_LAST_NUMERIC_FIELD = {type: Metrics.Storage.FIELD_DAILY_LAST_NUMERIC};
 
 
 this.Translation = {
+  STATE_OFFER: 0,
+  STATE_TRANSLATING: 1,
+  STATE_TRANSLATED: 2,
+  STATE_ERROR: 3,
+  STATE_UNAVAILABLE: 4,
+
+  serviceUnavailable: false,
+
   supportedSourceLanguages: ["en", "zh", "ja", "es", "de", "fr", "ru", "ar", "ko", "pt"],
   supportedTargetLanguages: ["en", "pl", "tr", "vi"],
 
@@ -37,21 +46,33 @@ this.Translation = {
     return this._defaultTargetLanguage;
   },
 
-  languageDetected: function(aBrowser, aDetectedLanguage) {
-    if (this.supportedSourceLanguages.indexOf(aDetectedLanguage) == -1 ||
-        aDetectedLanguage == this.defaultTargetLanguage)
-      return;
+  documentStateReceived: function(aBrowser, aData) {
+    if (aData.state == this.STATE_OFFER) {
+      if (this.supportedSourceLanguages.indexOf(aData.detectedLanguage) == -1 ||
+          aData.detectedLanguage == this.defaultTargetLanguage)
+        return;
 
-    TranslationHealthReport.recordTranslationOpportunity(aDetectedLanguage);
+      TranslationHealthReport.recordTranslationOpportunity(aData.detectedLanguage);
+    }
 
     if (!Services.prefs.getBoolPref(TRANSLATION_PREF_SHOWUI))
       return;
 
     if (!aBrowser.translationUI)
       aBrowser.translationUI = new TranslationUI(aBrowser);
+    let trUI = aBrowser.translationUI;
 
+    // Set all values before showing a new translation infobar.
+    trUI._state = aData.state;
+    trUI.detectedLanguage = aData.detectedLanguage;
+    trUI.translatedFrom = aData.translatedFrom;
+    trUI.translatedTo = aData.translatedTo;
+    trUI.originalShown = aData.originalShown;
 
-    aBrowser.translationUI.showTranslationUI(aDetectedLanguage);
+    trUI.showURLBarIcon();
+
+    if (trUI.shouldShowInfoBar(aBrowser.currentURI))
+      trUI.showTranslationInfoBar();
   }
 };
 
@@ -61,7 +82,6 @@ this.Translation = {
  * the infobar are:
  * - detectedLanguage, code of the language detected on the web page.
  * - state, the state in which the infobar should be displayed
- * - STATE_{OFFER,TRANSLATING,TRANSLATED,ERROR} constants.
  * - translatedFrom, if already translated, source language code.
  * - translatedTo, if already translated, target language code.
  * - translate, method starting the translation of the current page.
@@ -77,20 +97,15 @@ function TranslationUI(aBrowser) {
 }
 
 TranslationUI.prototype = {
-  STATE_OFFER: 0,
-  STATE_TRANSLATING: 1,
-  STATE_TRANSLATED: 2,
-  STATE_ERROR: 3,
-
   translate: function(aFrom, aTo) {
     if (aFrom == aTo ||
-        (this.state == this.STATE_TRANSLATED &&
+        (this.state == Translation.STATE_TRANSLATED &&
          this.translatedFrom == aFrom && this.translatedTo == aTo)) {
       // Nothing to do.
       return;
     }
 
-    this.state = this.STATE_TRANSLATING;
+    this.state = Translation.STATE_TRANSLATING;
     this.translatedFrom = aFrom;
     this.translatedTo = aTo;
 
@@ -100,10 +115,10 @@ TranslationUI.prototype = {
     );
   },
 
-  showURLBarIcon: function(aTranslated) {
+  showURLBarIcon: function() {
     let chromeWin = this.browser.ownerGlobal;
     let PopupNotifications = chromeWin.PopupNotifications;
-    let removeId = aTranslated ? "translate" : "translated";
+    let removeId = this.originalShown ? "translated" : "translate";
     let notification =
       PopupNotifications.getNotification(removeId, this.browser);
     if (notification)
@@ -120,7 +135,7 @@ TranslationUI.prototype = {
       return true;
     };
 
-    let addId = aTranslated ? "translated" : "translate";
+    let addId = this.originalShown ? "translate" : "translated";
     PopupNotifications.show(this.browser, addId, null,
                             addId + "-notification-icon", null, null,
                             {dismissed: true, eventCallback: callback});
@@ -137,14 +152,14 @@ TranslationUI.prototype = {
 
   originalShown: true,
   showOriginalContent: function() {
-    this.showURLBarIcon();
     this.originalShown = true;
+    this.showURLBarIcon();
     this.browser.messageManager.sendAsyncMessage("Translation:ShowOriginal");
   },
 
   showTranslatedContent: function() {
-    this.showURLBarIcon(true);
     this.originalShown = false;
+    this.showURLBarIcon();
     this.browser.messageManager.sendAsyncMessage("Translation:ShowTranslation");
   },
 
@@ -158,11 +173,16 @@ TranslationUI.prototype = {
     return notif;
   },
 
-  shouldShowInfoBar: function(aURI, aDetectedLanguage) {
+  shouldShowInfoBar: function(aURI) {
+    // Never show the infobar automatically while the translation
+    // service is temporarily unavailable.
+    if (Translation.serviceUnavailable)
+      return false;
+
     // Check if we should never show the infobar for this language.
     let neverForLangs =
       Services.prefs.getCharPref("browser.translation.neverForLanguages");
-    if (neverForLangs.split(",").indexOf(aDetectedLanguage) != -1)
+    if (neverForLangs.split(",").indexOf(this.detectedLanguage) != -1)
       return false;
 
     // or if we should never show the infobar for this domain.
@@ -181,7 +201,7 @@ TranslationUI.prototype = {
 
     this.showURLBarIcon();
 
-    if (!this.shouldShowInfoBar(this.browser.currentURI, aDetectedLanguage))
+    if (!this.shouldShowInfoBar(this.browser.currentURI))
       return null;
 
     return this.showTranslationInfoBar();
@@ -191,11 +211,18 @@ TranslationUI.prototype = {
     switch (msg.name) {
       case "Translation:Finished":
         if (msg.data.success) {
-          this.state = this.STATE_TRANSLATED;
-          this.showURLBarIcon(true);
           this.originalShown = false;
+          this.state = Translation.STATE_TRANSLATED;
+          this.showURLBarIcon();
+
+          // Record the number of characters translated.
+          TranslationHealthReport.recordTranslation(msg.data.from, msg.data.to,
+                                                    msg.data.characterCount);
+        } else if (msg.data.unavailable) {
+          Translation.serviceUnavailable = true;
+          this.state = Translation.STATE_UNAVAILABLE;
         } else {
-          this.state = this.STATE_ERROR;
+          this.state = Translation.STATE_ERROR;
         }
         break;
     }
@@ -300,6 +327,8 @@ TranslationMeasurement1.prototype = Object.freeze({
     pageTranslatedCountsByLanguage: DAILY_LAST_TEXT_FIELD,
     detectedLanguageChangedBefore: DAILY_COUNTER_FIELD,
     detectedLanguageChangedAfter: DAILY_COUNTER_FIELD,
+    detectLanguageEnabled: DAILY_LAST_NUMERIC_FIELD,
+    showTranslationUI: DAILY_LAST_NUMERIC_FIELD,
   },
 
   shouldIncludeField: function (field) {
@@ -324,7 +353,7 @@ TranslationMeasurement1.prototype = Object.freeze({
 
       return data;
     });
-},
+  },
 
   _wrapJSONSerializer: function (serializer) {
     let _parseInPlace = function(o, k) {
@@ -411,6 +440,19 @@ TranslationProvider.prototype = Object.freeze({
         } else {
           yield m.incrementDailyCounter("detectedLanguageChangedAfter");
         }
+    }.bind(this));
+  },
+
+  collectDailyData: function () {
+    let m = this.getMeasurement(TranslationMeasurement1.prototype.name,
+                                TranslationMeasurement1.prototype.version);
+
+    return this._enqueueTelemetryStorageTask(function* recordTask() {
+      let detectLanguageEnabled = Services.prefs.getBoolPref("browser.translation.detectLanguage");
+      yield m.setDailyLastNumeric("detectLanguageEnabled", detectLanguageEnabled ? 1 : 0);
+
+      let showTranslationUI = Services.prefs.getBoolPref("browser.translation.ui.show");
+      yield m.setDailyLastNumeric("showTranslationUI", showTranslationUI ? 1 : 0);
     }.bind(this));
   },
 

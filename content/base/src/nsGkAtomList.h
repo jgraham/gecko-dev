@@ -497,6 +497,7 @@ GK_ATOM(keydown, "keydown")
 GK_ATOM(keygen, "keygen")
 GK_ATOM(keypress, "keypress")
 GK_ATOM(keyset, "keyset")
+GK_ATOM(keysystem, "keysystem")
 GK_ATOM(keytext, "keytext")
 GK_ATOM(keyup, "keyup")
 GK_ATOM(kind, "kind")
@@ -1816,6 +1817,10 @@ GK_ATOM(onuserproximity, "onuserproximity")
 // light sensor support
 GK_ATOM(ondevicelight, "ondevicelight")
 
+// Audio channel events
+GK_ATOM(onmozinterruptbegin, "onmozinterruptbegin")
+GK_ATOM(onmozinterruptend, "onmozinterruptbegin")
+
 //---------------------------------------------------------------------------
 // Special atoms
 //---------------------------------------------------------------------------
@@ -1944,6 +1949,8 @@ GK_ATOM(oncuechange, "oncuechange")
 GK_ATOM(oncurrentchange, "oncurrentchange")
 GK_ATOM(onenter, "onenter")
 GK_ATOM(onexit, "onexit")
+GK_ATOM(onneedkey, "onneedkey")
+GK_ATOM(needkey, "needkey")
 GK_ATOM(onremovetrack, "onremovetrack")
 GK_ATOM(loadstart, "loadstart")
 GK_ATOM(suspend, "suspend")

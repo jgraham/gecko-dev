@@ -190,7 +190,7 @@ Element::IntrinsicState() const
 void
 Element::NotifyStateChange(EventStates aStates)
 {
-  nsIDocument* doc = GetCurrentDoc();
+  nsIDocument* doc = GetCrossShadowCurrentDoc();
   if (doc) {
     nsAutoScriptBlocker scriptBlocker;
     doc->ContentStateChanged(this, aStates);
@@ -216,7 +216,7 @@ Element::UpdateState(bool aNotify)
   if (aNotify) {
     EventStates changedStates = oldState ^ mState;
     if (!changedStates.IsEmpty()) {
-      nsIDocument* doc = GetCurrentDoc();
+      nsIDocument* doc = GetCrossShadowCurrentDoc();
       if (doc) {
         nsAutoScriptBlocker scriptBlocker;
         doc->ContentStateChanged(this, changedStates);
@@ -831,7 +831,7 @@ Element::CreateShadowRoot(ErrorResult& aError)
 
   // Recreate the frame for the bound content because binding a ShadowRoot
   // changes how things are rendered.
-  nsIDocument* doc = GetCurrentDoc();
+  nsIDocument* doc = GetCrossShadowCurrentDoc();
   if (doc) {
     nsIPresShell *shell = doc->GetShell();
     if (shell) {
@@ -1231,6 +1231,7 @@ Element::BindToTree(nsIDocument* aDocument, nsIContent* aParent,
       SetFlags(NODE_CHROME_ONLY_ACCESS);
     }
     if (aParent->HasFlag(NODE_IS_IN_SHADOW_TREE)) {
+      ClearSubtreeRootPointer();
       SetFlags(NODE_IS_IN_SHADOW_TREE);
     }
     ShadowRoot* parentContainingShadow = aParent->GetContainingShadow();
@@ -1288,12 +1289,26 @@ Element::BindToTree(nsIDocument* aDocument, nsIContent* aParent,
                NODE_NEEDS_FRAME | NODE_DESCENDANTS_NEED_FRAMES |
                // And the restyle bits
                ELEMENT_ALL_RESTYLE_FLAGS);
-
-    // Propagate scoped style sheet tracking bit.
-    SetIsElementInStyleScope(mParent->IsElementInStyleScope());
-  } else {
-    // If we're not in the doc, update our subtree pointer.
+  } else if (!HasFlag(NODE_IS_IN_SHADOW_TREE)) {
+    // If we're not in the doc and not in a shadow tree,
+    // update our subtree pointer.
     SetSubtreeRootPointer(aParent->SubtreeRoot());
+  }
+
+  // Propagate scoped style sheet tracking bit.
+  if (mParent->IsContent()) {
+    nsIContent* parent;
+    ShadowRoot* shadowRootParent = ShadowRoot::FromNode(mParent);
+    if (shadowRootParent) {
+      parent = shadowRootParent->GetHost();
+    } else {
+      parent = mParent->AsContent();
+    }
+
+    bool inStyleScope = parent->IsElementInStyleScope();
+
+    SetIsElementInStyleScope(inStyleScope);
+    SetIsElementInStyleScopeFlagOnShadowTree(inStyleScope);
   }
 
   // This has to be here, rather than in nsGenericHTMLElement::BindToTree,
@@ -1435,6 +1450,7 @@ Element::UnbindFromTree(bool aDeep, bool aNullParent)
     SetParentIsContent(false);
   }
   ClearInDocument();
+  UnsetFlags(NODE_IS_IN_SHADOW_TREE);
 
   // Begin keeping track of our subtree root.
   SetSubtreeRootPointer(aNullParent ? this : mParent->SubtreeRoot());
@@ -1470,7 +1486,7 @@ Element::UnbindFromTree(bool aDeep, bool aNullParent)
   }
 
   // Unset this since that's what the old code effectively did.
-  UnsetFlags(NODE_FORCE_XBL_BINDINGS | NODE_IS_IN_SHADOW_TREE);
+  UnsetFlags(NODE_FORCE_XBL_BINDINGS);
   
 #ifdef MOZ_XUL
   nsXULElement* xulElem = nsXULElement::FromContent(this);
@@ -1775,7 +1791,6 @@ Element::SetEventHandler(nsIAtom* aEventName,
 
   defer = defer && aDefer; // only defer if everyone agrees...
   manager->SetEventHandler(aEventName, aValue,
-                           nsIProgrammingLanguage::JAVASCRIPT,
                            defer, !nsContentUtils::IsChromeDoc(ownerDoc),
                            this);
   return NS_OK;

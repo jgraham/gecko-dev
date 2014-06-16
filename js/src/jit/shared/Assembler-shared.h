@@ -691,7 +691,7 @@ class AsmJSHeapAccess
         isFloat32Load_(false),
         loadedReg_(UINT8_MAX)
     {}
-#elif defined(JS_CODEGEN_ARM)
+#elif defined(JS_CODEGEN_ARM) || defined(JS_CODEGEN_MIPS)
     explicit AsmJSHeapAccess(uint32_t offset)
       : offset_(offset)
     {}
@@ -805,7 +805,22 @@ class AssemblerShared
     Vector<AsmJSGlobalAccess, 0, SystemAllocPolicy> asmJSGlobalAccesses_;
     Vector<AsmJSAbsoluteLink, 0, SystemAllocPolicy> asmJSAbsoluteLinks_;
 
+  protected:
+    bool enoughMemory_;
+
   public:
+    AssemblerShared()
+     : enoughMemory_(true)
+    {}
+
+    void propagateOOM(bool success) {
+        enoughMemory_ &= success;
+    }
+
+    bool oom() const {
+        return !enoughMemory_;
+    }
+
     bool append(CallSite callsite) { return callsites_.append(callsite); }
     CallSiteVector &&extractCallSites() { return Move(callsites_); }
 

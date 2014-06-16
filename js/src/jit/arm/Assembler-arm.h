@@ -138,8 +138,12 @@ static MOZ_CONSTEXPR_VAR FloatRegister d15 = {FloatRegisters::d15};
 static const uint32_t StackAlignment = 8;
 static const uint32_t CodeAlignment = 8;
 static const bool StackKeptAligned = true;
-static const uint32_t NativeFrameSize = sizeof(void*);
-static const uint32_t AlignmentAtAsmJSPrologue = sizeof(void*);
+
+// As an invariant across architectures, within asm.js code:
+//    $sp % StackAlignment = (AsmJSSizeOfRetAddr + masm.framePushed) % StackAlignment
+// To achieve this on ARM, the first instruction of the asm.js prologue pushes
+// lr without incrementing masm.framePushed.
+static const uint32_t AsmJSSizeOfRetAddr = sizeof(void*);
 
 static const Scale ScalePointer = TimesFour;
 
@@ -984,7 +988,8 @@ class BOffImm
       : data ((offset - 8) >> 2 & 0x00ffffff)
     {
         JS_ASSERT((offset & 0x3) == 0);
-        JS_ASSERT(isInRange(offset));
+        if (!isInRange(offset))
+            CrashAtUnhandlableOOM("BOffImm");
     }
     static bool isInRange(int offset)
     {
@@ -1265,8 +1270,6 @@ class Assembler : public AssemblerShared
     CompactBufferWriter relocations_;
     CompactBufferWriter preBarriers_;
 
-    bool enoughMemory_;
-
     //typedef JSC::AssemblerBufferWithConstantPool<1024, 4, 4, js::jit::Assembler> ARMBuffer;
     ARMBuffer m_buffer;
 
@@ -1286,8 +1289,7 @@ class Assembler : public AssemblerShared
 
   public:
     Assembler()
-      : enoughMemory_(true),
-        m_buffer(4, 4, 0, &pools_[0], 8),
+      : m_buffer(4, 4, 0, &pools_[0], 8),
         int32Pool(m_buffer.getPool(1)),
         doublePool(m_buffer.getPool(0)),
         isFinished(false),
@@ -1798,6 +1800,11 @@ class Assembler : public AssemblerShared
     static void patchDataWithValueCheck(CodeLocationLabel label, ImmPtr newValue,
                                         ImmPtr expectedValue);
     static void patchWrite_Imm32(CodeLocationLabel label, Imm32 imm);
+
+    static void patchInstructionImmediate(uint8_t *code, PatchedImmPtr imm) {
+        MOZ_ASSUME_UNREACHABLE("Unused.");
+    }
+
     static uint32_t alignDoubleArg(uint32_t offset) {
         return (offset+1)&~1;
     }
@@ -1811,6 +1818,10 @@ class Assembler : public AssemblerShared
 
     static void updateBoundsCheck(uint32_t logHeapSize, Instruction *inst);
     void processCodeLabels(uint8_t *rawCode);
+    static int32_t extractCodeLabelOffset(uint8_t *code) {
+        return *(uintptr_t *)code;
+    }
+
     bool bailed() {
         return m_buffer.bail();
     }

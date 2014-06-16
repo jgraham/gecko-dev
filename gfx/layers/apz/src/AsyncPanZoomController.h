@@ -9,6 +9,7 @@
 
 #include "CrossProcessMutex.h"
 #include "mozilla/layers/GeckoContentController.h"
+#include "mozilla/layers/APZCTreeManager.h"
 #include "mozilla/Attributes.h"
 #include "mozilla/EventForwards.h"
 #include "mozilla/Monitor.h"
@@ -38,7 +39,6 @@ class GestureEventListener;
 class ContainerLayer;
 class PCompositorParent;
 class ViewTransform;
-class APZCTreeManager;
 class AsyncPanZoomAnimation;
 class FlingAnimation;
 
@@ -318,6 +318,13 @@ public:
    */
   bool IsPannable() const;
 
+  /**
+   * Returns the identifier of the touch in the last touch event processed by
+   * this APZC. This should only be called when the last touch event contained
+   * only one touch.
+   */
+  int32_t GetLastTouchIdentifier() const;
+
 protected:
   enum PanZoomState {
     NOTHING,                  /* no touch-start events received */
@@ -386,6 +393,17 @@ protected:
    * any cleanup after a scale has ended.
    */
   nsEventStatus OnScaleEnd(const PinchGestureInput& aEvent);
+
+  /**
+   * Helper methods for handling pan events.
+   */
+  nsEventStatus OnPanMayBegin(const PanGestureInput& aEvent);
+  nsEventStatus OnPanCancelled(const PanGestureInput& aEvent);
+  nsEventStatus OnPanBegin(const PanGestureInput& aEvent);
+  nsEventStatus OnPan(const PanGestureInput& aEvent, bool aFingersOnTouchpad);
+  nsEventStatus OnPanEnd(const PanGestureInput& aEvent);
+  nsEventStatus OnPanMomentumStart(const PanGestureInput& aEvent);
+  nsEventStatus OnPanMomentumEnd(const PanGestureInput& aEvent);
 
   /**
    * Helper methods for long press gestures.
@@ -470,6 +488,11 @@ protected:
    * Sets the panning state ignoring the touch action value.
    */
   void HandlePanning(double angle);
+
+  /**
+   * Update the panning state and axis locks.
+   */
+  void HandlePanningUpdate(float aDX, float aDY);
 
   /**
    * Sets up anything needed for panning. This takes us out of the "TOUCHING"
@@ -658,11 +681,11 @@ private:
      compositor thread. */
   nsRefPtr<GeckoContentController> mGeckoContentController;
   nsRefPtr<GestureEventListener> mGestureEventListener;
-  Monitor mRefPtrMonitor;
+  mutable Monitor mRefPtrMonitor;
 
   /* Utility functions that return a addrefed pointer to the corresponding fields. */
-  already_AddRefed<GeckoContentController> GetGeckoContentController();
-  already_AddRefed<GestureEventListener> GetGestureEventListener();
+  already_AddRefed<GeckoContentController> GetGeckoContentController() const;
+  already_AddRefed<GestureEventListener> GetGestureEventListener() const;
 
   // If we are sharing our frame metrics with content across processes
   bool mSharingFrameMetricsAcrossProcesses;
@@ -1015,6 +1038,9 @@ public:
 
   virtual bool Sample(FrameMetrics& aFrameMetrics,
                       const TimeDuration& aDelta) = 0;
+
+  // Called if the animation is cancelled before it ends.
+  virtual void Cancel() {}
 
   /**
    * Get the deferred tasks in |mDeferredTasks|. See |mDeferredTasks|

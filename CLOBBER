@@ -22,4 +22,4 @@
 # changes to stick? As of bug 928195, this shouldn't be necessary! Please
 # don't change CLOBBER for WebIDL changes any more.
 
-Bug 989583 - Include all tests upon build time (even disabled ones) & only run enabled ones during run time. r=jmaher
+Clobber to work around bug 959928 / bug 1020776.

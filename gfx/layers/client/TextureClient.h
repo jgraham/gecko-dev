@@ -159,13 +159,13 @@ public:
    * {
    *   // Restrict this code's scope to ensure all references to dt are gone
    *   // when Unlock is called.
-   *   RefPtr<DrawTarget> dt = texture->GetAsDrawTarget();
+   *   DrawTarget* dt = texture->BorrowDrawTarget();
    *   // use the draw target ...
    * }
    * texture->Unlock();
    *
    */
-  virtual TemporaryRef<gfx::DrawTarget> GetAsDrawTarget() { return nullptr; }
+  virtual gfx::DrawTarget* BorrowDrawTarget() { return nullptr; }
 
   // TextureClients that can expose a DrawTarget should override this method.
   virtual gfx::SurfaceFormat GetFormat() const
@@ -291,11 +291,24 @@ public:
    */
   void ForceRemove();
 
-  virtual void SetReleaseFenceHandle(FenceHandle aReleaseFenceHandle) {}
+  virtual void SetReleaseFenceHandle(FenceHandle aReleaseFenceHandle)
+  {
+    mReleaseFenceHandle = aReleaseFenceHandle;
+  }
 
   const FenceHandle& GetReleaseFenceHandle() const
   {
     return mReleaseFenceHandle;
+  }
+
+  virtual void SetAcquireFenceHandle(FenceHandle aAcquireFenceHandle)
+  {
+    mAcquireFenceHandle = aAcquireFenceHandle;
+  }
+
+  const FenceHandle& GetAcquireFenceHandle() const
+  {
+    return mAcquireFenceHandle;
   }
 
   /**
@@ -347,6 +360,7 @@ protected:
   bool mShared;
   bool mValid;
   FenceHandle mReleaseFenceHandle;
+  FenceHandle mAcquireFenceHandle;
 
   friend class TextureChild;
   friend void TestTextureClientSurface(TextureClient*, gfxImageSurface*);
@@ -381,7 +395,7 @@ public:
 
   virtual bool CanExposeDrawTarget() const MOZ_OVERRIDE { return true; }
 
-  virtual TemporaryRef<gfx::DrawTarget> GetAsDrawTarget() MOZ_OVERRIDE;
+  virtual gfx::DrawTarget* BorrowDrawTarget() MOZ_OVERRIDE;
 
   virtual bool AllocateForSurface(gfx::IntSize aSize,
                                   TextureAllocationFlags aFlags = ALLOC_DEFAULT) MOZ_OVERRIDE;

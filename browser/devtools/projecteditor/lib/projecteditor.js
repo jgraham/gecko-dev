@@ -79,6 +79,7 @@ var ProjectEditor = Class({
    */
   initialize: function(iframe) {
     this._onTreeSelected = this._onTreeSelected.bind(this);
+    this._onTreeResourceRemoved = this._onTreeResourceRemoved.bind(this);
     this._onEditorCreated = this._onEditorCreated.bind(this);
     this._onEditorActivated = this._onEditorActivated.bind(this);
     this._onEditorDeactivated = this._onEditorDeactivated.bind(this);
@@ -167,7 +168,8 @@ var ProjectEditor = Class({
       resourceVisible: this.resourceVisible.bind(this),
       resourceFormatter: this.resourceFormatter.bind(this)
     });
-    this.projectTree.on("selection", this._onTreeSelected);
+    on(this, this.projectTree, "selection", this._onTreeSelected);
+    on(this, this.projectTree, "resource-removed", this._onTreeResourceRemoved);
 
     let sourcesBox = this.document.querySelector("#sources");
     sourcesBox.appendChild(this.projectTree.elt);
@@ -218,18 +220,15 @@ var ProjectEditor = Class({
   destroy: function() {
     this._plugins.forEach(plugin => { plugin.destroy(); });
 
-    this.project.allResources().forEach((resource) => {
-      let editor = this.editorFor(resource);
-      if (editor) {
-        editor.destroy();
-      }
-    });
+    forget(this, this.projectTree);
+    this.projectTree.destroy();
+    this.projectTree = null;
+
+    this.shells.destroy();
 
     forget(this, this.project);
     this.project.destroy();
     this.project = null;
-    this.projectTree.destroy();
-    this.projectTree = null;
   },
 
   /**
@@ -249,10 +248,7 @@ var ProjectEditor = Class({
     // exist for resources within it.
     on(this, project, "store-removed", (store) => {
       store.allResources().forEach((resource) => {
-        let editor = this.editorFor(resource);
-        if (editor) {
-          editor.destroy();
-        }
+        this.shells.removeResource(resource);
       });
     });
   },
@@ -264,14 +260,29 @@ var ProjectEditor = Class({
    * @param string path
    *               The file path to set
    * @param Object opts
-   *               Custom options used by the project. See plugins/app-manager.
+   *               Custom options used by the project.
+   *                - name: display name for project
+   *                - iconUrl: path to icon for project
+   *                - validationStatus: one of 'unknown|error|warning|valid'
+   *                - projectOverviewURL: path to load for iframe when project
+   *                    is selected in the tree.
    * @param Promise
    *        Promise that is resolved once the project is ready to be used.
    */
   setProjectToAppPath: function(path, opts = {}) {
     this.project.appManagerOpts = opts;
-    this.project.removeAllStores();
-    this.project.addPath(path);
+
+    let existingPaths = this.project.allPaths();
+    if (existingPaths.length !== 1 || existingPaths[0] !== path) {
+      // Only fully reset if this is a new path.
+      this.project.removeAllStores();
+      this.project.addPath(path);
+    } else {
+      // Otherwise, just ask for the root to be redrawn
+      let rootResource = this.project.localStores.get(path).root;
+      emit(rootResource, "label-change", rootResource);
+    }
+
     return this.project.refresh();
   },
 
@@ -299,6 +310,16 @@ var ProjectEditor = Class({
     }
     this.pluginDispatch("onTreeSelected", resource);
     this.openResource(resource);
+  },
+
+  /**
+   * When a node is removed, destroy it and its associated editor.
+   *
+   * @param Resource resource
+   *                 The resource being removed
+   */
+  _onTreeResourceRemoved: function(resource) {
+    this.shells.removeResource(resource);
   },
 
   /**

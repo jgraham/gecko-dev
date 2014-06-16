@@ -173,7 +173,8 @@ js::ObjectToSource(JSContext *cx, HandleObject obj)
         JSString *s = ToString<CanGC>(cx, idv);
         if (!s)
             return nullptr;
-        Rooted<JSLinearString*> idstr(cx, s->ensureLinear(cx));
+
+        RootedLinearString idstr(cx, s->ensureLinear(cx));
         if (!idstr)
             return nullptr;
 
@@ -205,6 +206,8 @@ js::ObjectToSource(JSContext *cx, HandleObject obj)
             const jschar *vchars = valstr->getChars(cx);
             if (!vchars)
                 return nullptr;
+
+            const jschar *start = vchars;
             size_t vlength = valstr->length();
 
             /*
@@ -212,7 +215,6 @@ js::ObjectToSource(JSContext *cx, HandleObject obj)
              * end so that we can put "get" in front of the function definition.
              */
             if (gsop[j] && IsFunctionObject(val[j])) {
-                const jschar *start = vchars;
                 const jschar *end = vchars + vlength;
 
                 uint8_t parenChomp = 0;
@@ -255,7 +257,7 @@ js::ObjectToSource(JSContext *cx, HandleObject obj)
             if (!buf.append(gsop[j] ? ' ' : ':'))
                 return nullptr;
 
-            if (!buf.append(vchars, vlength))
+            if (!buf.appendSubstring(valstr, vchars - start, vlength))
                 return nullptr;
         }
     }
@@ -291,7 +293,7 @@ JS_BasicObjectToString(JSContext *cx, HandleObject obj)
         return cx->names().objectWindow;
 
     StringBuffer sb(cx);
-    if (!sb.append("[object ") || !sb.appendInflated(className, strlen(className)) ||
+    if (!sb.append("[object ") || !sb.append(className, strlen(className)) ||
         !sb.append("]"))
     {
         return nullptr;
@@ -371,7 +373,7 @@ DefineAccessor(JSContext *cx, unsigned argc, Value *vp)
     if (!BoxNonStrictThis(cx, args))
         return false;
 
-    if (args.length() < 2 || !js_IsCallable(args[1])) {
+    if (args.length() < 2 || !IsCallable(args[1])) {
         JS_ReportErrorNumber(cx, js_GetErrorMessage, nullptr,
                              JSMSG_BAD_GETTER_OR_SETTER,
                              Type == GetterAccessor ? js_getter_str : js_setter_str);
@@ -1063,6 +1065,14 @@ static bool
 ProtoSetter(JSContext *cx, unsigned argc, Value *vp)
 {
     CallArgs args = CallArgsFromVp(argc, vp);
+
+    // Do this here, rather than after the this-check so even likely-buggy
+    // use of the __proto__ setter on unacceptable values, where no subsequent
+    // use occurs on an acceptable value, will trigger a warning.
+    RootedObject callee(cx, &args.callee());
+    if (!GlobalObject::warnOnceAboutPrototypeMutation(cx, callee))
+       return false;
+
     HandleValue thisv = args.thisv();
     if (thisv.isNullOrUndefined()) {
         ReportIncompatible(cx, args);

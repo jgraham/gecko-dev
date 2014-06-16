@@ -143,6 +143,8 @@ NS_IMPL_ISUPPORTS(SRGBOverrideObserver, nsIObserver, nsISupportsWeakReference)
 
 #define GFX_DOWNLOADABLE_FONTS_ENABLED "gfx.downloadable_fonts.enabled"
 
+#define GFX_PREF_HARFBUZZ_SCRIPTS "gfx.font_rendering.harfbuzz.scripts"
+#define HARFBUZZ_SCRIPTS_DEFAULT  mozilla::unicode::SHAPING_DEFAULT
 #define GFX_PREF_FALLBACK_USE_CMAPS  "gfx.font_rendering.fallback.always_use_cmaps"
 
 #define GFX_PREF_OPENTYPE_SVG "gfx.font_rendering.opentype_svg.enabled"
@@ -260,6 +262,7 @@ gfxPlatform::gfxPlatform()
   : mAzureCanvasBackendCollector(MOZ_THIS_IN_INITIALIZER_LIST(),
                                  &gfxPlatform::GetAzureBackendInfo)
 {
+    mUseHarfBuzzScripts = UNINITIALIZED_VALUE;
     mAllowDownloadableFonts = UNINITIALIZED_VALUE;
     mFallbackUsesCmaps = UNINITIALIZED_VALUE;
 
@@ -268,8 +271,6 @@ gfxPlatform::gfxPlatform()
     mGraphiteShapingEnabled = UNINITIALIZED_VALUE;
     mOpenTypeSVGEnabled = UNINITIALIZED_VALUE;
     mBidiNumeralOption = UNINITIALIZED_VALUE;
-
-    mLayersPreferMemoryOverShmem = XRE_GetProcessType() == GeckoProcessType_Default;
 
     mSkiaGlue = nullptr;
 
@@ -333,8 +334,6 @@ gfxPlatform::Init()
 
     gGfxPlatformPrefsLock = new Mutex("gfxPlatform::gGfxPlatformPrefsLock");
 
-    AsyncTransactionTrackersHolder::Initialize();
-
     /* Initialize the GfxInfo service.
      * Note: we can't call functions on GfxInfo that depend
      * on gPlatform until after it has been initialized
@@ -364,22 +363,7 @@ gfxPlatform::Init()
     mozilla::gl::GLContext::StaticInit();
 #endif
 
-    bool useOffMainThreadCompositing = OffMainThreadCompositionRequired() ||
-                                       GetPrefLayersOffMainThreadCompositionEnabled();
-
-    if (!OffMainThreadCompositionRequired()) {
-      useOffMainThreadCompositing &= GetPlatform()->SupportsOffMainThreadCompositing();
-    }
-
-    if (useOffMainThreadCompositing && (XRE_GetProcessType() == GeckoProcessType_Default)) {
-        CompositorParent::StartUp();
-        if (gfxPrefs::AsyncVideoEnabled()) {
-            ImageBridgeChild::StartUp();
-        }
-#ifdef MOZ_WIDGET_GONK
-        SharedBufferManagerChild::StartUp();
-#endif
-    }
+    InitLayersIPC();
 
     nsresult rv;
 
@@ -441,14 +425,23 @@ gfxPlatform::Init()
     RegisterStrongMemoryReporter(new GfxMemoryImageReporter());
 }
 
+static bool sLayersIPCIsUp = false;
+
 void
 gfxPlatform::Shutdown()
 {
+    if (!gPlatform) {
+      return;
+    }
+
+    MOZ_ASSERT(!sLayersIPCIsUp);
+
     // These may be called before the corresponding subsystems have actually
     // started up. That's OK, they can handle it.
     gfxFontCache::Shutdown();
     gfxFontGroup::Shutdown();
     gfxGradientCache::Shutdown();
+    gfxAlphaBoxBlur::ShutdownBlurCache();
     gfxGraphiteShaper::Shutdown();
 #if defined(XP_MACOSX) || defined(XP_WIN) // temporary, until this is implemented on others
     gfxPlatformFontList::Shutdown();
@@ -506,6 +499,51 @@ gfxPlatform::Shutdown()
     gPlatform = nullptr;
 }
 
+/* static */ void
+gfxPlatform::InitLayersIPC()
+{
+    if (sLayersIPCIsUp) {
+      return;
+    }
+    sLayersIPCIsUp = true;
+
+    AsyncTransactionTrackersHolder::Initialize();
+
+    if (UsesOffMainThreadCompositing() &&
+        XRE_GetProcessType() == GeckoProcessType_Default)
+    {
+        mozilla::layers::CompositorParent::StartUp();
+        if (gfxPrefs::AsyncVideoEnabled()) {
+            mozilla::layers::ImageBridgeChild::StartUp();
+        }
+#ifdef MOZ_WIDGET_GONK
+        SharedBufferManagerChild::StartUp();
+#endif
+    }
+}
+
+/* static */ void
+gfxPlatform::ShutdownLayersIPC()
+{
+    if (!sLayersIPCIsUp) {
+      return;
+    }
+    sLayersIPCIsUp = false;
+
+    if (UsesOffMainThreadCompositing() &&
+        XRE_GetProcessType() == GeckoProcessType_Default)
+    {
+        // This must happen after the shutdown of media and widgets, which
+        // are triggered by the NS_XPCOM_SHUTDOWN_OBSERVER_ID notification.
+        layers::ImageBridgeChild::ShutDown();
+#ifdef MOZ_WIDGET_GONK
+        layers::SharedBufferManagerChild::ShutDown();
+#endif
+
+        layers::CompositorParent::ShutDown();
+    }
+}
+
 gfxPlatform::~gfxPlatform()
 {
     mScreenReferenceSurface = nullptr;
@@ -530,61 +568,21 @@ gfxPlatform::~gfxPlatform()
 #endif
 }
 
-bool
-gfxPlatform::PreferMemoryOverShmem() const {
-  MOZ_ASSERT(!CompositorParent::IsInCompositorThread());
-  return mLayersPreferMemoryOverShmem;
-}
-
-already_AddRefed<gfxASurface>
-gfxPlatform::CreateOffscreenImageSurface(const gfxIntSize& aSize,
-                                         gfxContentType aContentType)
-{
-  nsRefPtr<gfxASurface> newSurface;
-  newSurface = new gfxImageSurface(aSize, OptimalFormatForContent(aContentType));
-
-  return newSurface.forget();
-}
-
-already_AddRefed<gfxASurface>
-gfxPlatform::OptimizeImage(gfxImageSurface *aSurface,
-                           gfxImageFormat format)
-{
-    IntSize surfaceSize = aSurface->GetSize().ToIntSize();
-
-#ifdef XP_WIN
-    if (gfxWindowsPlatform::GetPlatform()->GetRenderMode() ==
-        gfxWindowsPlatform::RENDER_DIRECT2D) {
-        return nullptr;
-    }
-#endif
-    nsRefPtr<gfxASurface> optSurface = CreateOffscreenSurface(surfaceSize, gfxASurface::ContentFromFormat(format));
-    if (!optSurface || optSurface->CairoStatus() != 0)
-        return nullptr;
-
-    gfxContext tmpCtx(optSurface);
-    tmpCtx.SetOperator(gfxContext::OPERATOR_SOURCE);
-    tmpCtx.SetSource(aSurface);
-    tmpCtx.Paint();
-
-    return optSurface.forget();
-}
-
 cairo_user_data_key_t kDrawTarget;
 
-RefPtr<DrawTarget>
+TemporaryRef<DrawTarget>
 gfxPlatform::CreateDrawTargetForSurface(gfxASurface *aSurface, const IntSize& aSize)
 {
   SurfaceFormat format = Optimal2DFormatForContent(aSurface->GetContentType());
   RefPtr<DrawTarget> drawTarget = Factory::CreateDrawTargetForCairoSurface(aSurface->CairoSurface(), aSize, &format);
   aSurface->SetData(&kDrawTarget, drawTarget, nullptr);
-  return drawTarget;
+  return drawTarget.forget();
 }
 
 // This is a temporary function used by ContentClient to build a DrawTarget
 // around the gfxASurface. This should eventually be replaced by plumbing
 // the DrawTarget through directly
-RefPtr<DrawTarget>
+TemporaryRef<DrawTarget>
 gfxPlatform::CreateDrawTargetForUpdateSurface(gfxASurface *aSurface, const IntSize& aSize)
 {
 #ifdef XP_MACOSX
@@ -681,7 +679,7 @@ CopySurface(gfxASurface* aSurface)
   return data;
 }
 
-RefPtr<SourceSurface>
+/* static */ TemporaryRef<SourceSurface>
 gfxPlatform::GetSourceSurfaceForSurface(DrawTarget *aTarget, gfxASurface *aSurface)
 {
   if (!aSurface->CairoSurface() || aSurface->CairoStatus()) {
@@ -689,8 +687,8 @@ gfxPlatform::GetSourceSurfaceForSurface(DrawTarget *aTarget, gfxASurface *aSurfa
   }
 
   if (!aTarget) {
-    if (ScreenReferenceDrawTarget()) {
-      aTarget = ScreenReferenceDrawTarget();
+    if (gfxPlatform::GetPlatform()->ScreenReferenceDrawTarget()) {
+      aTarget = gfxPlatform::GetPlatform()->ScreenReferenceDrawTarget();
     } else {
       return nullptr;
     }
@@ -747,7 +745,7 @@ gfxPlatform::GetSourceSurfaceForSurface(DrawTarget *aTarget, gfxASurface *aSurfa
     if (srcBuffer) {
       // It's cheap enough to make a new one so we won't keep it around and
       // keeping it creates a cycle.
-      return srcBuffer;
+      return srcBuffer.forget();
     }
   }
 
@@ -772,7 +770,7 @@ gfxPlatform::GetSourceSurfaceForSurface(DrawTarget *aTarget, gfxASurface *aSurfa
       // Our wrapping surface will hold a reference to its image surface. We cause
       // a reference cycle if we add it to the cache. And caching it is pretty
       // pointless since we'll just wrap it again next use.
-     return srcBuffer;
+     return srcBuffer.forget();
     }
   }
 
@@ -782,10 +780,10 @@ gfxPlatform::GetSourceSurfaceForSurface(DrawTarget *aTarget, gfxASurface *aSurfa
   srcSurfUD->mSrcSurface = srcBuffer;
   aSurface->SetData(&kSourceSurface, srcSurfUD, SourceBufferDestroy);
 
-  return srcBuffer;
+  return srcBuffer.forget();
 }
 
-RefPtr<DataSourceSurface>
+TemporaryRef<DataSourceSurface>
 gfxPlatform::GetWrappedDataSourceSurface(gfxASurface* aSurface)
 {
   nsRefPtr<gfxImageSurface> image = aSurface->GetAsImageSurface();
@@ -808,7 +806,7 @@ gfxPlatform::GetWrappedDataSourceSurface(gfxASurface* aSurface)
   srcSurfUD->mSurface = aSurface;
   result->AddUserData(&kThebesSurface, srcSurfUD, SourceSurfaceDestroyed);
 
-  return result;
+  return result.forget();
 }
 
 TemporaryRef<ScaledFont>
@@ -965,7 +963,7 @@ gfxPlatform::GetThebesSurfaceForDrawTarget(DrawTarget *aTarget)
   return surf.forget();
 }
 
-RefPtr<DrawTarget>
+TemporaryRef<DrawTarget>
 gfxPlatform::CreateDrawTargetForBackend(BackendType aBackend, const IntSize& aSize, SurfaceFormat aFormat)
 {
   // There is a bunch of knowledge in the gfxPlatform heirarchy about how to
@@ -989,27 +987,27 @@ gfxPlatform::CreateDrawTargetForBackend(BackendType aBackend, const IntSize& aSi
   }
 }
 
-RefPtr<DrawTarget>
+TemporaryRef<DrawTarget>
 gfxPlatform::CreateOffscreenCanvasDrawTarget(const IntSize& aSize, SurfaceFormat aFormat)
 {
   NS_ASSERTION(mPreferredCanvasBackend != BackendType::NONE, "No backend.");
   RefPtr<DrawTarget> target = CreateDrawTargetForBackend(mPreferredCanvasBackend, aSize, aFormat);
   if (target ||
       mFallbackCanvasBackend == BackendType::NONE) {
-    return target;
+    return target.forget();
   }
 
   return CreateDrawTargetForBackend(mFallbackCanvasBackend, aSize, aFormat);
 }
 
-RefPtr<DrawTarget>
+TemporaryRef<DrawTarget>
 gfxPlatform::CreateOffscreenContentDrawTarget(const IntSize& aSize, SurfaceFormat aFormat)
 {
   NS_ASSERTION(mPreferredCanvasBackend != BackendType::NONE, "No backend.");
   return CreateDrawTargetForBackend(mContentBackend, aSize, aFormat);
 }
 
-RefPtr<DrawTarget>
+TemporaryRef<DrawTarget>
 gfxPlatform::CreateDrawTargetForData(unsigned char* aData, const IntSize& aSize, int32_t aStride, SurfaceFormat aFormat)
 {
   NS_ASSERTION(mContentBackend != BackendType::NONE, "No backend.");
@@ -1118,6 +1116,18 @@ gfxPlatform::UseGraphiteShaping()
     }
 
     return mGraphiteShapingEnabled;
+}
+
+bool
+gfxPlatform::UseHarfBuzzForScript(int32_t aScriptCode)
+{
+    if (mUseHarfBuzzScripts == UNINITIALIZED_VALUE) {
+        mUseHarfBuzzScripts = Preferences::GetInt(GFX_PREF_HARFBUZZ_SCRIPTS, HARFBUZZ_SCRIPTS_DEFAULT);
+    }
+
+    int32_t shapingType = mozilla::unicode::ScriptShapingType(aScriptCode);
+
+    return (mUseHarfBuzzScripts & shapingType) != 0;
 }
 
 gfxFontEntry*
@@ -1251,11 +1261,13 @@ bool gfxPlatform::ForEachPrefFont(eFontPrefLang aLangArray[], uint32_t aLangArra
 eFontPrefLang
 gfxPlatform::GetFontPrefLangFor(const char* aLang)
 {
-    if (!aLang || !aLang[0])
+    if (!aLang || !aLang[0]) {
         return eFontPrefLang_Others;
-    for (uint32_t i = 0; i < uint32_t(eFontPrefLang_LangCount); ++i) {
-        if (!PL_strcasecmp(gPrefLangNames[i], aLang))
+    }
+    for (uint32_t i = 0; i < ArrayLength(gPrefLangNames); ++i) {
+        if (!PL_strcasecmp(gPrefLangNames[i], aLang)) {
             return eFontPrefLang(i);
+        }
     }
     return eFontPrefLang_Others;
 }
@@ -1273,8 +1285,9 @@ gfxPlatform::GetFontPrefLangFor(nsIAtom *aLang)
 const char*
 gfxPlatform::GetPrefLangName(eFontPrefLang aLang)
 {
-    if (uint32_t(aLang) < uint32_t(eFontPrefLang_AllCount))
+    if (uint32_t(aLang) < ArrayLength(gPrefLangNames)) {
         return gPrefLangNames[uint32_t(aLang)];
+    }
     return nullptr;
 }
 
@@ -1549,9 +1562,7 @@ gfxPlatform::GetBackendPref(const char* aBackendPrefName, uint32_t &aBackendBitm
 bool
 gfxPlatform::OffMainThreadCompositingEnabled()
 {
-  return XRE_GetProcessType() == GeckoProcessType_Default ?
-    CompositorParent::CompositorLoop() != nullptr :
-    CompositorChild::ChildProcessHasCompositor();
+  return UsesOffMainThreadCompositing();
 }
 
 eCMSMode
@@ -1853,6 +1864,9 @@ gfxPlatform::FontsPrefsChanged(const char *aPref)
     } else if (!strcmp(GFX_PREF_GRAPHITE_SHAPING, aPref)) {
         mGraphiteShapingEnabled = UNINITIALIZED_VALUE;
         FlushFontAndWordCaches();
+    } else if (!strcmp(GFX_PREF_HARFBUZZ_SCRIPTS, aPref)) {
+        mUseHarfBuzzScripts = UNINITIALIZED_VALUE;
+        FlushFontAndWordCaches();
     } else if (!strcmp(BIDI_NUMERAL_PREF, aPref)) {
         mBidiNumeralOption = UNINITIALIZED_VALUE;
     } else if (!strcmp(GFX_PREF_OPENTYPE_SVG, aPref)) {
@@ -1987,6 +2001,7 @@ InitLayersAccelerationPrefs()
     // explicit.
     MOZ_ASSERT(NS_IsMainThread(), "can only initialize prefs on the main thread");
 
+    gfxPrefs::GetSingleton();
     sPrefBrowserTabsRemoteAutostart = Preferences::GetBool("browser.tabs.remote.autostart", false);
 
 #ifdef XP_WIN
@@ -2013,27 +2028,6 @@ InitLayersAccelerationPrefs()
 
     sLayersAccelerationPrefsInitialized = true;
   }
-}
-
-bool
-gfxPlatform::GetPrefLayersOffMainThreadCompositionEnabled()
-{
-  InitLayersAccelerationPrefs();
-  return gfxPrefs::LayersOffMainThreadCompositionEnabled() ||
-         gfxPrefs::LayersOffMainThreadCompositionForceEnabled() ||
-         gfxPrefs::LayersOffMainThreadCompositionTestingEnabled();
-}
-
-bool gfxPlatform::OffMainThreadCompositionRequired()
-{
-  InitLayersAccelerationPrefs();
-#if defined(MOZ_WIDGET_GTK) && defined(NIGHTLY_BUILD)
-  // Linux users who chose OpenGL are being grandfathered in to OMTC
-  return sPrefBrowserTabsRemoteAutostart ||
-         gfxPrefs::LayersAccelerationForceEnabled();
-#else
-  return sPrefBrowserTabsRemoteAutostart;
-#endif
 }
 
 bool
@@ -2081,4 +2075,33 @@ gfxPlatform::GetScaledFontForFontWithCairoSkia(DrawTarget* aTarget, gfxFont* aFo
     }
 
     return nullptr;
+}
+
+/* static */ bool
+gfxPlatform::UsesOffMainThreadCompositing()
+{
+  InitLayersAccelerationPrefs();
+  static bool firstTime = true;
+  static bool result = false;
+
+  if (firstTime) {
+    result =
+      sPrefBrowserTabsRemoteAutostart ||
+      gfxPrefs::LayersOffMainThreadCompositionEnabled() ||
+      gfxPrefs::LayersOffMainThreadCompositionForceEnabled() ||
+      gfxPrefs::LayersOffMainThreadCompositionTestingEnabled();
+#if defined(MOZ_WIDGET_GTK) && defined(NIGHTLY_BUILD)
+    // Linux users who chose OpenGL are being grandfathered in to OMTC
+    result |=
+      gfxPrefs::LayersAccelerationForceEnabled() ||
+      PR_GetEnv("MOZ_USE_OMTC") ||
+      PR_GetEnv("MOZ_OMTC_ENABLED"); // yeah, these two env vars do the same thing.
+                                    // I'm told that one of them is enabled on some test slaves config.
+                                    // so be slightly careful if you think you can
+                                    // remove one of them.
+#endif
+    firstTime = false;
+  }
+
+  return result;
 }

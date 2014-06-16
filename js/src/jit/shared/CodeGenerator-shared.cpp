@@ -49,7 +49,7 @@ CodeGeneratorShared::CodeGeneratorShared(MIRGenerator *gen, LIRGraph *graph, Mac
     pushedArgs_(0),
 #endif
     lastOsiPointOffset_(0),
-    sps_(&GetIonContext()->runtime->spsProfiler(), &lastPC_),
+    sps_(&GetIonContext()->runtime->spsProfiler(), &lastNotInlinedPC_),
     osrEntryOffset_(0),
     skipArgCheckEntryOffset_(0),
     frameDepth_(graph->paddedLocalSlotsSize() + graph->argumentsSize()),
@@ -68,17 +68,10 @@ CodeGeneratorShared::CodeGeneratorShared(MIRGenerator *gen, LIRGraph *graph, Mac
         // An MAsmJSCall does not align the stack pointer at calls sites but instead
         // relies on the a priori stack adjustment (in the prologue) on platforms
         // (like x64) which require the stack to be aligned.
-#if defined(JS_CODEGEN_ARM) || defined(JS_CODEGEN_MIPS)
-        bool forceAlign = true;
-#else
-        bool forceAlign = false;
-#endif
-        if (gen->needsInitialStackAlignment() || forceAlign) {
-            unsigned alignmentAtCall = AlignmentAtAsmJSPrologue + frameDepth_;
-            if (unsigned rem = alignmentAtCall % StackAlignment) {
-                frameInitialAdjustment_ = StackAlignment - rem;
-                frameDepth_ += frameInitialAdjustment_;
-            }
+        if (StackKeptAligned || gen->needsInitialStackAlignment()) {
+            unsigned alignmentAtCall = AsmJSSizeOfRetAddr + frameDepth_;
+            if (unsigned rem = alignmentAtCall % StackAlignment)
+                frameDepth_ += StackAlignment - rem;
         }
 
         // FrameSizeClass is only used for bailing, which cannot happen in
@@ -92,9 +85,13 @@ CodeGeneratorShared::CodeGeneratorShared(MIRGenerator *gen, LIRGraph *graph, Mac
 bool
 CodeGeneratorShared::generateOutOfLineCode()
 {
+    JSScript *topScript = sps_.getPushed();
     for (size_t i = 0; i < outOfLineCode_.length(); i++) {
         if (!gen->alloc().ensureBallast())
             return false;
+
+        IonSpew(IonSpew_Codegen, "# Emitting out of line code");
+
         masm.setFramePushed(outOfLineCode_[i]->framePushed());
         lastPC_ = outOfLineCode_[i]->pc();
         if (!sps_.prepareForOOL())
@@ -107,6 +104,7 @@ CodeGeneratorShared::generateOutOfLineCode()
             return false;
         sps_.finishOOL();
     }
+    sps_.setPushed(topScript);
     oolIns = nullptr;
 
     return true;

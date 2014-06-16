@@ -81,8 +81,6 @@ namespace WTF { class BumpPointerAllocator; }
 
 namespace js {
 
-typedef Rooted<JSLinearString*> RootedLinearString;
-
 class Activation;
 class ActivationIterator;
 class AsmJSActivation;
@@ -133,6 +131,8 @@ struct ScopeCoordinateNameCache {
     ScopeCoordinateNameCache() : shape(nullptr) {}
     void purge();
 };
+
+typedef Vector<ScriptAndCounts, 0, SystemAllocPolicy> ScriptAndCountsVector;
 
 struct EvalCacheEntry
 {
@@ -577,6 +577,11 @@ class PerThreadData : public PerThreadDataFriendFields
      */
     int32_t suppressGC;
 
+#ifdef DEBUG
+    // Whether this thread is actively Ion compiling.
+    bool ionCompiling;
+#endif
+
     // Number of active bytecode compilation on this thread.
     unsigned activeCompilations;
 
@@ -953,31 +958,16 @@ struct JSRuntime : public JS::shadow::Runtime,
     bool isHeapMinorCollecting() { return gc.isHeapMinorCollecting(); }
     bool isHeapCollecting() { return gc.isHeapCollecting(); }
 
-#ifdef JS_GC_ZEAL
-    int gcZeal() { return gc.zealMode; }
+    // Performance note: if isFJMinorCollecting turns out to be slow
+    // because reading the counter is slow then we may be able to
+    // augment the counter with a volatile flag that is set iff the
+    // counter is greater than zero.  (It will require some care to
+    // make sure the two variables stay in sync.)
+    bool isFJMinorCollecting() { return gc.fjCollectionCounter > 0; }
+    void incFJMinorCollecting() { gc.fjCollectionCounter++; }
+    void decFJMinorCollecting() { gc.fjCollectionCounter--; }
 
-    bool upcomingZealousGC() {
-        return gc.nextScheduled == 1;
-    }
-
-    bool needZealousGC() {
-        if (gc.nextScheduled > 0 && --gc.nextScheduled == 0) {
-            if (gcZeal() == js::gc::ZealAllocValue ||
-                gcZeal() == js::gc::ZealGenerationalGCValue ||
-                (gcZeal() >= js::gc::ZealIncrementalRootsThenFinish &&
-                 gcZeal() <= js::gc::ZealIncrementalMultipleSlices))
-            {
-                gc.nextScheduled = gc.zealFrequency;
-            }
-            return true;
-        }
-        return false;
-    }
-#else
-    int gcZeal() { return 0; }
-    bool upcomingZealousGC() { return false; }
-    bool needZealousGC() { return false; }
-#endif
+    int gcZeal() { return gc.zeal(); }
 
     void lockGC() {
         assertCanLock(js::GCLock);
@@ -1001,6 +991,9 @@ struct JSRuntime : public JS::shadow::Runtime,
     js::jit::SimulatorRuntime *simulatorRuntime() const;
     void setSimulatorRuntime(js::jit::SimulatorRuntime *srt);
 #endif
+
+    /* Strong references on scripts held for PCCount profiling API. */
+    js::ScriptAndCountsVector *scriptAndCountsVector;
 
     /* Well-known numbers held for use by this runtime's contexts. */
     const js::Value     NaNValue;
@@ -1276,13 +1269,6 @@ struct JSRuntime : public JS::shadow::Runtime,
 
     JSRuntime *thisFromCtor() { return this; }
 
-    void setGCMaxMallocBytes(size_t value);
-
-    void resetGCMallocBytes() {
-        gc.mallocBytes = ptrdiff_t(gc.maxMallocBytes);
-        gc.mallocGCTriggered = false;
-    }
-
     /*
      * Call this after allocating memory held by GC things, to update memory
      * pressure counters or report the OOM error if necessary. If oomError and
@@ -1295,10 +1281,6 @@ struct JSRuntime : public JS::shadow::Runtime,
     void updateMallocCounter(JS::Zone *zone, size_t nbytes);
 
     void reportAllocationOverflow() { js_ReportAllocationOverflow(nullptr); }
-
-    bool isTooMuchMalloc() const {
-        return gc.mallocBytes <= 0;
-    }
 
     /*
      * The function must be called outside the GC lock.
@@ -1683,6 +1665,32 @@ class RuntimeAllocPolicy
 };
 
 extern const JSSecurityCallbacks NullSecurityCallbacks;
+
+// Debugging RAII class which marks the current thread as performing an Ion
+// compilation, for use by CurrentThreadCan{Read,Write}CompilationData
+class AutoEnterIonCompilation
+{
+  public:
+    AutoEnterIonCompilation(MOZ_GUARD_OBJECT_NOTIFIER_ONLY_PARAM) {
+        MOZ_GUARD_OBJECT_NOTIFIER_INIT;
+
+#if defined(DEBUG) && defined(JS_THREADSAFE)
+        PerThreadData *pt = js::TlsPerThreadData.get();
+        JS_ASSERT(!pt->ionCompiling);
+        pt->ionCompiling = true;
+#endif
+    }
+
+    ~AutoEnterIonCompilation() {
+#if defined(DEBUG) && defined(JS_THREADSAFE)
+        PerThreadData *pt = js::TlsPerThreadData.get();
+        JS_ASSERT(pt->ionCompiling);
+        pt->ionCompiling = false;
+#endif
+    }
+
+    MOZ_DECL_USE_GUARD_OBJECT_NOTIFIER
+};
 
 } /* namespace js */
 

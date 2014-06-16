@@ -91,6 +91,9 @@ class MBasicBlock : public TempObject, public InlineListNode<MBasicBlock>
     // Mark this block (and only this block) as unreachable.
     void setUnreachable() {
         JS_ASSERT(!unreachable_);
+        setUnreachableUnchecked();
+    }
+    void setUnreachableUnchecked() {
         unreachable_ = true;
     }
     bool unreachable() const {
@@ -361,9 +364,14 @@ class MBasicBlock : public TempObject, public InlineListNode<MBasicBlock>
         return mark_;
     }
     void mark() {
+        MOZ_ASSERT(!mark_, "Marking already-marked block");
+        markUnchecked();
+    }
+    void markUnchecked() {
         mark_ = true;
     }
     void unmark() {
+        MOZ_ASSERT(mark_, "Unarking unmarked block");
         mark_ = false;
     }
     void makeStart(MStart *start) {
@@ -603,6 +611,9 @@ class MIRGraph
     PostorderIterator poBegin() {
         return blocks_.rbegin();
     }
+    PostorderIterator poBegin(MBasicBlock *at) {
+        return blocks_.rbegin(at);
+    }
     PostorderIterator poEnd() {
         return blocks_.rend();
     }
@@ -621,6 +632,11 @@ class MIRGraph
         JS_ASSERT(block->id());
         blocks_.remove(block);
         blocks_.pushBack(block);
+    }
+    void moveBlockBefore(MBasicBlock *at, MBasicBlock *block) {
+        JS_ASSERT(block->id());
+        blocks_.remove(block);
+        blocks_.insertBefore(at, block);
     }
     size_t numBlocks() const {
         return numBlocks_;

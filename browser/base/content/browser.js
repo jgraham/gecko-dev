@@ -172,6 +172,9 @@ let gInitialPages = [
 #include browser-feeds.js
 #include browser-fullScreen.js
 #include browser-fullZoom.js
+#ifdef MOZ_LOOP
+#include browser-loop.js
+#endif
 #include browser-places.js
 #include browser-plugins.js
 #include browser-safebrowsing.js
@@ -1182,6 +1185,10 @@ var gBrowserInit = {
     gDataNotificationInfoBar.init();
 #endif
 
+#ifdef MOZ_LOOP
+    LoopUI.initialize();
+#endif
+
     gBrowserThumbnails.init();
 
     // Add Devtools menuitems and listeners
@@ -1219,6 +1226,21 @@ var gBrowserInit = {
 
       SocialUI.init();
       TabView.init();
+
+      // Telemetry for master-password - we do this after 5 seconds as it
+      // can cause IO if NSS/PSM has not already initialized.
+      setTimeout(() => {
+        if (window.closed) {
+          return;
+        }
+        let secmodDB = Cc["@mozilla.org/security/pkcs11moduledb;1"]
+                       .getService(Ci.nsIPKCS11ModuleDB);
+        let slot = secmodDB.findSlotByName("");
+        let mpEnabled = slot &&
+                        slot.status != Ci.nsIPKCS11Slot.SLOT_UNINITIALIZED &&
+                        slot.status != Ci.nsIPKCS11Slot.SLOT_READY;
+        Services.telemetry.getHistogramById("MASTER_PASSWORD_ENABLED").add(mpEnabled);
+      }, 5000);
     });
     this.delayedStartupFinished = true;
 
@@ -4546,6 +4568,9 @@ var TabsInTitlebar = {
     }
 
     ToolbarIconColor.inferFromText();
+    if (CustomizationHandler.isCustomizing()) {
+      gCustomizeMode.updateLWTStyling();
+    }
   },
 
   _sizePlaceholder: function (type, width) {
@@ -5308,8 +5333,8 @@ function setStyleDisabled(disabled) {
 
 var LanguageDetectionListener = {
   init: function() {
-    window.messageManager.addMessageListener("LanguageDetection:Result", msg => {
-      Translation.languageDetected(msg.target, msg.data);
+    window.messageManager.addMessageListener("Translation:DocumentState", msg => {
+      Translation.documentStateReceived(msg.target, msg.data);
     });
   }
 };

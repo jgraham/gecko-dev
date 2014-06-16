@@ -34,8 +34,9 @@ ConcatStrings(ThreadSafeContext *cx,
               typename MaybeRooted<JSString*, allowGC>::HandleType right);
 
 // Return s advanced past any Unicode white space characters.
-static inline const jschar *
-SkipSpace(const jschar *s, const jschar *end)
+template <typename CharT>
+static inline const CharT *
+SkipSpace(const CharT *s, const CharT *end)
 {
     JS_ASSERT(s <= end);
 
@@ -60,12 +61,6 @@ CompareChars(const jschar *s1, size_t l1, const jschar *s2, size_t l2)
 }
 
 }  /* namespace js */
-
-extern JSString * JS_FASTCALL
-js_toLowerCase(JSContext *cx, JSString *str);
-
-extern JSString * JS_FASTCALL
-js_toUpperCase(JSContext *cx, JSString *str);
 
 struct JSSubString {
     size_t          length;
@@ -98,21 +93,17 @@ extern const char js_decodeURIComponent_str[];
 extern const char js_encodeURIComponent_str[];
 
 /* GC-allocate a string descriptor for the given malloc-allocated chars. */
-template <js::AllowGC allowGC>
+template <js::AllowGC allowGC, typename CharT>
 extern JSFlatString *
-js_NewString(js::ThreadSafeContext *cx, jschar *chars, size_t length);
+js_NewString(js::ThreadSafeContext *cx, CharT *chars, size_t length);
 
 extern JSLinearString *
 js_NewDependentString(JSContext *cx, JSString *base, size_t start, size_t length);
 
 /* Copy a counted string and GC-allocate a descriptor for it. */
-template <js::AllowGC allowGC>
+template <js::AllowGC allowGC, typename CharT>
 extern JSFlatString *
-js_NewStringCopyN(js::ExclusiveContext *cx, const jschar *s, size_t n);
-
-template <js::AllowGC allowGC>
-extern JSFlatString *
-js_NewStringCopyN(js::ThreadSafeContext *cx, const char *s, size_t n);
+js_NewStringCopyN(js::ThreadSafeContext *cx, const CharT *s, size_t n);
 
 /* Copy a C string and GC-allocate a descriptor for it. */
 template <js::AllowGC allowGC>
@@ -242,6 +233,16 @@ js_strdup(js::ThreadSafeContext *cx, const jschar *s);
 
 namespace js {
 
+inline bool
+EqualCharsLatin1TwoByte(const Latin1Char *s1, const jschar *s2, size_t len)
+{
+    for (const Latin1Char *s1end = s1 + len; s1 < s1end; s1++, s2++) {
+        if (jschar(*s1) != *s2)
+            return false;
+    }
+    return true;
+}
+
 /*
  * Inflate bytes in ASCII encoding to jschars. Return null on error, otherwise
  * return the jschar that was malloc'ed. length is updated to the length of the
@@ -312,8 +313,9 @@ namespace js {
 extern size_t
 PutEscapedStringImpl(char *buffer, size_t size, FILE *fp, JSLinearString *str, uint32_t quote);
 
+template <typename CharT>
 extern size_t
-PutEscapedStringImpl(char *buffer, size_t bufferSize, FILE *fp, const jschar *chars,
+PutEscapedStringImpl(char *buffer, size_t bufferSize, FILE *fp, const CharT *chars,
                      size_t length, uint32_t quote);
 
 /*

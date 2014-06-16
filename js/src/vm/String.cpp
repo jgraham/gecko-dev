@@ -24,6 +24,8 @@ using mozilla::PodCopy;
 using mozilla::RangedPtr;
 using mozilla::RoundUpPow2;
 
+using JS::AutoCheckCannotGC;
+
 size_t
 JSString::sizeOfExcludingThis(mozilla::MallocSizeOf mallocSizeOf)
 {
@@ -536,25 +538,24 @@ JSDependentString::undepend(ExclusiveContext *cx)
     return &this->asFlat();
 }
 
-bool
-JSFlatString::isIndexSlow(uint32_t *indexp) const
+template <typename CharT>
+/* static */ bool
+JSFlatString::isIndexSlow(const CharT *s, size_t length, uint32_t *indexp)
 {
-    const jschar *s = charsZ();
-    jschar ch = *s;
+    CharT ch = *s;
 
     if (!JS7_ISDEC(ch))
         return false;
 
-    size_t n = length();
-    if (n > UINT32_CHAR_BUFFER_LENGTH)
+    if (length > UINT32_CHAR_BUFFER_LENGTH)
         return false;
 
     /*
      * Make sure to account for the '\0' at the end of characters, dereferenced
      * in the loop below.
      */
-    RangedPtr<const jschar> cp(s, n + 1);
-    const RangedPtr<const jschar> end(s + n, s, n + 1);
+    RangedPtr<const CharT> cp(s, length + 1);
+    const RangedPtr<const CharT> end(s + length, s, length + 1);
 
     uint32_t index = JS7_UNDEC(*cp++);
     uint32_t oldIndex = 0;
@@ -584,6 +585,12 @@ JSFlatString::isIndexSlow(uint32_t *indexp) const
 
     return false;
 }
+
+template bool
+JSFlatString::isIndexSlow(const Latin1Char *s, size_t length, uint32_t *indexp);
+
+template bool
+JSFlatString::isIndexSlow(const jschar *s, size_t length, uint32_t *indexp);
 
 bool
 ScopedThreadSafeStringInspector::ensureChars(ThreadSafeContext *cx, const AutoCheckCannotGC &nogc)
@@ -735,6 +742,57 @@ StaticStrings::isStatic(JSAtom *atom)
       default:
         return false;
     }
+}
+
+AutoStableStringChars::~AutoStableStringChars()
+{
+    if (ownsChars_) {
+        MOZ_ASSERT(state_ == Latin1 || state_ == TwoByte);
+        if (state_ == Latin1)
+            js_free(const_cast<Latin1Char*>(latin1Chars_));
+        else
+            js_free(const_cast<jschar*>(twoByteChars_));
+    }
+}
+
+bool
+AutoStableStringChars::init()
+{
+    MOZ_ASSERT(state_ == Uninitialized);
+
+    if (s_->hasLatin1Chars()) {
+        state_ = Latin1;
+        latin1Chars_ = s_->rawLatin1Chars();
+    } else {
+        state_ = TwoByte;
+        twoByteChars_ = s_->rawTwoByteChars();
+    }
+
+    return true;
+}
+
+bool
+AutoStableStringChars::initTwoByte(JSContext *cx)
+{
+    MOZ_ASSERT(state_ == Uninitialized);
+
+    if (s_->hasTwoByteChars()) {
+        state_ = TwoByte;
+        twoByteChars_ = s_->rawTwoByteChars();
+        return true;
+    }
+
+    jschar *chars = cx->pod_malloc<jschar>(s_->length() + 1);
+    if (!chars)
+        return false;
+
+    CopyAndInflateChars(chars, s_->rawLatin1Chars(), s_->length());
+    chars[s_->length()] = 0;
+
+    state_ = TwoByte;
+    ownsChars_ = true;
+    twoByteChars_ = chars;
+    return true;
 }
 
 #ifdef DEBUG

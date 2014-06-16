@@ -96,7 +96,7 @@ void ProfileEntry::log()
   //   mTagPtr    (void*)        d,l,L,B (immediate backtrace), S(start-of-stack)
   //   mTagInt    (int)          n,f,y
   //   mTagChar   (char)         h
-  //   mTagFloat  (double)       r,t,p,R (resident memory)
+  //   mTagFloat  (double)       r,t,p,R (resident memory), U (unshared memory)
   switch (mTagName) {
     case 'm':
       LOGF("%c \"%s\"", mTagName, mTagMarker->GetMarkerName()); break;
@@ -108,7 +108,7 @@ void ProfileEntry::log()
       LOGF("%c %d", mTagName, mTagInt); break;
     case 'h':
       LOGF("%c \'%c\'", mTagName, mTagChar); break;
-    case 'r': case 't': case 'p': case 'R':
+    case 'r': case 't': case 'p': case 'R': case 'U':
       LOGF("%c %f", mTagName, mTagFloat); break;
     default:
       LOGF("'%c' unknown_tag", mTagName); break;
@@ -143,33 +143,33 @@ std::ostream& operator<<(std::ostream& stream, const ProfileEntry& entry)
 
 #define DYNAMIC_MAX_STRING 512
 
-ThreadProfile::ThreadProfile(const char* aName, int aEntrySize,
-                             PseudoStack *aStack, Thread::tid_t aThreadId,
-                             PlatformData* aPlatform,
-                             bool aIsMainThread, void *aStackTop)
-  : mWritePos(0)
+ThreadProfile::ThreadProfile(ThreadInfo* aInfo, int aEntrySize)
+  : mThreadInfo(aInfo)
+  , mWritePos(0)
   , mLastFlushPos(0)
   , mReadPos(0)
   , mEntrySize(aEntrySize)
-  , mPseudoStack(aStack)
+  , mPseudoStack(aInfo->Stack())
   , mMutex("ThreadProfile::mMutex")
-  , mName(strdup(aName))
-  , mThreadId(aThreadId)
-  , mIsMainThread(aIsMainThread)
-  , mPlatformData(aPlatform)
+  , mThreadId(aInfo->ThreadId())
+  , mIsMainThread(aInfo->IsMainThread())
+  , mPlatformData(aInfo->GetPlatformData())
   , mGeneration(0)
   , mPendingGenerationFlush(0)
-  , mStackTop(aStackTop)
+  , mStackTop(aInfo->StackTop())
+  , mRespInfo(MOZ_THIS_IN_INITIALIZER_LIST())
 #ifdef XP_LINUX
   , mRssMemory(0)
+  , mUssMemory(0)
 #endif
 {
+  MOZ_COUNT_CTOR(ThreadProfile);
   mEntries = new ProfileEntry[mEntrySize];
 }
 
 ThreadProfile::~ThreadProfile()
 {
-  free(mName);
+  MOZ_COUNT_DTOR(ThreadProfile);
   delete[] mEntries;
 }
 
@@ -324,7 +324,7 @@ void ThreadProfile::StreamJSObject(JSStreamWriter& b)
       // TODO Add the proper plugin name
       b.NameValue("name", "Plugin");
     } else {
-      b.NameValue("name", mName);
+      b.NameValue("name", Name());
     }
     b.NameValue("tid", static_cast<int>(mThreadId));
 
@@ -356,6 +356,13 @@ void ThreadProfile::StreamJSObject(JSStreamWriter& b)
             {
               if (sample) {
                 b.NameValue("rss", entry.mTagFloat);
+              }
+            }
+            break;
+          case 'U':
+            {
+              if (sample) {
+                b.NameValue("uss", entry.mTagFloat);
               }
             }
             break;

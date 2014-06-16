@@ -85,6 +85,9 @@ function MarkupView(aInspector, aFrame, aControllerWindow) {
   this._boundMutationObserver = this._mutationObserver.bind(this);
   this.walker.on("mutations", this._boundMutationObserver);
 
+  this._boundOnDisplayChange = this._onDisplayChange.bind(this);
+  this.walker.on("display-change", this._boundOnDisplayChange);
+
   this._boundOnNewSelection = this._onNewSelection.bind(this);
   this._inspector.selection.on("new-node-front", this._boundOnNewSelection);
   this._onNewSelection();
@@ -172,10 +175,26 @@ MarkupView.prototype = {
     this._hoveredNode = null;
   },
 
+  /**
+   * Show the box model highlighter on a given node front
+   * @param {NodeFront} nodeFront The node to show the highlighter for
+   * @param {Object} options Options for the highlighter
+   * @return a promise that resolves when the highlighter for this nodeFront is
+   * shown, taking into account that there could already be highlighter requests
+   * queued up
+   */
   _showBoxModel: function(nodeFront, options={}) {
-    this._inspector.toolbox.highlighterUtils.highlightNodeFront(nodeFront, options);
+    return this._inspector.toolbox.highlighterUtils.highlightNodeFront(nodeFront, options);
   },
 
+  /**
+   * Hide the box model highlighter on a given node front
+   * @param {NodeFront} nodeFront The node to hide the highlighter for
+   * @param {Boolean} forceHide See toolbox-highlighter-utils/unhighlight
+   * @return a promise that resolves when the highlighter for this nodeFront is
+   * hidden, taking into account that there could already be highlighter requests
+   * queued up
+   */
   _hideBoxModel: function(forceHide) {
     return this._inspector.toolbox.highlighterUtils.unhighlight(forceHide);
   },
@@ -612,6 +631,19 @@ MarkupView.prototype = {
 
       }
     });
+  },
+
+  /**
+   * React to display-change events from the walker
+   * @param {Array} nodes An array of nodeFronts
+   */
+  _onDisplayChange: function(nodes) {
+    for (let node of nodes) {
+      let container = this._containers.get(node);
+      if (container) {
+        container.isDisplayed = node.isDisplayed;
+      }
+    }
   },
 
   /**
@@ -1110,6 +1142,9 @@ MarkupView.prototype = {
     this.walker.off("mutations", this._boundMutationObserver)
     this._boundMutationObserver = null;
 
+    this.walker.off("display-change", this._boundOnDisplayChange);
+    this._boundOnDisplayChange = null;
+
     this._elt.removeEventListener("mousemove", this._onMouseMove, false);
     this._elt.removeEventListener("mouseleave", this._onMouseLeave, false);
     this._elt = null;
@@ -1268,6 +1303,9 @@ function MarkupContainer(aMarkupView, aNode, aInspector) {
 
   // Prepare the image preview tooltip data if any
   this._prepareImagePreview();
+
+  // Marking the node as shown or hidden
+  this.isDisplayed = this.node.isDisplayed;
 }
 
 MarkupContainer.prototype = {
@@ -1340,6 +1378,16 @@ MarkupContainer.prototype = {
     }, () => {
       tooltip.setBrokenImageContent();
     });
+  },
+
+  /**
+   * Show the element has displayed or not
+   */
+  set isDisplayed(isDisplayed) {
+    this.elt.classList.remove("not-displayed");
+    if (!isDisplayed) {
+      this.elt.classList.add("not-displayed");
+    }
   },
 
   copyImageDataUri: function() {

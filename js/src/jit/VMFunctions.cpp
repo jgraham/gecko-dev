@@ -16,6 +16,7 @@
 #include "vm/ArrayObject.h"
 #include "vm/Debugger.h"
 #include "vm/Interpreter.h"
+#include "vm/TraceLogging.h"
 
 #include "jsinferinlines.h"
 
@@ -763,6 +764,21 @@ DebugPrologue(JSContext *cx, BaselineFrame *frame, jsbytecode *pc, bool *mustRet
 }
 
 bool
+DebugEpilogueOnBaselineReturn(JSContext *cx, BaselineFrame *frame, jsbytecode *pc)
+{
+    if (!DebugEpilogue(cx, frame, pc, true)) {
+        // DebugEpilogue popped the frame by updating jitTop, so run the stop event
+        // here before we enter the exception handler.
+        TraceLogger *logger = TraceLoggerForMainThread(cx->runtime());
+        TraceLogStopEvent(logger, TraceLogger::Baseline);
+        TraceLogStopEvent(logger); // Leave script.
+        return false;
+    }
+
+    return true;
+}
+
+bool
 DebugEpilogue(JSContext *cx, BaselineFrame *frame, jsbytecode *pc, bool ok)
 {
     // Unwind scope chain to stack depth 0.
@@ -1154,6 +1170,15 @@ AssertValidValue(JSContext *cx, Value *v)
     }
 }
 #endif
+
+// Definition of the MTypedObjectProto MIR.
+JSObject *
+TypedObjectProto(JSObject *obj)
+{
+    JS_ASSERT(obj->is<TypedObject>());
+    TypedObject &typedObj = obj->as<TypedObject>();
+    return &typedObj.typedProto();
+}
 
 } // namespace jit
 } // namespace js

@@ -396,8 +396,13 @@ NS_IMETHODIMP
 NotificationObserver::Observe(nsISupports* aSubject, const char* aTopic,
                               const char16_t* aData)
 {
+  nsCOMPtr<nsPIDOMWindow> window = mNotification->GetOwner();
+  if (!window) {
+    // Window has been closed, this observer is not valid anymore
+    return NS_ERROR_FAILURE;
+  }
+
   if (!strcmp("alertclickcallback", aTopic)) {
-    nsCOMPtr<nsPIDOMWindow> window = mNotification->GetOwner();
     nsIDocument* doc = window ? window->GetExtantDoc() : nullptr;
     if (doc) {
       nsContentUtils::DispatchChromeEvent(doc, window,
@@ -601,7 +606,7 @@ Notification::ShowInternal()
         ops.mLang = mLang;
         ops.mTag = mTag;
 
-        if (!ops.ToObject(cx, &val)) {
+        if (!ToJSValue(cx, ops, &val)) {
           NS_WARNING("Converting dict to object failed!");
           return;
         }

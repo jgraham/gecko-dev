@@ -250,13 +250,23 @@ pref("media.apple.mp3.enabled", true);
 #ifdef MOZ_WEBRTC
 pref("media.navigator.enabled", true);
 pref("media.navigator.video.enabled", true);
-pref("media.navigator.load_adapt", false);
+pref("media.navigator.load_adapt", true);
 pref("media.navigator.load_adapt.measure_interval",1000);
 pref("media.navigator.load_adapt.avg_seconds",3);
 pref("media.navigator.load_adapt.high_load","0.90");
 pref("media.navigator.load_adapt.low_load","0.40");
 pref("media.navigator.video.default_fps",30);
 pref("media.navigator.video.default_minfps",10);
+
+pref("media.webrtc.debug.trace_mask", 0);
+pref("media.webrtc.debug.multi_log", false);
+#if defined(ANDROID) || defined(XP_WIN)
+pref("media.webrtc.debug.log_file", "");
+#else
+pref("media.webrtc.debug.log_file", "/tmp/WebRTC.log");
+#endif
+pref("media.webrtc.debug.aec_dump_max_size", 4194304); // 4MB
+
 #ifdef MOZ_WIDGET_GONK
 pref("media.navigator.video.default_width",320);
 pref("media.navigator.video.default_height",240);
@@ -434,6 +444,23 @@ pref("gfx.font_rendering.wordcache.charlimit", 32);
 pref("gfx.font_rendering.wordcache.maxentries", 10000);
 
 pref("gfx.font_rendering.graphite.enabled", true);
+
+// Check intl/unicharutil/util/nsUnicodeProperties.h for definitions of script bits
+// in the ShapingType enumeration
+// Currently-defined bits:
+//  SHAPING_DEFAULT   = 0x0001,
+//  SHAPING_ARABIC    = 0x0002,
+//  SHAPING_HEBREW    = 0x0004,
+//  SHAPING_HANGUL    = 0x0008,
+//  SHAPING_MONGOLIAN = 0x0010,
+//  SHAPING_INDIC     = 0x0020,
+//  SHAPING_THAI      = 0x0040
+// (see http://mxr.mozilla.org/mozilla-central/ident?i=ShapingType)
+// Scripts not listed are grouped in the default category.
+// Set the pref to 255 to have all text shaped via the harfbuzz backend.
+// Default setting:
+// We use harfbuzz for all scripts (except when using AAT fonts on OS X).
+pref("gfx.font_rendering.harfbuzz.scripts", 255);
 
 #ifdef XP_WIN
 pref("gfx.font_rendering.directwrite.enabled", false);
@@ -769,6 +796,12 @@ pref("dom.forms.number", true);
 // platforms which don't have a color picker implemented yet.
 pref("dom.forms.color", true);
 
+// Support for new @autocomplete values
+pref("dom.forms.autocomplete.experimental", false);
+
+// Enables requestAutocomplete DOM API on forms.
+pref("dom.forms.requestAutocomplete", false);
+
 // Enables system messages and activities
 pref("dom.sysmsg.enabled", false);
 
@@ -798,6 +831,11 @@ pref("privacy.donottrackheader.value",      1);
 
 pref("dom.event.contextmenu.enabled",       true);
 pref("dom.event.clipboardevents.enabled",   true);
+#if defined(XP_WIN) && !defined(RELEASE_BUILD)
+pref("dom.event.highrestimestamp.enabled",  true);
+#else
+pref("dom.event.highrestimestamp.enabled",  false);
+#endif
 
 pref("dom.webcomponents.enabled",           false);
 
@@ -2097,11 +2135,7 @@ pref("svg.svg-iframe.enabled", false);
 
 // Is support for the new getBBox method from SVG 2 enabled?
 // See https://svgwg.org/svg2-draft/single-page.html#types-SVGBoundingBoxOptions
-#ifdef RELEASE_BUILD
 pref("svg.new-getBBox.enabled", false);
-#else
-pref("svg.new-getBBox.enabled", true);
-#endif
 
 // Default font types and sizes by locale
 pref("font.default.ar", "sans-serif");
@@ -3942,8 +3976,12 @@ pref("profiler.enabled", false);
 pref("profiler.interval", 10);
 pref("profiler.entries", 100000);
 
+#if defined(MOZ_WIDGET_GONK) || defined(MOZ_WIDGET_ANDROID)
 // Network Information API
 pref("dom.netinfo.enabled", true);
+#else
+pref("dom.netinfo.enabled", false);
+#endif
 
 #ifdef XP_WIN
 // On 32-bit Windows, fire a low-memory notification if we have less than this
@@ -4168,6 +4206,13 @@ pref("touchcaret.distance.threshold", 1500);
 // When time exceed this expiration time, we'll hide touch caret.
 // In milliseconds. (0 means disable this feature)
 pref("touchcaret.expiration.time", 3000);
+
+// Turn off selection caret by default
+pref("selectioncaret.enabled", false);
+
+// This will inflate size of selection caret frame when we checking if
+// user click on selection caret or not. In app units.
+pref("selectioncaret.inflatesize.threshold", 40);
 
 // Wakelock is disabled by default.
 pref("dom.wakelock.enabled", false);

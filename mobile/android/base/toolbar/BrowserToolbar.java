@@ -15,7 +15,6 @@ import org.mozilla.gecko.BrowserApp;
 import org.mozilla.gecko.EventDispatcher;
 import org.mozilla.gecko.GeckoAppShell;
 import org.mozilla.gecko.GeckoApplication;
-import org.mozilla.gecko.GeckoProfile;
 import org.mozilla.gecko.LightweightTheme;
 import org.mozilla.gecko.R;
 import org.mozilla.gecko.Tab;
@@ -141,7 +140,7 @@ public class BrowserToolbar extends ThemedRelativeLayout
     private MenuPopup menuPopup;
     private List<View> focusOrder;
 
-    private final ImageView editCancel;
+    private final ThemedImageView editCancel;
 
     private final View[] tabletDisplayModeViews;
     private boolean hidForwardButtonOnStartEditing = false;
@@ -234,7 +233,7 @@ public class BrowserToolbar extends ThemedRelativeLayout
         actionItemBar = (LinearLayout) findViewById(R.id.menu_items);
         hasSoftMenuButton = !HardwareUtils.hasMenuButton();
 
-        editCancel = (ImageView) findViewById(R.id.edit_cancel);
+        editCancel = (ThemedImageView) findViewById(R.id.edit_cancel);
 
         // We use different layouts on phones and tablets, so adjust the focus
         // order appropriately.
@@ -335,7 +334,6 @@ public class BrowserToolbar extends ThemedRelativeLayout
                     if (url == null) {
                         menu.findItem(R.id.copyurl).setVisible(false);
                         menu.findItem(R.id.add_to_launcher).setVisible(false);
-                        MenuUtils.safeSetVisible(menu, R.id.share, false);
                     }
 
                     MenuUtils.safeSetVisible(menu, R.id.subscribe, tab.hasFeeds());
@@ -344,12 +342,9 @@ public class BrowserToolbar extends ThemedRelativeLayout
                     // if there is no tab, remove anything tab dependent
                     menu.findItem(R.id.copyurl).setVisible(false);
                     menu.findItem(R.id.add_to_launcher).setVisible(false);
-                    MenuUtils.safeSetVisible(menu, R.id.share, false);
                     MenuUtils.safeSetVisible(menu, R.id.subscribe, false);
                     MenuUtils.safeSetVisible(menu, R.id.add_search_engine, false);
                 }
-
-                MenuUtils.safeSetVisible(menu, R.id.share, !GeckoProfile.get(getContext()).inGuestMode());
             }
         });
 
@@ -1455,10 +1450,13 @@ public class BrowserToolbar extends ThemedRelativeLayout
         stateList.addState(EMPTY_STATE_SET, drawable);
 
         setBackgroundDrawable(stateList);
+
+        editCancel.onLightweightThemeChanged();
     }
 
     @Override
     public void onLightweightThemeReset() {
         setBackgroundResource(R.drawable.url_bar_bg);
+        editCancel.onLightweightThemeReset();
     }
 }

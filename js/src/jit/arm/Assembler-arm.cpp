@@ -1255,11 +1255,11 @@ VFPRegister::isMissing()
 bool
 Assembler::oom() const
 {
-    return m_buffer.oom() ||
-        !enoughMemory_ ||
-        jumpRelocations_.oom() ||
-        dataRelocations_.oom() ||
-        preBarriers_.oom();
+    return AssemblerShared::oom() ||
+           m_buffer.oom() ||
+           jumpRelocations_.oom() ||
+           dataRelocations_.oom() ||
+           preBarriers_.oom();
 }
 
 bool
@@ -1861,7 +1861,7 @@ Assembler::as_b(Label *l, Condition c, bool isPatchable)
         // This will currently throw an assertion if we couldn't actually
         // encode the offset of the branch.
         if (!BOffImm::isInRange(old)) {
-            m_buffer.bail();
+            m_buffer.fail_bail();
             return ret;
         }
         ret = as_b(BOffImm(old), c, isPatchable);
@@ -1923,7 +1923,7 @@ Assembler::as_bl(Label *l, Condition c)
         // encode the offset of the branch.
         old = l->offset();
         if (!BOffImm::isInRange(old)) {
-            m_buffer.bail();
+            m_buffer.fail_bail();
             return ret;
         }
         ret = as_bl(BOffImm(old), c);

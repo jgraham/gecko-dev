@@ -105,7 +105,6 @@ class RangeAnalysis
                                                   MTest *test, BranchDirection direction);
     void analyzeLoopPhi(MBasicBlock *header, LoopIterationBound *loopBound, MPhi *phi);
     bool tryHoistBoundsCheck(MBasicBlock *header, MBoundsCheck *ins);
-    bool markBlocksInLoopBody(MBasicBlock *header, MBasicBlock *current);
 };
 
 class Range : public TempObject {
@@ -415,6 +414,7 @@ class Range : public TempObject {
     static Range *abs(TempAllocator &alloc, const Range *op);
     static Range *min(TempAllocator &alloc, const Range *lhs, const Range *rhs);
     static Range *max(TempAllocator &alloc, const Range *lhs, const Range *rhs);
+    static Range *floor(TempAllocator &alloc, const Range *op);
 
     static bool negativeZeroMul(const Range *lhs, const Range *rhs);
 
@@ -587,11 +587,6 @@ class Range : public TempObject {
     }
     void setSymbolicUpper(SymbolicBound *bound) {
         symbolicUpper_ = bound;
-    }
-
-    void resetFractionalPart() {
-        canHaveFractionalPart_ = false;
-        optimize();
     }
 };
 

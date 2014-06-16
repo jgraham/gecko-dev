@@ -93,6 +93,9 @@ class BaseMachFormatter(base.BaseFormatter):
                 (data.get("pid", None), test, success, data["top_frame"]))
 
     def log(self, data):
+        if data.get('component'):
+            return " ".join([data["component"], data["level"], data["message"]])
+
         return "%s %s" % (data["level"], data["message"])
 
     def _get_subtest_data(self, data):

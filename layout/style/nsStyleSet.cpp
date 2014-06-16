@@ -1613,6 +1613,27 @@ nsStyleSet::KeyframesRuleForName(nsPresContext* aPresContext,
   return nullptr;
 }
 
+nsCSSCounterStyleRule*
+nsStyleSet::CounterStyleRuleForName(nsPresContext* aPresContext,
+                                    const nsAString& aName)
+{
+  NS_ENSURE_FALSE(mInShutdown, nullptr);
+
+  for (uint32_t i = ArrayLength(gCSSSheetTypes); i-- != 0; ) {
+    if (gCSSSheetTypes[i] == eScopedDocSheet)
+      continue;
+    nsCSSRuleProcessor *ruleProc = static_cast<nsCSSRuleProcessor*>
+                                    (mRuleProcessors[gCSSSheetTypes[i]].get());
+    if (!ruleProc)
+      continue;
+    nsCSSCounterStyleRule *result =
+      ruleProc->CounterStyleRuleForName(aPresContext, aName);
+    if (result)
+      return result;
+  }
+  return nullptr;
+}
+
 bool
 nsStyleSet::AppendFontFeatureValuesRules(nsPresContext* aPresContext,
                                  nsTArray<nsCSSFontFeatureValuesRule*>& aArray)
@@ -1646,18 +1667,17 @@ nsStyleSet::GetFontFeatureValuesLookup()
     for (i = 0; i < numRules; i++) {
       nsCSSFontFeatureValuesRule *rule = rules[i];
 
-      const nsTArray<nsString>& familyList = rule->GetFamilyList();
+      const nsTArray<FontFamilyName>& familyList = rule->GetFamilyList().GetFontlist();
       const nsTArray<gfxFontFeatureValueSet::FeatureValues>&
         featureValues = rule->GetFeatureValues();
 
       // for each family
-      uint32_t f, numFam;
+      size_t f, numFam;
 
       numFam = familyList.Length();
       for (f = 0; f < numFam; f++) {
-        const nsString& family = familyList.ElementAt(f);
-        nsAutoString silly(family);
-        mFontFeatureValuesLookup->AddFontFeatureValues(silly, featureValues);
+        mFontFeatureValuesLookup->AddFontFeatureValues(familyList[f].mName,
+                                                       featureValues);
       }
     }
   }
