@@ -78,6 +78,7 @@ namespace layers {
 class Animation;
 class AnimationData;
 class AsyncPanZoomController;
+class ClientLayerManager;
 class CommonLayerAttributes;
 class Layer;
 class ThebesLayer;
@@ -201,6 +202,9 @@ public:
   { return nullptr; }
 
   virtual LayerManagerComposite* AsLayerManagerComposite()
+  { return nullptr; }
+
+  virtual ClientLayerManager* AsClientLayerManager()
   { return nullptr; }
 
   /**
@@ -838,7 +842,7 @@ public:
       Mutated();
     }
   }
-  
+
   void DeprecatedSetMixBlendMode(gfxContext::GraphicsOperator aMixBlendMode)
   {
     SetMixBlendMode(gfx::CompositionOpForOp(aMixBlendMode));
@@ -852,7 +856,7 @@ public:
       Mutated();
     }
   }
-  
+
   bool GetForceIsolatedGroup() const
   {
     return mForceIsolatedGroup;
@@ -1256,13 +1260,13 @@ public:
    * to and excluding the nearest ancestor that has UseIntermediateSurface() set.
    */
   float GetEffectiveOpacity();
-  
+
   /**
    * Returns the blendmode of this layer.
    */
   gfx::CompositionOp GetEffectiveMixBlendMode();
   gfxContext::GraphicsOperator DeprecatedGetEffectiveMixBlendMode();
-  
+
   /**
    * This returns the effective transform computed by
    * ComputeEffectiveTransforms. Typically this is a transform that transforms
@@ -1902,11 +1906,11 @@ public:
       , mTexID(0)
       , mSize(0,0)
       , mHasAlpha(false)
-      , mIsGLAlphaPremult(false)
+      , mIsGLAlphaPremult(true)
     { }
 
     // One of these two must be specified for Canvas2D, but never both
-    mozilla::gfx::DrawTarget *mDrawTarget; // a DrawTarget for the canvas contents
+    mozilla::gfx::DrawTarget* mDrawTarget; // a DrawTarget for the canvas contents
     mozilla::gl::GLContext* mGLContext; // or this, for GL.
 
     // Canvas/SkiaGL uses this

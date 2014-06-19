@@ -260,11 +260,8 @@ pref("media.navigator.video.default_minfps",10);
 
 pref("media.webrtc.debug.trace_mask", 0);
 pref("media.webrtc.debug.multi_log", false);
-#if defined(ANDROID) || defined(XP_WIN)
+pref("media.webrtc.debug.aec_log_dir", "");
 pref("media.webrtc.debug.log_file", "");
-#else
-pref("media.webrtc.debug.log_file", "/tmp/WebRTC.log");
-#endif
 pref("media.webrtc.debug.aec_dump_max_size", 4194304); // 4MB
 
 #ifdef MOZ_WIDGET_GONK
@@ -849,7 +846,7 @@ pref("javascript.options.ion",              true);
 pref("javascript.options.asmjs",            true);
 pref("javascript.options.native_regexp",    true);
 pref("javascript.options.parallel_parsing", true);
-pref("javascript.options.ion.parallel_compilation", true);
+pref("javascript.options.ion.offthread_compilation", true);
 // This preference instructs the JS engine to discard the
 // source of any privileged JS after compilation. This saves
 // memory, but makes things like Function.prototype.toSource()
@@ -3786,36 +3783,29 @@ pref("layers.offmainthreadcomposition.enabled", false);
 // -1 -> default (match layout.frame_rate or 60 FPS)
 // 0  -> full-tilt mode: Recomposite even if not transaction occured.
 pref("layers.offmainthreadcomposition.frame-rate", -1);
-#ifndef XP_WIN
+
 // Asynchonous video compositing using the ImageBridge IPDL protocol.
 // requires off-main-thread compositing.
-pref("layers.async-video.enabled",false);
-#endif
+pref("layers.async-video.enabled", true);
+pref("layers.async-video-oop.enabled",true);
 
 #ifdef XP_WIN
 pref("layers.offmainthreadcomposition.enabled", true);
-pref("layers.async-video.enabled", true);
-#endif
-
-#ifdef MOZ_X11
-// OMTC off by default on Linux, but if activated, use new textures and async-video.
-pref("layers.async-video.enabled", true);
+// XXX - see bug 1009616
+pref("layers.async-video-oop.enabled", false);
 #endif
 
 #ifdef MOZ_WIDGET_QT
 pref("layers.offmainthreadcomposition.enabled", true);
-pref("layers.async-video.enabled",true);
 #endif
 
 #ifdef XP_MACOSX
 pref("layers.offmainthreadcomposition.enabled", true);
-pref("layers.async-video.enabled",true);
 #endif
 
 // ANDROID covers android and b2g
 #ifdef ANDROID
 pref("layers.offmainthreadcomposition.enabled", true);
-pref("layers.async-video.enabled",true);
 #endif
 
 // same effect as layers.offmainthreadcomposition.enabled, but specifically for

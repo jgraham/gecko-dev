@@ -684,7 +684,9 @@ CompositorParent::ForceComposeToTarget(DrawTarget* aTarget, const nsIntRect* aRe
 bool
 CompositorParent::CanComposite()
 {
-  return !(mPaused || !mLayerManager || !mLayerManager->GetRoot());
+  return mLayerManager &&
+         mLayerManager->GetRoot() &&
+         !mPaused;
 }
 
 // Go down the composite layer tree, setting properties to match their
@@ -1129,6 +1131,7 @@ public:
   virtual AsyncCompositionManager* GetCompositionManager(LayerTransactionParent* aParent) MOZ_OVERRIDE;
 
   void DidComposite(uint64_t aId);
+
 private:
   // Private destructor, to discourage deletion outside of Release():
   virtual ~CrossProcessCompositorParent();

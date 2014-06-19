@@ -31,7 +31,7 @@
 
 class nsAttrAndChildArray;
 class nsChildContentList;
-class nsCSSSelectorList;
+struct nsCSSSelectorList;
 class nsDOMAttributeMap;
 class nsIContent;
 class nsIDocument;
@@ -183,7 +183,8 @@ enum {
 
 // Make sure we have space for our bits
 #define ASSERT_NODE_FLAGS_SPACE(n) \
-  static_assert(WRAPPER_CACHE_FLAGS_BITS_USED + (n) <= 32, \
+  static_assert(WRAPPER_CACHE_FLAGS_BITS_USED + (n) <=                          \
+                  sizeof(nsWrapperCache::FlagsType) * 8,                        \
                 "Not enough space for our bits")
 ASSERT_NODE_FLAGS_SPACE(NODE_TYPE_SPECIFIC_BITS_OFFSET);
 
@@ -948,7 +949,7 @@ public:
   }
 #endif
 
-  void SetFlags(uint32_t aFlagsToSet)
+  void SetFlags(FlagsType aFlagsToSet)
   {
     NS_ASSERTION(!(aFlagsToSet & (NODE_IS_ANONYMOUS_ROOT |
                                   NODE_IS_NATIVE_ANONYMOUS_ROOT |
@@ -962,7 +963,7 @@ public:
     nsWrapperCache::SetFlags(aFlagsToSet);
   }
 
-  void UnsetFlags(uint32_t aFlagsToUnset)
+  void UnsetFlags(FlagsType aFlagsToUnset)
   {
     NS_ASSERTION(!(aFlagsToUnset &
                    (NODE_IS_ANONYMOUS_ROOT |
@@ -1350,6 +1351,8 @@ private:
     // Set if the element has a parser insertion mode other than "in body",
     // per the HTML5 "Parse state" section.
     ElementHasWeirdParserInsertionMode,
+    // Parser sets this flag if it has notified about the node.
+    ParserHasNotified,
     // Guard value
     BooleanFlagCount
   };
@@ -1490,6 +1493,8 @@ public:
   bool IsScopedStyleRoot() { return GetBoolFlag(ElementIsScopedStyleRoot); }
   bool HasRelevantHoverRules() const { return GetBoolFlag(NodeHasRelevantHoverRules); }
   void SetHasRelevantHoverRules() { SetBoolFlag(NodeHasRelevantHoverRules); }
+  void SetParserHasNotified() { SetBoolFlag(ParserHasNotified); };
+  bool HasParserNotified() { return GetBoolFlag(ParserHasNotified); }
 protected:
   void SetParentIsContent(bool aValue) { SetBoolFlag(ParentIsContent, aValue); }
   void SetInDocument() { SetBoolFlag(IsInDocument); }

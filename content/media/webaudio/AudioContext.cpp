@@ -554,6 +554,8 @@ AudioContext::Shutdown()
     Mute();
   }
 
+  mDecoder.Shutdown();
+
   // Release references to active nodes.
   // Active AudioNodes don't unregister in destructors, at which point the
   // Node is already unregistered.
@@ -673,7 +675,7 @@ AudioContext::SizeOfIncludingThis(mozilla::MallocSizeOf aMallocSizeOf) const
 
 NS_IMETHODIMP
 AudioContext::CollectReports(nsIHandleReportCallback* aHandleReport,
-                             nsISupports* aData)
+                             nsISupports* aData, bool aAnonymize)
 {
   int64_t amount = SizeOfIncludingThis(MallocSizeOf);
   return MOZ_COLLECT_REPORT("explicit/webaudio/audiocontext", KIND_HEAP, UNITS_BYTES,

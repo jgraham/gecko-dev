@@ -758,8 +758,7 @@ typedef bool
  */
 typedef JSObject *
 (* JSWrapObjectCallback)(JSContext *cx, JS::HandleObject existing, JS::HandleObject obj,
-                         JS::HandleObject proto, JS::HandleObject parent,
-                         unsigned flags);
+                         JS::HandleObject parent, unsigned flags);
 
 /*
  * Callback used by the wrap hook to ask the embedding to prepare an object
@@ -2216,7 +2215,7 @@ extern JS_PUBLIC_API(int)
 JS_IdArrayLength(JSContext *cx, JSIdArray *ida);
 
 extern JS_PUBLIC_API(jsid)
-JS_IdArrayGet(JSContext *cx, JSIdArray *ida, int index);
+JS_IdArrayGet(JSContext *cx, JSIdArray *ida, unsigned index);
 
 extern JS_PUBLIC_API(void)
 JS_DestroyIdArray(JSContext *cx, JSIdArray *ida);
@@ -2241,7 +2240,7 @@ class AutoIdArray : private AutoGCRooter
     }
     jsid operator[](size_t i) const {
         JS_ASSERT(idArray);
-        return JS_IdArrayGet(context, idArray, i);
+        return JS_IdArrayGet(context, idArray, unsigned(i));
     }
     size_t length() const {
         return JS_IdArrayLength(context, idArray);
@@ -4755,14 +4754,14 @@ extern JS_PUBLIC_API(void)
 JS_SetParallelParsingEnabled(JSRuntime *rt, bool enabled);
 
 extern JS_PUBLIC_API(void)
-JS_SetParallelIonCompilationEnabled(JSRuntime *rt, bool enabled);
+JS_SetOffthreadIonCompilationEnabled(JSRuntime *rt, bool enabled);
 
 #define JIT_COMPILER_OPTIONS(Register)                                  \
     Register(BASELINE_USECOUNT_TRIGGER, "baseline.usecount.trigger")    \
     Register(ION_USECOUNT_TRIGGER, "ion.usecount.trigger")              \
     Register(ION_ENABLE, "ion.enable")                                  \
     Register(BASELINE_ENABLE, "baseline.enable")                        \
-    Register(PARALLEL_COMPILATION_ENABLE, "parallel-compilation.enable")
+    Register(OFFTHREAD_COMPILATION_ENABLE, "offthread-compilation.enable")
 
 typedef enum JSJitCompilerOption {
 #define JIT_COMPILER_DECLARE(key, str) \

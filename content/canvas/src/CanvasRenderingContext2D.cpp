@@ -150,7 +150,7 @@ public:
   NS_DECL_ISUPPORTS
 
   NS_IMETHOD CollectReports(nsIHandleReportCallback* aHandleReport,
-                            nsISupports* aData)
+                            nsISupports* aData, bool aAnonymize)
   {
     return MOZ_COLLECT_REPORT(
       "canvas-2d-pixels", KIND_OTHER, UNITS_BYTES,
@@ -2327,6 +2327,8 @@ CanvasRenderingContext2D::SetFont(const nsAString& font,
                      fontStyle->mFont.systemFont,
                      printerFont,
                      fontStyle->mFont.variant == NS_STYLE_FONT_VARIANT_SMALL_CAPS,
+                     fontStyle->mFont.synthesis & NS_FONT_SYNTHESIS_WEIGHT,
+                     fontStyle->mFont.synthesis & NS_FONT_SYNTHESIS_STYLE,
                      fontStyle->mFont.languageOverride);
 
   fontStyle->mFont.AddFontFeaturesToStyle(&style);
@@ -4358,7 +4360,7 @@ CanvasPath::CanvasPath(nsISupports* aParent)
   mPathBuilder = gfxPlatform::GetPlatform()->ScreenReferenceDrawTarget()->CreatePathBuilder();
 }
 
-CanvasPath::CanvasPath(nsISupports* aParent, RefPtr<PathBuilder> aPathBuilder)
+CanvasPath::CanvasPath(nsISupports* aParent, TemporaryRef<PathBuilder> aPathBuilder)
   : mParent(aParent), mPathBuilder(aPathBuilder)
 {
   SetIsDOMBinding();
@@ -4555,8 +4557,8 @@ CanvasPath::BezierTo(const gfx::Point& aCP1,
   mPathBuilder->BezierTo(aCP1, aCP2, aCP3);
 }
 
-RefPtr<gfx::Path>
-CanvasPath::GetPath(const CanvasWindingRule& winding, const mozilla::RefPtr<mozilla::gfx::DrawTarget>& mTarget) const
+TemporaryRef<gfx::Path>
+CanvasPath::GetPath(const CanvasWindingRule& winding, const DrawTarget* aTarget) const
 {
   FillRule fillRule = FillRule::FILL_WINDING;
   if (winding == CanvasWindingRule::Evenodd) {
@@ -4564,7 +4566,7 @@ CanvasPath::GetPath(const CanvasWindingRule& winding, const mozilla::RefPtr<mozi
   }
 
   if (mPath &&
-      (mPath->GetBackendType() == mTarget->GetType()) &&
+      (mPath->GetBackendType() == aTarget->GetType()) &&
       (mPath->GetFillRule() == fillRule)) {
     return mPath;
   }
@@ -4580,8 +4582,8 @@ CanvasPath::GetPath(const CanvasWindingRule& winding, const mozilla::RefPtr<mozi
   }
 
   // retarget our backend if we're used with a different backend
-  if (mPath->GetBackendType() != mTarget->GetType()) {
-    RefPtr<PathBuilder> tmpPathBuilder = mTarget->CreatePathBuilder(fillRule);
+  if (mPath->GetBackendType() != aTarget->GetType()) {
+    RefPtr<PathBuilder> tmpPathBuilder = aTarget->CreatePathBuilder(fillRule);
     mPath->StreamToSink(tmpPathBuilder);
     mPath = tmpPathBuilder->Finish();
   } else if (mPath->GetFillRule() != fillRule) {

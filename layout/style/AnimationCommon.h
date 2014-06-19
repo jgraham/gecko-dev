@@ -23,7 +23,7 @@
 class nsIFrame;
 class nsPresContext;
 class nsStyleChangeList;
-class ElementPropertyTransition;
+struct ElementPropertyTransition;
 
 
 namespace mozilla {
@@ -282,6 +282,10 @@ struct ComputedTiming
  */
 struct ElementAnimation
 {
+protected:
+  virtual ~ElementAnimation() { }
+
+public:
   ElementAnimation()
     : mIsRunningOnCompositor(false)
     , mLastNotification(LAST_NOTIFICATION_NONE)
@@ -291,7 +295,6 @@ struct ElementAnimation
   // FIXME: If we succeed in moving transition-specific code to a type of
   // AnimationEffect (as per the Web Animations API) we should remove these
   // virtual methods.
-  virtual ~ElementAnimation() { }
   virtual ElementPropertyTransition* AsTransition() { return nullptr; }
   virtual const ElementPropertyTransition* AsTransition() const {
     return nullptr;
@@ -303,6 +306,7 @@ struct ElementAnimation
 
   bool HasAnimationOfProperty(nsCSSProperty aProperty) const;
   bool IsRunningAt(mozilla::TimeStamp aTime) const;
+  bool IsCurrentAt(mozilla::TimeStamp aTime) const;
 
   // Return the duration, at aTime (or, if paused, mPauseStart), since
   // the *end* of the delay period.  May be negative.
@@ -458,6 +462,10 @@ struct CommonElementAnimationData : public PRCList
   uint64_t mAnimationGeneration;
   // Update mAnimationGeneration to nsCSSFrameConstructor's count
   void UpdateAnimationGeneration(nsPresContext* aPresContext);
+
+  // Returns true if there is an animation in the before or active phase at
+  // the given time.
+  bool HasCurrentAnimationsAt(mozilla::TimeStamp aTime);
 
   // The refresh time associated with mStyleRule.
   TimeStamp mStyleRuleRefreshTime;
