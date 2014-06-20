@@ -6968,8 +6968,13 @@
         "path": "XMLHttpRequest/xmlhttprequest-unsent.htm"
       }, 
       {
-        "url": "/ambient-light/DeviceLight_tests.html", 
-        "path": "ambient-light/DeviceLight_tests.html"
+        "url": "/ambient-light/AmbientLight_tests.html", 
+        "path": "ambient-light/AmbientLight_tests.html", 
+        "timeout": "long"
+      }, 
+      {
+        "url": "/ambient-light/idlharness.html", 
+        "path": "ambient-light/idlharness.html"
       }, 
       {
         "url": "/animation-timing/callback-invoked.html", 
@@ -11936,6 +11941,18 @@
       {
         "url": "/js/builtins/WeakMap.prototype-properties.html", 
         "path": "js/builtins/WeakMap.prototype-properties.html"
+      }, 
+      {
+        "url": "/media-source/URL-createObjectURL-null.html", 
+        "path": "media-source/URL-createObjectURL-null.html"
+      }, 
+      {
+        "url": "/media-source/URL-createObjectURL-revoke.html", 
+        "path": "media-source/URL-createObjectURL-revoke.html"
+      }, 
+      {
+        "url": "/media-source/URL-createObjectURL.html", 
+        "path": "media-source/URL-createObjectURL.html"
       }, 
       {
         "url": "/media-source/interfaces.html", 
@@ -17502,12 +17519,8 @@
         "path": "XMLHttpRequest/resources/xmlhttprequest-timeout.js"
       }, 
       {
-        "url": "/ambient-light/DeviceLight_tests.js", 
-        "path": "ambient-light/DeviceLight_tests.js"
-      }, 
-      {
-        "url": "/ambient-light/manifest.txt", 
-        "path": "ambient-light/manifest.txt"
+        "url": "/ambient-light/DeviceLightEvent_tests.js", 
+        "path": "ambient-light/DeviceLightEvent_tests.js"
       }, 
       {
         "url": "/battery-status/battery-interface.js", 
@@ -18244,6 +18257,26 @@
       {
         "url": "html/dom/elements/global-attributes/style-01-ref.html", 
         "path": "html/dom/elements/global-attributes/style-01-ref.html"
+      }, 
+      {
+        "url": "/html/dom/elements/global-attributes/the-lang-attribute-003.html.headers", 
+        "path": "html/dom/elements/global-attributes/the-lang-attribute-003.html.headers"
+      }, 
+      {
+        "url": "/html/dom/elements/global-attributes/the-lang-attribute-005.html.headers", 
+        "path": "html/dom/elements/global-attributes/the-lang-attribute-005.html.headers"
+      }, 
+      {
+        "url": "/html/dom/elements/global-attributes/the-lang-attribute-006.html.headers", 
+        "path": "html/dom/elements/global-attributes/the-lang-attribute-006.html.headers"
+      }, 
+      {
+        "url": "/html/dom/elements/global-attributes/the-lang-attribute-009.html.headers", 
+        "path": "html/dom/elements/global-attributes/the-lang-attribute-009.html.headers"
+      }, 
+      {
+        "url": "/html/dom/elements/global-attributes/the-lang-attribute-011.html.headers", 
+        "path": "html/dom/elements/global-attributes/the-lang-attribute-011.html.headers"
       }, 
       {
         "url": "/html/dom/elements/wai-aria/README.md", 
@@ -21328,5 +21361,5 @@
     ]
   }, 
   "local_changes": [], 
-  "rev": "12708681a936856c1730d990adf7c5e108928e83"
+  "rev": "2ce2e35f947be48fdfca570cfc2ae6277b7e1479"
 }
