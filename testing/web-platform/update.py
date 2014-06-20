@@ -3,9 +3,9 @@ import sys
 import os
 
 here = os.path.dirname(__file__)
-sys.path.insert(0, os.path.join(here, "harness"))
+os.path.abspath(sys.path.insert(0, os.path.join(here, "harness")))
 
-from wptrunner import update, wptcommandline
+from wptrunner import update
 
 if __name__ == "__main__":
     success = update.main()

@@ -26,7 +26,6 @@ from mach.decorators import (
 
 here = os.path.abspath(os.path.split(__file__)[0])
 sys.path.insert(0, os.path.join(here, "harness"))
-sys.path.insert(0, here)
 
 from wptrunner import wptcommandline
 

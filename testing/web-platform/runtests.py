@@ -2,28 +2,28 @@
 import os
 import sys
 
-here = os.path.dirname(__file__)
+here = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(here, "harness"))
 
 marionette_deps = [('client', 'marionette'),
                    ('transport', 'marionette_transport')]
 
-mozbase_deps = ([('manifestdestiny', 'manifestparser')] +
-                [(item, item) for item in ['mozcrash',
-                                           'mozdevice',
-                                           'mozfile',
-                                           'mozhttpd',
-                                           'mozinfo',
-                                           'mozlog',
-                                           'moznetwork',
-                                           'mozprocess',
-                                           'mozprofile',
-                                           'mozrunner',
-                                           'moztest',
-                                           'mozversion']])
+mozbase_deps = ['manifestparser',
+                'mozcrash',
+                'mozdevice',
+                'mozfile',
+                'mozhttpd',
+                'mozinfo',
+                'mozlog',
+                'moznetwork',
+                'mozprocess',
+                'mozprofile',
+                'mozrunner',
+                'moztest',
+                'mozversion']
 
 deps = ([(os.path.join('marionette', item[0]), item[1]) for item in marionette_deps] +
-        [(os.path.join('mozbase', item[0]), item[1]) for item in mozbase_deps])
+        [(os.path.join('mozbase', item), item) for item in mozbase_deps])
 
 testing = os.path.realpath(os.path.join(here, '..'))
 
