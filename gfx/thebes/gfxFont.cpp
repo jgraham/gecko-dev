@@ -4328,10 +4328,6 @@ gfxFont::SplitAndInitTextRun(gfxContext *aContext,
 
 gfxGlyphExtents *
 gfxFont::GetOrCreateGlyphExtents(int32_t aAppUnitsPerDevUnit) {
-    if (GetStyle()->size == 0) {
-        return nullptr;
-    }
-
     uint32_t i, count = mGlyphExtentsArray.Length();
     for (i = 0; i < count; ++i) {
         if (mGlyphExtentsArray[i]->GetAppUnitsPerDevUnit() == aAppUnitsPerDevUnit)
@@ -7706,9 +7702,6 @@ gfxTextRun::FetchGlyphExtents(gfxContext *aRefContext)
         bool fontIsSetup = false;
         uint32_t j;
         gfxGlyphExtents *extents = font->GetOrCreateGlyphExtents(mAppUnitsPerDevUnit);
-        if (!extents) {
-            continue;
-        }
   
         for (j = start; j < end; ++j) {
             const gfxTextRun::CompressedGlyph *glyphData = &charGlyphs[j];
