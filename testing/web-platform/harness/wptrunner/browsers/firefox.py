@@ -31,7 +31,9 @@ def check_args(**kwargs):
 
 def browser_kwargs(**kwargs):
     return {"binary": kwargs["binary"],
-            "prefs_root": kwargs["prefs_root"]}
+            "prefs_root": kwargs["prefs_root"],
+            "debug_args": kwargs["debug_args"],
+            "interactive": kwargs["interactive"]}
 
 
 def get_executor_kwargs(http_server_url, **kwargs):
@@ -49,17 +51,22 @@ def env_options():
 class FirefoxBrowser(Browser):
     used_ports = set()
 
-    def __init__(self, logger, binary, prefs_root):
+    def __init__(self, logger, binary, prefs_root, debug_args=None, interactive=None):
         Browser.__init__(self, logger)
         self.binary = binary
         self.prefs_root = prefs_root
-        self.marionette_port = get_free_port(2828, exclude=self.used_ports)
+        self.marionette_port = None
         self.used_ports.add(self.marionette_port)
         self.runner = None
+        self.debug_args = debug_args
+        self.interactive = interactive
 
     def start(self):
+        self.marionette_port = get_free_port(2828, exclude=self.used_ports)
+
         env = os.environ.copy()
         env['MOZ_CRASHREPORTER_NO_REPORT'] = '1'
+        env["MOZ_DISABLE_NONLOCAL_CONNECTIONS"] = "1"
 
         locations = ServerLocations(filename=os.path.join(here, "server-locations.txt"))
 
@@ -78,7 +85,7 @@ class FirefoxBrowser(Browser):
                                     process_class=ProcessHandler)
 
         self.logger.debug("Starting Firefox")
-        self.runner.start()
+        self.runner.start(debug_args=self.debug_args, interactive=self.interactive)
         self.logger.debug("Firefox Started")
 
     def load_prefs(self):
@@ -123,4 +130,5 @@ class FirefoxBrowser(Browser):
         self.stop()
 
     def executor_browser(self):
+        assert self.marionette_port is not None
         return ExecutorBrowser, {"marionette_port": self.marionette_port}
