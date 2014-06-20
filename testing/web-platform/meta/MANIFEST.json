@@ -6747,8 +6747,8 @@
         "path": "XMLHttpRequest/send-no-response-event-order.htm"
       }, 
       {
-        "url": "/XMLHttpRequest/send-non-same-origin.htm", 
-        "path": "XMLHttpRequest/send-non-same-origin.htm"
+        "url": "/XMLHttpRequest/send-non-same-origin.sub.htm", 
+        "path": "XMLHttpRequest/send-non-same-origin.sub.htm"
       }, 
       {
         "url": "/XMLHttpRequest/send-redirect-bogus-sync.htm", 
@@ -9303,8 +9303,8 @@
         "path": "html/infrastructure/terminology/plugins/text-plain.html"
       }, 
       {
-        "url": "/html/infrastructure/urls/dynamic-changes-to-base-urls/dynamic-urls.xhtml", 
-        "path": "html/infrastructure/urls/dynamic-changes-to-base-urls/dynamic-urls.xhtml"
+        "url": "/html/infrastructure/urls/dynamic-changes-to-base-urls/dynamic-urls.sub.xhtml", 
+        "path": "html/infrastructure/urls/dynamic-changes-to-base-urls/dynamic-urls.sub.xhtml"
       }, 
       {
         "url": "/html/infrastructure/urls/resolving-urls/query-encoding/utf-16be.html", 
@@ -9449,8 +9449,8 @@
         "path": "html/semantics/document-metadata/the-base-element/base_href_empty.html"
       }, 
       {
-        "url": "/html/semantics/document-metadata/the-base-element/base_href_specified.html", 
-        "path": "html/semantics/document-metadata/the-base-element/base_href_specified.html"
+        "url": "/html/semantics/document-metadata/the-base-element/base_href_specified.sub.html", 
+        "path": "html/semantics/document-metadata/the-base-element/base_href_specified.sub.html"
       }, 
       {
         "url": "/html/semantics/document-metadata/the-base-element/base_href_unspecified.html", 
@@ -10403,8 +10403,8 @@
         "path": "html/semantics/embedded-content/the-canvas-element/security.pattern.canvas.timing.sub.html"
       }, 
       {
-        "url": "/html/semantics/embedded-content/the-canvas-element/security.pattern.create.html", 
-        "path": "html/semantics/embedded-content/the-canvas-element/security.pattern.create.html"
+        "url": "/html/semantics/embedded-content/the-canvas-element/security.pattern.create.sub.html", 
+        "path": "html/semantics/embedded-content/the-canvas-element/security.pattern.create.sub.html"
       }, 
       {
         "url": "/html/semantics/embedded-content/the-canvas-element/security.pattern.cross.sub.html", 
@@ -14081,10 +14081,6 @@
       {
         "url": "/websockets/Create-valid-url.htm", 
         "path": "websockets/Create-valid-url.htm"
-      }, 
-      {
-        "url": "/websockets/Create-verify-url-set-default-port.htm", 
-        "path": "websockets/Create-verify-url-set-default-port.htm"
       }, 
       {
         "url": "/websockets/Create-verify-url-set-non-default-port.htm", 
@@ -21361,5 +21357,5 @@
     ]
   }, 
   "local_changes": [], 
-  "rev": "2ce2e35f947be48fdfca570cfc2ae6277b7e1479"
+  "rev": "37399dd8718445cf7399202a807d16cb8b91d13e"
 }
