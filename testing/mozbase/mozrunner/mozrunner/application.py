@@ -41,15 +41,13 @@ class B2GContext(object):
 
     def __init__(self, b2g_home=None, adb_path=None):
         self.homedir = b2g_home or os.environ.get('B2G_HOME')
-        if not self.homedir:
-            raise EnvironmentError('Must define B2G_HOME or pass the b2g_home parameter')
 
-        if not os.path.isdir(self.homedir):
+        if self.homedir is not None and not os.path.isdir(self.homedir):
             raise OSError('Homedir \'%s\' does not exist!' % self.homedir)
 
         self._adb = adb_path
-        self.update_tools = os.path.join(self.homedir, 'tools', 'update-tools')
-        self.fastboot = self.which('fastboot')
+        self._update_tools = None
+        self._fastboot = None
 
         self.remote_binary = '/system/bin/b2g.sh'
         self.remote_process = '/system/b2g/b2g'
@@ -57,6 +55,18 @@ class B2GContext(object):
         self.remote_busybox = '/system/bin/busybox'
         self.remote_profiles_ini = '/data/b2g/mozilla/profiles.ini'
         self.remote_test_root = '/data/local/tests'
+
+    @property
+    def fastboot(self):
+        if self._fastboot is None:
+            self._fastboot = self.which('fastboot')
+        return self._fastboot
+
+    @property
+    def update_tools(self):
+        if self._update_tools is None:
+            self._update_tools = os.path.join(self.homedir, 'tools', 'update-tools')
+        return self._update_tools
 
     @property
     def adb(self):
@@ -73,7 +83,7 @@ class B2GContext(object):
 
     @property
     def bindir(self):
-        if not self._bindir:
+        if self._bindir is None and self.homedir is not None:
             # TODO get this via build configuration
             path = os.path.join(self.homedir, 'out', 'host', '*', 'bin')
             self._bindir = glob.glob(path)[0]
@@ -93,18 +103,28 @@ class B2GContext(object):
 
 
     def which(self, binary):
-        if self.bindir not in sys.path:
+        if self.bindir is not None and self.bindir not in sys.path:
             sys.path.insert(0, self.bindir)
 
-        return find_executable(binary, os.pathsep.join(sys.path))
+        rv = find_executable(binary, os.pathsep.join(sys.path))
+        if not rv:
+            rv = find_executable(binary, os.environ.get("PATH"))
+        return rv
 
     def stop_application(self):
-        self.dm.shellCheckOutput(['stop', 'b2g'])
+        if self.bindir is None:
+            # Assume this is a real device
+            print("Restarting device")
+            self.dm.reboot(wait=True)
+            import subprocess
+            print(subprocess.call(["adb", "wait-for-device"]))
+        else:
+            self.dm.shellCheckOutput(['stop', 'b2g'])
 
-        # For some reason user.js in the profile doesn't get picked up.
-        # Manually copy it over to prefs.js. See bug 1009730 for more details.
-        self.dm.moveTree(posixpath.join(self.remote_profile, 'user.js'),
-                         posixpath.join(self.remote_profile, 'prefs.js'))
+            # For some reason user.js in the profile doesn't get picked up.
+            # Manually copy it over to prefs.js. See bug 1009730 for more details.
+            self.dm.moveTree(posixpath.join(self.remote_profile, 'user.js'),
+                             posixpath.join(self.remote_profile, 'prefs.js'))
 
 
 class FirefoxContext(object):

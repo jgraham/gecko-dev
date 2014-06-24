@@ -5,6 +5,7 @@ from ConfigParser import (
 import datetime
 import os
 import posixpath
+import shutil
 import socket
 import subprocess
 import tempfile
@@ -12,12 +13,15 @@ import time
 import traceback
 
 from mozdevice import DMError
+from mozprocess import ProcessHandler
 
 class Device(object):
-    def __init__(self, app_ctx, restore=True):
+    def __init__(self, app_ctx, logdir=None, serial=None, restore=True):
         self.app_ctx = app_ctx
         self.dm = self.app_ctx.dm
         self.restore = restore
+        self.serial = serial
+        self.logdir = logdir
         self.added_files = set()
         self.backup_files = set()
 
@@ -105,6 +109,31 @@ class Device(object):
 
         self.backup_file(self.app_ctx.remote_profiles_ini)
         self.dm.pushFile(new_profiles_ini.name, self.app_ctx.remote_profiles_ini)
+
+    def _get_online_devices(self):
+        return [d[0] for d in self.dm.devices() if d[1] != 'offline' if not d[0].startswith('emulator')]
+
+    def connect(self):
+        """
+        Connects to a running device. If no serial was specified in the
+        constructor, defaults to the first entry in `adb devices`.
+        """
+        if self.dm.connected:
+            return
+
+        serial = self.serial or self._get_online_devices()[0]
+        self.dm._deviceSerial = serial
+        self.dm.connect()
+
+        if self.logdir:
+            # save logcat
+            logcat_log = os.path.join(self.logdir, '%s.log' % serial)
+            if os.path.isfile(logcat_log):
+                self._rotate_log(logcat_log)
+            logcat_args = [self.app_ctx.adb, '-s', '%s' % serial,
+                           'logcat', '-v', 'threadtime']
+            self.logcat_proc = ProcessHandler(logcat_args, logfile=logcat_log)
+            self.logcat_proc.run()
 
     def install_busybox(self, busybox):
         """
@@ -195,6 +224,26 @@ class Device(object):
                     pass
         # Remove the test profile
         self.dm.removeDir(self.app_ctx.remote_profile)
+
+    def _rotate_log(self, srclog, index=1):
+        """
+        Rotate a logfile, by recursively rotating logs further in the sequence,
+        deleting the last file if necessary.
+        """
+        basename = os.path.basename(srclog)
+        basename = basename[:-len('.log')]
+        if index > 1:
+            basename = basename[:-len('.1')]
+        basename = '%s.%d.log' % (basename, index)
+
+        destlog = os.path.join(self.logdir, basename)
+        if os.path.isfile(destlog):
+            if index == 3:
+                os.remove(destlog)
+            else:
+                self._rotate_log(destlog, index+1)
+        shutil.move(srclog, destlog)
+
 
 
 class ProfileConfigParser(RawConfigParser):

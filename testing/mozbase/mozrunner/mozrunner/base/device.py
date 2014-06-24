@@ -60,8 +60,8 @@ class DeviceRunner(BaseRunner):
         return cmd
 
     def start(self, *args, **kwargs):
-        if not self.device.proc:
-            self.device.start()
+        self.device.connect()
+        print("Installing device profile")
         self.device.setup_profile(self.profile)
         self.app_ctx.stop_application()
 
