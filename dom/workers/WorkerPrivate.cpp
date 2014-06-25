@@ -1374,6 +1374,8 @@ DummyCallback(nsITimer* aTimer, void* aClosure)
 
 class TimerThreadEventTarget MOZ_FINAL : public nsIEventTarget
 {
+  ~TimerThreadEventTarget() {}
+
   WorkerPrivate* mWorkerPrivate;
   nsRefPtr<WorkerRunnable> mWorkerRunnable;
 
@@ -3135,10 +3137,11 @@ WorkerPrivateParent<Derived>::BroadcastErrorToSharedWorkers(
 
     size_t actionsIndex = windowActions.LastIndexOf(WindowAction(window));
 
-    nsIGlobalObject* global = sharedWorker->GetParentObject();
-    AutoJSAPIWithErrorsReportedToWindow jsapi(global);
+    AutoJSAPI jsapi;
+    if (NS_WARN_IF(!jsapi.InitWithLegacyErrorReportingUsingWin(sharedWorker->GetOwner()))) {
+      continue;
+    }
     JSContext* cx = jsapi.cx();
-    JSAutoCompartment ac(cx, global->GetGlobalJSObject());
 
     RootedDictionary<ErrorEventInit> errorInit(aCx);
     errorInit.mBubbles = false;

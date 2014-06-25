@@ -52,7 +52,6 @@
 #include "gfxBlur.h"
 #include "gfxUtils.h"
 
-#include "nsFrameManager.h"
 #include "nsFrameLoader.h"
 #include "nsBidi.h"
 #include "nsBidiPresUtils.h"
@@ -2326,7 +2325,6 @@ CanvasRenderingContext2D::SetFont(const nsAString& font,
                      fontStyle->mFont.sizeAdjust,
                      fontStyle->mFont.systemFont,
                      printerFont,
-                     fontStyle->mFont.variant == NS_STYLE_FONT_VARIANT_SMALL_CAPS,
                      fontStyle->mFont.synthesis & NS_FONT_SYNTHESIS_WEIGHT,
                      fontStyle->mFont.synthesis & NS_FONT_SYNTHESIS_STYLE,
                      fontStyle->mFont.languageOverride);
@@ -4566,7 +4564,7 @@ CanvasPath::GetPath(const CanvasWindingRule& winding, const DrawTarget* aTarget)
   }
 
   if (mPath &&
-      (mPath->GetBackendType() == aTarget->GetType()) &&
+      (mPath->GetBackendType() == aTarget->GetBackendType()) &&
       (mPath->GetFillRule() == fillRule)) {
     return mPath;
   }
@@ -4582,7 +4580,7 @@ CanvasPath::GetPath(const CanvasWindingRule& winding, const DrawTarget* aTarget)
   }
 
   // retarget our backend if we're used with a different backend
-  if (mPath->GetBackendType() != aTarget->GetType()) {
+  if (mPath->GetBackendType() != aTarget->GetBackendType()) {
     RefPtr<PathBuilder> tmpPathBuilder = aTarget->CreatePathBuilder(fillRule);
     mPath->StreamToSink(tmpPathBuilder);
     mPath = tmpPathBuilder->Finish();

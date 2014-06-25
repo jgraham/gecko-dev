@@ -33,6 +33,8 @@
 #include "mozilla/StaticPtr.h"
 #include "mozilla/unused.h"
 
+#define ERR_SET_PROPERTY  "SetPropertyError"
+
 #define ENSURE_BLUETOOTH_IS_READY(runnable, result)                    \
   do {                                                                 \
     if (!sBtInterface || !IsEnabled()) {                               \
@@ -50,12 +52,12 @@ USING_BLUETOOTH_NAMESPACE
 static nsString sAdapterBdAddress;
 static nsString sAdapterBdName;
 static InfallibleTArray<nsString> sAdapterBondedAddressArray;
-static nsTArray<nsRefPtr<BluetoothReplyRunnable> > sChangeAdapterStateRunnableArray;
 
 // Static variables below should only be used on *main thread*
 static const bt_interface_t* sBtInterface;
 static nsTArray<nsRefPtr<BluetoothProfileController> > sControllerArray;
 static nsTArray<int> sRequestedDeviceCountArray;
+static nsTArray<nsRefPtr<BluetoothReplyRunnable> > sChangeAdapterStateRunnableArray;
 static nsTArray<nsRefPtr<BluetoothReplyRunnable> > sChangeDiscoveryRunnableArray;
 static nsTArray<nsRefPtr<BluetoothReplyRunnable> > sSetPropertyRunnableArray;
 static nsTArray<nsRefPtr<BluetoothReplyRunnable> > sGetDeviceRunnableArray;
@@ -295,6 +297,27 @@ PlayStatusStringToControlPlayStatus(const nsAString& aPlayStatus)
   return playStatus;
 }
 
+class AdapterStateChangedCallbackTask MOZ_FINAL : public nsRunnable
+{
+public:
+  NS_IMETHOD
+  Run()
+  {
+    MOZ_ASSERT(NS_IsMainThread());
+
+    // Resolve promise if existed
+    if (!sChangeAdapterStateRunnableArray.IsEmpty()) {
+      BluetoothValue values(true);
+      DispatchBluetoothReply(sChangeAdapterStateRunnableArray[0],
+                             values, EmptyString());
+
+      sChangeAdapterStateRunnableArray.RemoveElementAt(0);
+    }
+
+    return NS_OK;
+  }
+};
+
 /**
  *  Bluedroid HAL callback functions
  *
@@ -327,13 +350,8 @@ AdapterStateChangeCallback(bt_state_t aStatus)
     return;
   }
 
-  // Resolve promise if existed
-  if(!sChangeAdapterStateRunnableArray.IsEmpty()) {
-    DispatchBluetoothReply(sChangeAdapterStateRunnableArray[0],
-                           BluetoothValue(true),
-                           EmptyString());
-    sChangeAdapterStateRunnableArray.RemoveElementAt(0);
-  }
+  // Redirect to main thread to avoid racing problem
+  NS_DispatchToMainThread(new AdapterStateChangedCallbackTask());
 }
 
 class AdapterPropertiesCallbackTask MOZ_FINAL : public nsRunnable
@@ -1124,7 +1142,11 @@ BluetoothServiceBluedroid::SetProperty(BluetoothObjectType aType,
   } else if (propName.EqualsLiteral("DiscoverableTimeout")) {
     prop.type = BT_PROPERTY_ADAPTER_DISCOVERY_TIMEOUT;
   } else {
-    BT_LOGR("Warning: Property type is not supported yet, type: %d", prop.type);
+    BT_LOGR("Warning: Property type is not supported yet, type: %s",
+            NS_ConvertUTF16toUTF8(propName).get());
+    DispatchBluetoothReply(aRunnable, BluetoothValue(),
+                           NS_LITERAL_STRING(ERR_SET_PROPERTY));
+    return NS_OK;
   }
 
   if (aValue.value().type() == BluetoothValue::Tuint32_t) {
@@ -1145,6 +1167,8 @@ BluetoothServiceBluedroid::SetProperty(BluetoothObjectType aType,
     prop.len = sizeof(scanMode);
   } else {
     BT_LOGR("SetProperty but the property cannot be recognized correctly.");
+    DispatchBluetoothReply(aRunnable, BluetoothValue(),
+                           NS_LITERAL_STRING(ERR_SET_PROPERTY));
     return NS_OK;
   }
 
@@ -1152,7 +1176,8 @@ BluetoothServiceBluedroid::SetProperty(BluetoothObjectType aType,
 
   int ret = sBtInterface->set_adapter_property(&prop);
   if (ret != BT_STATUS_SUCCESS) {
-    ReplyStatusError(aRunnable, ret, NS_LITERAL_STRING("SetProperty"));
+    ReplyStatusError(aRunnable, ret, NS_LITERAL_STRING(ERR_SET_PROPERTY));
+    sSetPropertyRunnableArray.RemoveElement(aRunnable);
   }
 
   return NS_OK;

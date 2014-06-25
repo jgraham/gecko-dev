@@ -138,6 +138,11 @@ pref("dom.webcrypto.enabled", true);
 // Whether the UndoManager API is enabled
 pref("dom.undo_manager.enabled", false);
 
+// Whether to run add-on code in different compartments from browser code. This
+// causes a separate compartment for each (addon, global) combination, which may
+// significantly increase the number of compartments in the system.
+pref("dom.compartment_per_addon", false);
+
 // Fastback caching - if this pref is negative, then we calculate the number
 // of content viewers to cache based on the amount of available memory.
 pref("browser.sessionhistory.max_total_viewers", -1);
@@ -272,6 +277,7 @@ pref("media.peerconnection.video.enabled", true);
 pref("media.navigator.video.max_fs", 1200); // 640x480 == 1200mb
 pref("media.navigator.video.max_fr", 30);
 pref("media.peerconnection.video.h264_enabled", false);
+pref("media.getusermedia.aec", 4);
 #else
 pref("media.navigator.video.default_width",0);  // adaptive default
 pref("media.navigator.video.default_height",0); // adaptive default
@@ -279,6 +285,7 @@ pref("media.peerconnection.enabled", true);
 pref("media.peerconnection.video.enabled", true);
 pref("media.navigator.video.max_fs", 0); // unrestricted
 pref("media.navigator.video.max_fr", 0); // unrestricted
++pref("media.getusermedia.aec", 1);
 #endif
 pref("media.peerconnection.video.min_bitrate", 200);
 pref("media.peerconnection.video.start_bitrate", 300);
@@ -298,7 +305,6 @@ pref("media.peerconnection.identity.timeout", 10000);
 // setting (for Xxx = Ec, Agc, or Ns).  Defaults are all set to kXxxDefault here.
 pref("media.peerconnection.turn.disable", false);
 pref("media.getusermedia.aec_enabled", true);
-pref("media.getusermedia.aec", 1);
 pref("media.getusermedia.agc_enabled", false);
 pref("media.getusermedia.agc", 1);
 pref("media.getusermedia.noise_enabled", true);
@@ -1048,8 +1054,8 @@ pref("network.http.pipelining.reschedule-timeout", 1500);
 // restarted without pipelining.
 pref("network.http.pipelining.read-timeout", 30000);
 
-// Prompt for 307 redirects
-pref("network.http.prompt-temp-redirect", true);
+// Prompt for redirects resulting in unsafe HTTP requests
+pref("network.http.prompt-temp-redirect", false);
 
 // If true generate CORRUPTED_CONTENT errors for entities that
 // contain an invalid Assoc-Req response header
@@ -1402,6 +1408,8 @@ pref("network.predictor.preserve", 80); // percentage of predictor data to keep 
 
 // Allow insecure NTLMv1 when needed.
 pref("network.negotiate-auth.allow-insecure-ntlm-v1", false);
+// Allow insecure NTLMv1 for HTTPS protected sites by default.
+pref("network.negotiate-auth.allow-insecure-ntlm-v1-https", true);
 
 // This list controls which URIs can use the negotiate-auth protocol.  This
 // list should be limited to the servers you know you'll need to login to.
@@ -3708,8 +3716,9 @@ pref("webgl.msaa-force", false);
 pref("webgl.prefer-16bpp", false);
 pref("webgl.default-no-alpha", false);
 pref("webgl.force-layers-readback", false);
-pref("webgl.lose-context-on-heap-minimize", false);
+pref("webgl.lose-context-on-memory-preasure", false);
 pref("webgl.can-lose-context-in-foreground", true);
+pref("webgl.restore-context-when-visible", true);
 pref("webgl.max-warnings-per-context", 32);
 pref("webgl.enable-draft-extensions", false);
 pref("webgl.enable-privileged-extensions", false);

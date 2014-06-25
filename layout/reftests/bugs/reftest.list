@@ -515,7 +515,7 @@ random-if(cocoaWidget) == 350506-1.html 350506-1-ref.html
 == 352980-3f.html 352980-3-ref.html
 == 355548-1.xml 355548-1-ref.xml
 == 355548-2.xml 355548-2-ref.xml
-asserts-if(gtk2Widget,1) == 355548-3.xml 355548-3-ref.xml # bug 456899
+== 355548-3.xml 355548-3-ref.xml
 == 355548-4.xml 355548-4-ref.xml
 == 355548-5.xml 355548-5-ref.xml
 fails-if(cocoaWidget) == 356774-1.html 356774-1-ref.html # probably bug 379317
@@ -1592,7 +1592,7 @@ random-if(Android||(B2G&&browserIsRemote)) == 594333-1.html 594333-1-ref.html
 random-if(B2G&&browserIsRemote) == 594624-1.html 594624-1-ref.html
 == 594737-1.html 594737-1-ref.html
 == 597721-1.html 597721-1-ref.html
-random-if(winWidget) fuzzy-if(Android,38,539) needs-focus == 598726-1.html 598726-1-ref.html # Fails on Windows, bug 782196
+random-if(winWidget) fuzzy-if(B2G,1,35) fuzzy-if(Android,38,539) needs-focus == 598726-1.html 598726-1-ref.html # Fails on Windows, bug 782196
 == 599113-1.html 599113-1-ref.html
 fails-if(!haveTestPlugin) == 599476.html 599476-ref.html
 == 599882-1a.html 599882-1-ref.html
