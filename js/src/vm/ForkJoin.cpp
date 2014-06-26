@@ -200,7 +200,7 @@ ExecuteSequentially(JSContext *cx, HandleValue funVal, uint16_t *sliceStart,
 ThreadLocal<ForkJoinContext*> ForkJoinContext::tlsForkJoinContext;
 
 /* static */ bool
-ForkJoinContext::initialize()
+ForkJoinContext::initializeTls()
 {
     if (!tlsForkJoinContext.initialized()) {
         if (!tlsForkJoinContext.init())
@@ -1611,9 +1611,20 @@ ForkJoinShared::executeFromMainThread(ThreadPoolWorker *worker)
     }
     TlsPerThreadData.set(&thisThread);
 
-    // Don't use setIonStackLimit() because that acquires the ionStackLimitLock, and the
-    // lock has not been initialized in these cases.
-    thisThread.jitStackLimit = oldData->jitStackLimit;
+    // Subtlety warning: the reason the stack limit is set via
+    // GetNativeStackLimit instead of oldData->jitStackLimit is because the
+    // main thread's jitStackLimit could be -1 due to runtime->interrupt being
+    // set.
+    //
+    // In turn, the reason that it is okay for runtime->interrupt to be
+    // set and for us to still continue PJS execution is because PJS, being
+    // unable to use the signal-based interrupt handling like sequential JIT
+    // code, keeps a separate flag, interruptPar, to filter out interrupts
+    // which should not interrupt JIT code.
+    //
+    // Thus, use GetNativeStackLimit instead of just propagating the
+    // main thread's.
+    thisThread.jitStackLimit = GetNativeStackLimit(cx_);
     executePortion(&thisThread, worker);
     TlsPerThreadData.set(oldData);
 
@@ -1628,6 +1639,10 @@ ForkJoinShared::executePortion(PerThreadData *perThread, ThreadPoolWorker *worke
 
     Allocator *allocator = allocators_[worker->id()];
     ForkJoinContext cx(perThread, worker, allocator, this, &records_[worker->id()]);
+    if (!cx.initialize()) {
+        setAbortFlagAndRequestInterrupt(true);
+        return;
+    }
     AutoSetForkJoinContext autoContext(&cx);
 
     // ForkJoinContext already contains an AutoSuppressGCAnalysis; however, the
@@ -1837,10 +1852,19 @@ ForkJoinContext::ForkJoinContext(PerThreadData *perThreadData, ThreadPoolWorker 
     allocator_ = allocator;
 }
 
+bool ForkJoinContext::initialize()
+{
+#ifdef JSGC_FJGENERATIONAL
+    if (!fjNursery_.initialize())
+        return false;
+#endif
+    return true;
+}
+
 bool
 ForkJoinContext::isMainThread() const
 {
-    return perThreadData == &shared_->runtime()->mainThread;
+    return worker_->isMainThread();
 }
 
 JSRuntime *

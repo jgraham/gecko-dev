@@ -1,4 +1,4 @@
-# -*- Mode: JavaScript; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+# -*- indent-tabs-mode: nil; js-indent-level: 2 -*-
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -218,7 +218,7 @@ pref("app.update.incompatible.mode", 0);
 
 // Whether or not to attempt using the service for updates.
 #ifdef MOZ_MAINTENANCE_SERVICE
-#ifndef HAVE_64BIT_OS
+#ifndef HAVE_64BIT_BUILD
 pref("app.update.service.enabled", true);
 #endif
 #endif
@@ -1523,9 +1523,6 @@ pref("social.manifest.facebook", "{\"origin\":\"https://www.facebook.com\",\"nam
 pref("social.sidebar.unload_timeout_ms", 10000);
 
 pref("dom.identity.enabled", false);
-
-// Turn on the CSP 1.0 parser for Content Security Policy headers
-pref("security.csp.speccompliant", true);
 
 // Block insecure active content on https pages
 pref("security.mixed_content.block_active_content", true);
