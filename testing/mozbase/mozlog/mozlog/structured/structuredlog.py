@@ -94,6 +94,9 @@ def set_default_loggger(logger):
     global _default_logger_name
     _default_logger_name = logger.name
 
+def get_default_logger(component=None):
+    return None
+
 class StructuredLogger(object):
     _lock = Lock()
     _handlers = defaultdict(list)

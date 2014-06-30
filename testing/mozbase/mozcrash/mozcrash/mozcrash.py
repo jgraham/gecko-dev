@@ -78,10 +78,11 @@ def check_for_crashes(dump_directory, symbols_path,
                 if dump["stackwalk_stderr"]:
                     stackwalk_output.append("stderr from minidump_stackwalk:")
                     stackwalk_output.append(dump["stackwalk_stderr"])
-                else:
-                    stackwalk_output.append["stackwalk_stdout"]
-                if dump["stackwalk_returncode"] != 0:
-                    stackwalk_output.append("minidump_stackwalk exited with return code %d" % dump["stackwalk_returncode"])
+                elif dump["stackwalk_stdout"] is not None:
+                    stackwalk_output.append(dump["stackwalk_stdout"])
+                if dump["stackwalk_retcode"] is not None and dump["stackwalk_retcode"] != 0:
+                    stackwalk_output.append("minidump_stackwalk exited with return code %d" %
+                                            dump["stackwalk_retcode"])
                 top_frame = dump.get("top_frame", "unknown top frame")
                 print "PROCESS-CRASH | %s | application crashed [%s]" % (test_name,
                                                                          top_frame)
@@ -146,12 +147,11 @@ class CrashInfo(object):
         self.logger = get_logger()
         self._dump_files = None
 
-        self._get_symbols()
-
     def __enter__(self):
         return self
 
     def _get_symbols(self):
+        # This updates self.symbols_path so we only download once
         if self.symbols_path and mozfile.is_url(self.symbols_path):
             self.remove_symbols = True
             self.logger.info("Downloading symbols from: %s", self.symbols_path)
@@ -202,6 +202,8 @@ class CrashInfo(object):
                    errors: List of errors in human-readable form that prevented
                            stackwalk being launched.
         """
+        self._get_symbols()
+
         errors = []
         top_frame = None
         include_stderr = False
