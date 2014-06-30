@@ -24,9 +24,6 @@ from mach.decorators import (
     Command,
 )
 
-here = os.path.abspath(os.path.split(__file__)[0])
-sys.path.insert(0, os.path.join(here, "harness"))
-
 from wptrunner import wptcommandline
 
 # This should probably be consolidated with similar classes in other test
@@ -161,4 +158,3 @@ class MachCommands(MachCommandBase):
         self.setup()
         wpt_reduce = self._spawn(WebPlatformTestsReduce)
         return wpt_reduce.run_reduce(**params)
-

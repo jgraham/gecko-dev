@@ -44,6 +44,7 @@ SEARCH_PATHS = [
     'testing',
     'testing/xpcshell',
     'testing/web-platform',
+    'testing/web-platform/harness',
     'testing/marionette/client',
     'testing/marionette/client/marionette',
     'testing/marionette/transport',
