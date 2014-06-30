@@ -2,18 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import argparse
 import os
 import sys
-
-import argparse
-
-from mozlog.structured import commandline
-from mozrunner import local
-
-import products
-
-root = os.path.join(os.path.split(__file__)[0])
-
 
 def abs_path(path):
     return os.path.abspath(os.path.expanduser(path))
@@ -35,6 +26,9 @@ def require_arg(kwargs, name, value_func=None):
 
 
 def create_parser(allow_mandatory=True):
+    from mozlog.structured import commandline
+    import browsers
+
     if not allow_mandatory:
         prefix = "--"
     else:
@@ -87,7 +81,7 @@ def create_parser(allow_mandatory=True):
     parser.add_argument("--no-capture-stdio", action="store_true", default=False,
                         help="Don't capture stdio and write to logging")
 
-    parser.add_argument("--product", action="store", choices=[item[0] for item in products.iter_products()],
+    parser.add_argument("--product", action="store", choices=browsers.product_list,
                         default="firefox")
 
     parser.add_argument('--debugger',
@@ -104,6 +98,8 @@ def create_parser(allow_mandatory=True):
 
 
 def check_args(kwargs):
+    from mozrunner import cli
+
     if kwargs["this_chunk"] > 1:
         require_arg(kwargs, "total_chunks", lambda x: x >= kwargs["this_chunk"])
 
@@ -111,8 +107,8 @@ def check_args(kwargs):
             kwargs["chunk_type"] = "equal_time"
 
     if kwargs["debugger"] is not None:
-        debug_args, interactive = local.debugger_arguments(kwargs["debugger"],
-                                                           kwargs["debugger_args"])
+        debug_args, interactive = cli.debugger_arguments(kwargs["debugger"],
+                                                         kwargs["debugger_args"])
         if interactive:
             require_arg(kwargs, "processes", lambda x: x == 1)
             kwargs["no_capture_stdio"] = True
