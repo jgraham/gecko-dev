@@ -51,11 +51,10 @@ def get_blobber_url(branch, job):
         assert len(job_data) == 1
         job_data = job_data[0]
         try:
-            link = job_data["blob"]["tinderbox_printlines"][1]
-            prefix = "<a href='"
-            assert link.startswith(prefix)
-            link = link[len(prefix):]
-            return link[:link.find("'")]
+            details = job_data["blob"]["job_details"]
+            for item in details:
+                if item["value"] == "wpt_structured_full.log":
+                    return item["url"]
         except:
             return None
 
