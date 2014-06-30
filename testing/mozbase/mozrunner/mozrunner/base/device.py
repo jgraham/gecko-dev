@@ -60,8 +60,8 @@ class DeviceRunner(BaseRunner):
         return cmd
 
     def start(self, *args, **kwargs):
-        if not self.device.proc:
-            self.device.start()
+        self.device.connect()
+        print("Installing device profile")
         self.device.setup_profile(self.profile)
         self.app_ctx.stop_application()
 
@@ -75,6 +75,9 @@ class DeviceRunner(BaseRunner):
             time.sleep(1)
         else:
             print("timed out waiting for '%s' process to start" % self.app_ctx.remote_process)
+
+        if not self.device.wait_for_net():
+            raise Exception("Failed to get a network connection")
 
     def on_output(self, line):
         match = re.findall(r"TEST-START \| ([^\s]*)", line)
