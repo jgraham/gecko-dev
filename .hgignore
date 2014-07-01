@@ -72,5 +72,8 @@ GRTAGS
 GSYMS
 GPATH
 
+# Unit tests for Loop
+^browser/components/loop/standalone/content/config\.js$
 #Ignore staging area for updating web-platform-tests
 ^testing/web-platform-tests/sync/
+^browser/components/loop/standalone/node_modules/

@@ -24,8 +24,11 @@ Cu.import("resource://gre/modules/systemlibs.js");
 Cu.import("resource://gre/modules/Promise.jsm");
 Cu.import("resource://gre/modules/FileUtils.jsm");
 
-var RIL = {};
-Cu.import("resource://gre/modules/ril_consts.js", RIL);
+XPCOMUtils.defineLazyGetter(this, "RIL", function () {
+  let obj = {};
+  Cu.import("resource://gre/modules/ril_consts.js", obj);
+  return obj;
+});
 
 // Ril quirk to attach data registration on demand.
 let RILQUIRKS_DATA_REGISTRATION_ON_DEMAND =
@@ -54,6 +57,8 @@ const GSMICCINFO_CID =
   Components.ID("{d90c4261-a99d-47bc-8b05-b057bb7e8f8a}");
 const CDMAICCINFO_CID =
   Components.ID("{39ba3c08-aacc-46d0-8c04-9b619c387061}");
+const NEIGHBORINGCELLINFO_CID =
+  Components.ID("{f9dfe26a-851e-4a8b-a769-cbb1baae7ded}");
 
 const NS_XPCOM_SHUTDOWN_OBSERVER_ID      = "xpcom-shutdown";
 const kNetworkInterfaceStateChangedTopic = "network-interface-state-changed";
@@ -1055,6 +1060,25 @@ CdmaIccInfo.prototype = {
   prlVersion: 0
 };
 
+function NeighboringCellInfo() {}
+NeighboringCellInfo.prototype = {
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsINeighboringCellInfo]),
+  classID:        NEIGHBORINGCELLINFO_CID,
+  classInfo:      XPCOMUtils.generateCI({
+    classID:          NEIGHBORINGCELLINFO_CID,
+    classDescription: "NeighboringCellInfo",
+    interfaces:       [Ci.nsINeighboringCellInfo]
+  }),
+
+  // nsINeighboringCellInfo
+
+  networkType: null,
+  gsmLocationAreaCode: -1,
+  gsmCellId: -1,
+  wcdmaPsc: -1,
+  signalStrength: 99
+};
+
 function DataConnectionHandler(clientId, radioInterface) {
   // Initial owning attributes.
   this.clientId = clientId;
@@ -1608,9 +1632,7 @@ WorkerMessenger.prototype = {
           libcutils.property_get("ro.moz.ril.send_stk_profile_dl", "false") == "true",
         dataRegistrationOnDemand: RILQUIRKS_DATA_REGISTRATION_ON_DEMAND,
         subscriptionControl: RILQUIRKS_SUBSCRIPTION_CONTROL
-      },
-      rilEmergencyNumbers: libcutils.property_get("ril.ecclist") ||
-                           libcutils.property_get("ro.ril.ecclist")
+      }
     };
 
     this.send(null, "setInitialOptions", options);
@@ -3272,6 +3294,10 @@ RadioInterface.prototype = {
     // Update lastKnownHomeNetwork.
     if (message.mcc && message.mnc) {
       this._lastKnownHomeNetwork = message.mcc + "-" + message.mnc;
+      // Append spn information if available.
+      if (message.spn) {
+        this._lastKnownHomeNetwork += "-" + message.spn;
+      }
     }
 
     // If spn becomes available, we should check roaming again.
@@ -4352,6 +4378,28 @@ RadioInterface.prototype = {
     } else {
       this.workerMessenger.send(rilMessageType, message);
     }
+  },
+
+  getNeighboringCellIds: function(callback) {
+    this.workerMessenger.send("getNeighboringCellIds",
+                              null,
+                              function(response) {
+      if (response.errorMsg) {
+        callback.notifyGetNeighboringCellIdsFailed(response.errorMsg);
+        return;
+      }
+
+      let neighboringCellIds = [];
+      let count = response.result.length;
+      for (let i = 0; i < count; i++) {
+        let srcCellInfo = response.result[i];
+        let cellInfo = new NeighboringCellInfo();
+        this.updateInfo(srcCellInfo, cellInfo);
+        neighboringCellIds.push(cellInfo);
+      }
+      callback.notifyGetNeighboringCellIds(neighboringCellIds);
+
+    }.bind(this));
   }
 };
 

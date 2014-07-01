@@ -16,10 +16,11 @@ const COLLAPSE_INSPECTOR_STRING = L10N.getStr("collapseInspector");
 const INSPECTOR_WIDTH = 300;
 
 // Globals for d3 stuff
-// Width/height in pixels of SVG graph
-// TODO investigate to see how this works in other host types bug 994257
-const WIDTH = 1000;
-const HEIGHT = 400;
+// Default properties of the graph on rerender
+const GRAPH_DEFAULTS = {
+  translate: [20, 20],
+  scale: 1
+};
 
 // Sizes of SVG arrows in graph
 const ARROW_HEIGHT = 5;
@@ -38,7 +39,7 @@ const GENERIC_VARIABLES_VIEW_SETTINGS = {
   editableValueTooltip: "",
   editableNameTooltip: "",
   preventDisableOnChange: true,
-  preventDescriptorModifiers: true,
+  preventDescriptorModifiers: false,
   eval: () => {}
 };
 
@@ -84,15 +85,39 @@ let WebAudioGraphView = {
    * and clears out old content
    */
   resetUI: function () {
-    this.resetGraph();
+    this.clearGraph();
+    this.resetGraphPosition();
   },
 
   /**
    * Clears out the rendered graph, called when resetting the SVG elements to draw again,
    * or when resetting the entire UI tool
    */
-  resetGraph: function () {
+  clearGraph: function () {
     $("#graph-target").innerHTML = "";
+  },
+
+  /**
+   * Moves the graph back to its original scale and translation.
+   */
+  resetGraphPosition: function () {
+    if (this._zoomBinding) {
+      let { translate, scale } = GRAPH_DEFAULTS;
+      // Must set the `zoomBinding` so the next `zoom` event is in sync with
+      // where the graph is visually (set by the `transform` attribute).
+      this._zoomBinding.scale(scale);
+      this._zoomBinding.translate(translate);
+      d3.select("#graph-target")
+        .attr("transform", "translate(" + translate + ") scale(" + scale + ")");
+    }
+  },
+
+  getCurrentScale: function () {
+    return this._zoomBinding ? this._zoomBinding.scale() : null;
+  },
+
+  getCurrentTranslation: function () {
+    return this._zoomBinding ? this._zoomBinding.translate() : null;
   },
 
   /**
@@ -124,7 +149,7 @@ let WebAudioGraphView = {
    */
   draw: function () {
     // Clear out previous SVG information
-    this.resetGraph();
+    this.clearGraph();
 
     let graph = new dagreD3.Digraph();
     let edges = [];
@@ -220,6 +245,10 @@ let WebAudioGraphView = {
           .attr("transform", "translate(" + ev.translate + ") scale(" + ev.scale + ")");
       });
       d3.select("svg").call(this._zoomBinding);
+
+      // Set initial translation and scale -- this puts D3's awareness of
+      // the graph in sync with what the user sees originally.
+      this.resetGraphPosition();
     }
   },
 
@@ -437,8 +466,11 @@ let WebAudioInspectorView = {
     // when there are no props i.e. AudioDestinationNode
     this._togglePropertiesView(!!props.length);
 
-    props.forEach(({ param, value }) => {
-      let descriptor = { value: value };
+    props.forEach(({ param, value, flags }) => {
+      let descriptor = {
+        value: value,
+        writable: !flags || !flags.readonly,
+      };
       audioParamsScope.addItem(param, descriptor);
     });
 
@@ -477,18 +509,22 @@ let WebAudioInspectorView = {
     let propName = variable.name;
     let error;
 
-    // Cast value to proper type
-    try {
-      let number = parseFloat(value);
-      if (!isNaN(number)) {
-        value = number;
-      } else {
-        value = JSON.parse(value);
+    if (!variable._initialDescriptor.writable) {
+      error = new Error("Variable " + propName + " is not writable.");
+    } else {
+      // Cast value to proper type
+      try {
+        let number = parseFloat(value);
+        if (!isNaN(number)) {
+          value = number;
+        } else {
+          value = JSON.parse(value);
+        }
+        error = yield node.actor.setParam(propName, value);
       }
-      error = yield node.actor.setParam(propName, value);
-    }
-    catch (e) {
-      error = e;
+      catch (e) {
+        error = e;
+      }
     }
 
     // TODO figure out how to handle and display set prop errors

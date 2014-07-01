@@ -719,7 +719,7 @@ ToLowerCase(JSContext *cx, JSLinearString *str)
         newChars[length] = 0;
     }
 
-    JSString *res = NewString<CanGC>(cx, newChars.get(), length);
+    JSString *res = NewStringDontDeflate<CanGC>(cx, newChars.get(), length);
     if (!res)
         return nullptr;
 
@@ -1009,40 +1009,53 @@ js_str_charAt(JSContext *cx, unsigned argc, Value *vp)
 }
 
 bool
+js::str_charCodeAt_impl(JSContext *cx, HandleString string, HandleValue index, MutableHandleValue res)
+{
+    RootedString str(cx);
+    size_t i;
+    if (index.isInt32()) {
+        i = index.toInt32();
+        if (i >= string->length())
+            goto out_of_range;
+    } else {
+        double d = 0.0;
+        if (!ToInteger(cx, index, &d))
+            return false;
+        // check whether d is negative as size_t is unsigned
+        if (d < 0 || string->length() <= d )
+            goto out_of_range;
+        i = size_t(d);
+    }
+    jschar c;
+    if (!string->getChar(cx, i , &c))
+        return false;
+    res.setInt32(c);
+    return true;
+
+out_of_range:
+    res.setNaN();
+    return true;
+}
+
+bool
 js_str_charCodeAt(JSContext *cx, unsigned argc, Value *vp)
 {
     CallArgs args = CallArgsFromVp(argc, vp);
-
     RootedString str(cx);
-    size_t i;
-    if (args.thisv().isString() && args.length() != 0 && args[0].isInt32()) {
+    RootedValue index(cx);
+    if (args.thisv().isString()) {
         str = args.thisv().toString();
-        i = size_t(args[0].toInt32());
-        if (i >= str->length())
-            goto out_of_range;
     } else {
         str = ThisToStringForStringProto(cx, args);
         if (!str)
             return false;
-
-        double d = 0.0;
-        if (args.length() > 0 && !ToInteger(cx, args[0], &d))
-            return false;
-
-        if (d < 0 || str->length() <= d)
-            goto out_of_range;
-        i = size_t(d);
     }
+    if (args.length() != 0)
+        index = args[0];
+    else
+        index.setInt32(0);
 
-    jschar c;
-    if (!str->getChar(cx, i, &c))
-        return false;
-    args.rval().setInt32(c);
-    return true;
-
-out_of_range:
-    args.rval().setNaN();
-    return true;
+    return js::str_charCodeAt_impl(cx, str, index, args.rval());
 }
 
 /*
@@ -3102,9 +3115,9 @@ AppendSubstrings(JSContext *cx, Handle<JSFlatString*> flatStr,
         return NewDependentString(cx, flatStr, ranges[0].start, ranges[0].length);
 
     bool isLatin1 = flatStr->hasLatin1Chars();
-    uint32_t fatInlineMaxLength = isLatin1
-                                  ? JSFatInlineString::MAX_LENGTH_LATIN1
-                                  : JSFatInlineString::MAX_LENGTH_TWO_BYTE;
+    uint32_t fatInlineMaxLength = JSFatInlineString::MAX_LENGTH_TWO_BYTE;
+    if (isLatin1)
+        fatInlineMaxLength = JSFatInlineString::MAX_LENGTH_LATIN1;
 
     /* Collect substrings into a rope */
     size_t i = 0;
@@ -4192,16 +4205,10 @@ js::str_fromCharCode_one_arg(JSContext *cx, HandleValue code, MutableHandleValue
         return true;
     }
 
-    jschar *chars = cx->pod_malloc<jschar>(2);
-    if (!chars)
+    jschar c = jschar(ucode);
+    JSString *str = NewStringCopyN<CanGC>(cx, &c, 1);
+    if (!str)
         return false;
-    chars[0] = jschar(ucode);
-    chars[1] = 0;
-    JSString *str = NewString<CanGC>(cx, chars, 1);
-    if (!str) {
-        js_free(chars);
-        return false;
-    }
 
     rval.setString(str);
     return true;
@@ -4267,35 +4274,6 @@ js_InitStringClass(JSContext *cx, HandleObject obj)
 
     return proto;
 }
-
-template <AllowGC allowGC, typename CharT>
-JSFlatString *
-js::NewString(ThreadSafeContext *cx, CharT *chars, size_t length)
-{
-    if (length == 1) {
-        jschar c = chars[0];
-        if (StaticStrings::hasUnit(c)) {
-            // Free |chars| because we're taking possession of it, but it's no
-            // longer needed because we use the static string instead.
-            js_free(chars);
-            return cx->staticStrings().getUnit(c);
-        }
-    }
-
-    return JSFlatString::new_<allowGC>(cx, chars, length);
-}
-
-template JSFlatString *
-js::NewString<CanGC>(ThreadSafeContext *cx, jschar *chars, size_t length);
-
-template JSFlatString *
-js::NewString<NoGC>(ThreadSafeContext *cx, jschar *chars, size_t length);
-
-template JSFlatString *
-js::NewString<CanGC>(ThreadSafeContext *cx, Latin1Char *chars, size_t length);
-
-template JSFlatString *
-js::NewString<NoGC>(ThreadSafeContext *cx, Latin1Char *chars, size_t length);
 
 JSLinearString *
 js::NewDependentString(JSContext *cx, JSString *baseArg, size_t start, size_t length)
@@ -4402,7 +4380,7 @@ NewStringDeflated(ThreadSafeContext *cx, const jschar *s, size_t n)
     }
     news[n] = '\0';
 
-    JSFlatString *str = NewString<allowGC>(cx, news.get(), n);
+    JSFlatString *str = JSFlatString::new_<allowGC>(cx, news.get(), n);
     if (!str)
         return nullptr;
 
@@ -4416,6 +4394,72 @@ NewStringDeflated(ThreadSafeContext *cx, const Latin1Char *s, size_t n)
 {
     MOZ_CRASH("Shouldn't be called for Latin1 chars");
 }
+
+template <AllowGC allowGC, typename CharT>
+JSFlatString *
+js::NewStringDontDeflate(ThreadSafeContext *cx, CharT *chars, size_t length)
+{
+    if (length == 1) {
+        jschar c = chars[0];
+        if (StaticStrings::hasUnit(c)) {
+            // Free |chars| because we're taking possession of it, but it's no
+            // longer needed because we use the static string instead.
+            js_free(chars);
+            return cx->staticStrings().getUnit(c);
+        }
+    }
+
+    return JSFlatString::new_<allowGC>(cx, chars, length);
+}
+
+template JSFlatString *
+js::NewStringDontDeflate<CanGC>(ThreadSafeContext *cx, jschar *chars, size_t length);
+
+template JSFlatString *
+js::NewStringDontDeflate<NoGC>(ThreadSafeContext *cx, jschar *chars, size_t length);
+
+template JSFlatString *
+js::NewStringDontDeflate<CanGC>(ThreadSafeContext *cx, Latin1Char *chars, size_t length);
+
+template JSFlatString *
+js::NewStringDontDeflate<NoGC>(ThreadSafeContext *cx, Latin1Char *chars, size_t length);
+
+template <AllowGC allowGC, typename CharT>
+JSFlatString *
+js::NewString(ThreadSafeContext *cx, CharT *chars, size_t length)
+{
+    if (IsSame<CharT, jschar>::value && CanStoreCharsAsLatin1(chars, length)) {
+        if (length == 1) {
+            jschar c = chars[0];
+            if (StaticStrings::hasUnit(c)) {
+                js_free(chars);
+                return cx->staticStrings().getUnit(c);
+            }
+        }
+
+        JSFlatString *s = NewStringDeflated<allowGC>(cx, chars, length);
+        if (!s)
+            return nullptr;
+
+        // Free |chars| because we're taking possession of it but not using it.
+        js_free(chars);
+        return s;
+    }
+
+    return NewStringDontDeflate<allowGC>(cx, chars, length);
+}
+
+template JSFlatString *
+js::NewString<CanGC>(ThreadSafeContext *cx, jschar *chars, size_t length);
+
+template JSFlatString *
+js::NewString<NoGC>(ThreadSafeContext *cx, jschar *chars, size_t length);
+
+template JSFlatString *
+js::NewString<CanGC>(ThreadSafeContext *cx, Latin1Char *chars, size_t length);
+
+template JSFlatString *
+js::NewString<NoGC>(ThreadSafeContext *cx, Latin1Char *chars, size_t length);
 
 namespace js {
 
@@ -4434,7 +4478,7 @@ NewStringCopyNDontDeflate(ThreadSafeContext *cx, const CharT *s, size_t n)
         PodCopy(news.get(), s, n);
         news[n] = 0;
 
-        JSFlatString *str = NewString<allowGC>(cx, news.get(), n);
+        JSFlatString *str = JSFlatString::new_<allowGC>(cx, news.get(), n);
         if (!str)
             return nullptr;
 
@@ -4452,7 +4496,7 @@ NewStringCopyNDontDeflate(ThreadSafeContext *cx, const CharT *s, size_t n)
     CopyCharsMaybeInflate(news.get(), s, n);
     news[n] = 0;
 
-    JSFlatString *str = NewString<allowGC>(cx, news.get(), n);
+    JSFlatString *str = JSFlatString::new_<allowGC>(cx, news.get(), n);
     if (!str)
         return nullptr;
 
@@ -4494,47 +4538,7 @@ NewStringCopyN<CanGC>(ThreadSafeContext *cx, const Latin1Char *s, size_t n);
 template JSFlatString *
 NewStringCopyN<NoGC>(ThreadSafeContext *cx, const Latin1Char *s, size_t n);
 
-template <>
-JSFlatString *
-NewStringCopyN<CanGC>(ThreadSafeContext *cx, const char *s, size_t n)
-{
-    return NewStringCopyN<CanGC>(cx, reinterpret_cast<const Latin1Char *>(s), n);
-}
-
-template <>
-JSFlatString *
-NewStringCopyN<NoGC>(ThreadSafeContext *cx, const char *s, size_t n)
-{
-    return NewStringCopyN<NoGC>(cx, reinterpret_cast<const Latin1Char *>(s), n);
-}
-
 } /* namespace js */
-
-template <AllowGC allowGC>
-JSFlatString *
-js::NewStringCopyZ(ExclusiveContext *cx, const jschar *s)
-{
-    return NewStringCopyN<allowGC>(cx, s, js_strlen(s));
-}
-
-template JSFlatString *
-js::NewStringCopyZ<CanGC>(ExclusiveContext *cx, const jschar *s);
-
-template JSFlatString *
-js::NewStringCopyZ<NoGC>(ExclusiveContext *cx, const jschar *s);
-
-template <AllowGC allowGC>
-JSFlatString *
-js::NewStringCopyZ(ThreadSafeContext *cx, const char *s)
-{
-    return NewStringCopyN<allowGC>(cx, s, strlen(s));
-}
-
-template JSFlatString *
-js::NewStringCopyZ<CanGC>(ThreadSafeContext *cx, const char *s);
-
-template JSFlatString *
-js::NewStringCopyZ<NoGC>(ThreadSafeContext *cx, const char *s);
 
 const char *
 js_ValueToPrintable(JSContext *cx, const Value &vArg, JSAutoByteString *bytes, bool asSource)

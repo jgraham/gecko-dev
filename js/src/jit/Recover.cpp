@@ -8,6 +8,7 @@
 
 #include "jscntxt.h"
 #include "jsmath.h"
+#include "jsstr.h"
 
 #include "builtin/TypedObject.h"
 
@@ -509,6 +510,31 @@ RConcat::recover(JSContext *cx, SnapshotIterator &iter) const
     return true;
 }
 
+RStringLength::RStringLength(CompactBufferReader &reader)
+{}
+
+bool
+RStringLength::recover(JSContext *cx, SnapshotIterator &iter) const
+{
+    RootedValue operand(cx, iter.read());
+    RootedValue result(cx);
+
+    MOZ_ASSERT(!operand.isObject());
+    if (!js::GetLengthProperty(operand, &result))
+        return false;
+
+    iter.storeInstructionResult(result);
+    return true;
+}
+
+bool
+MStringLength::writeRecoverData(CompactBufferWriter &writer) const
+{
+    MOZ_ASSERT(canRecoverOnBailout());
+    writer.writeUnsigned(uint32_t(RInstruction::Recover_StringLength));
+    return true;
+}
+
 bool
 MFloor::writeRecoverData(CompactBufferWriter &writer) const
 {
@@ -551,6 +577,31 @@ RRound::recover(JSContext *cx, SnapshotIterator &iter) const
 
     MOZ_ASSERT(!arg.isObject());
     if(!js::math_round_handle(cx, arg, &result))
+        return false;
+
+    iter.storeInstructionResult(result);
+    return true;
+}
+
+bool
+MCharCodeAt::writeRecoverData(CompactBufferWriter &writer) const
+{
+    MOZ_ASSERT(canRecoverOnBailout());
+    writer.writeUnsigned(uint32_t(RInstruction::Recover_CharCodeAt));
+    return true;
+}
+
+RCharCodeAt::RCharCodeAt(CompactBufferReader &reader)
+{}
+
+bool
+RCharCodeAt::recover(JSContext *cx, SnapshotIterator &iter) const
+{
+    RootedString lhs(cx, iter.read().toString());
+    RootedValue rhs(cx, iter.read());
+    RootedValue result(cx);
+
+    if (!js::str_charCodeAt_impl(cx, lhs, rhs, &result))
         return false;
 
     iter.storeInstructionResult(result);

@@ -3340,7 +3340,10 @@ CodeGenerator::generateBody()
         // blocks are created to split critical edges, and if we didn't end up
         // putting any instructions in them, we can skip them.
         if (current->isTrivial())
-            continue; 
+            continue;
+
+        IonSpew(IonSpew_Codegen, "# block%lu%s:", i,
+                current->mir()->isLoopHeader() ? " (loop header)" : "");
 
         masm.bind(current->label());
 
@@ -8478,6 +8481,15 @@ CodeGenerator::visitIsCallable(LIsCallable *ins)
     masm.cmpPtrSet(Assembler::NonZero, Address(output, offsetof(js::Class, call)), ImmPtr(nullptr), output);
     masm.bind(&done);
 
+    return true;
+}
+
+bool
+CodeGenerator::visitIsObject(LIsObject *ins)
+{
+    Register output = ToRegister(ins->output());
+    ValueOperand value = ToValue(ins, LIsObject::Input);
+    masm.testObjectSet(Assembler::Equal, value, output);
     return true;
 }
 

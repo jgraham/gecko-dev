@@ -308,7 +308,7 @@ CopyStringPure(JSContext *cx, JSString *str)
     if (!str->asRope().copyTwoByteCharsZ(cx, copiedChars))
         return nullptr;
 
-    return NewString<CanGC>(cx, copiedChars.forget(), len);
+    return NewStringDontDeflate<CanGC>(cx, copiedChars.forget(), len);
 }
 
 bool
@@ -523,12 +523,6 @@ JSCompartment::wrap(JSContext *cx, MutableHandle<PropDesc> desc)
         if (!comp->wrap(cx, &set))
             return false;
         desc.setSetter(set);
-    }
-    if (desc.descriptorValue().isObject()) {
-        RootedObject descObj(cx, &desc.descriptorValue().toObject());
-        if (!comp->wrap(cx, &descObj))
-            return false;
-        desc.setDescriptorObject(descObj);
     }
     return true;
 }
