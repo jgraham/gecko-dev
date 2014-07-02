@@ -15,6 +15,7 @@ from StringIO import StringIO
 
 from mozbuild.base import (
     MachCommandBase,
+    MachCommandConditions as conditions,
     MozbuildObject,
 )
 
@@ -34,13 +35,13 @@ class InvalidTestPathError(Exception):
 class WebPlatformTestsRunner(MozbuildObject):
     """Run web platform tests."""
 
-    def __init__(self, topsrcdir, settings, log_manager, topobjdir=None):
+    def __init__(self, topsrcdir, settings, log_manager, **kwargs):
         import machlogging
         from mozlog.structured import structuredlog
 
         log_manager = machlogging.StructuredLoggingManager()
         self._logger = structuredlog.StructuredLogger("web-platform-tests.mach")
-        MozbuildObject.__init__(self, topsrcdir, settings, log_manager, topobjdir)
+        MozbuildObject.__init__(self, topsrcdir, settings, log_manager, **kwargs)
 
     def setup_kwargs(self, kwargs):
         build_path = os.path.join(self.topobjdir, 'build')
@@ -128,6 +129,7 @@ class WebPlatformTestsReduce(WebPlatformTestsRunner):
 class MachCommands(MachCommandBase):
     @Command("web-platform-tests",
              category="testing",
+             conditions=[conditions.is_firefox],
              parser=wptcommandline.create_parser(False))
     def run_web_platform_tests(self, **params):
         self.setup()
@@ -140,6 +142,7 @@ class MachCommands(MachCommandBase):
 
     @Command("web-platform-tests-update",
              category="testing",
+             conditions=[conditions.is_firefox],
              parser=wptcommandline.create_parser_update(False))
     def update_web_platform_tests(self, **params):
         self.setup()
@@ -153,6 +156,7 @@ class MachCommands(MachCommandBase):
 
     @Command("web-platform-tests-reduce",
              category="testing",
+             conditions=[conditions.is_firefox],
              parser=wptcommandline.create_parser_reduce(False))
     def unstable_web_platform_tests(self, **params):
         self.setup()
