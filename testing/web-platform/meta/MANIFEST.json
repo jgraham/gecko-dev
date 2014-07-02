@@ -3874,6 +3874,14 @@
         "path": "2dcontext/hit-regions/addHitRegions-NotSupportedError-01.html"
       }, 
       {
+        "url": "/2dcontext/hit-regions/hitregions-members-exist.html", 
+        "path": "2dcontext/hit-regions/hitregions-members-exist.html"
+      }, 
+      {
+        "url": "/2dcontext/image-smoothing/imagesmoothing.html", 
+        "path": "2dcontext/image-smoothing/imagesmoothing.html"
+      }, 
+      {
         "url": "/2dcontext/line-styles/2d.line.cap.butt.html", 
         "path": "2dcontext/line-styles/2d.line.cap.butt.html"
       }, 
@@ -6579,12 +6587,21 @@
         "path": "XMLHttpRequest/overridemimetype-unsent-state-force-shiftjis.htm"
       }, 
       {
+        "url": "/XMLHttpRequest/progress-events-response-data-gzip.htm", 
+        "path": "XMLHttpRequest/progress-events-response-data-gzip.htm", 
+        "timeout": "long"
+      }, 
+      {
         "url": "/XMLHttpRequest/response-data-arraybuffer.htm", 
         "path": "XMLHttpRequest/response-data-arraybuffer.htm"
       }, 
       {
         "url": "/XMLHttpRequest/response-data-blob.htm", 
         "path": "XMLHttpRequest/response-data-blob.htm"
+      }, 
+      {
+        "url": "/XMLHttpRequest/response-data-deflate.htm", 
+        "path": "XMLHttpRequest/response-data-deflate.htm"
       }, 
       {
         "url": "/XMLHttpRequest/response-data-gzip.htm", 
@@ -8247,6 +8264,42 @@
       {
         "url": "/ext-xhtml-pubid/the-xhtml-syntax/parsing-xhtml-documents/xhtml-pubid-1.html", 
         "path": "ext-xhtml-pubid/the-xhtml-syntax/parsing-xhtml-documents/xhtml-pubid-1.html"
+      }, 
+      {
+        "url": "/geolocation-API/PositionOptions.html", 
+        "path": "geolocation-API/PositionOptions.html"
+      }, 
+      {
+        "url": "/geolocation-API/clearWatch_TypeError.html", 
+        "path": "geolocation-API/clearWatch_TypeError.html"
+      }, 
+      {
+        "url": "/geolocation-API/getCurrentPosition_IDL.html", 
+        "path": "geolocation-API/getCurrentPosition_IDL.html"
+      }, 
+      {
+        "url": "/geolocation-API/getCurrentPosition_TypeError.html", 
+        "path": "geolocation-API/getCurrentPosition_TypeError.html"
+      }, 
+      {
+        "url": "/geolocation-API/getCurrentPosition_permission_allow.html", 
+        "path": "geolocation-API/getCurrentPosition_permission_allow.html"
+      }, 
+      {
+        "url": "/geolocation-API/getCurrentPosition_permission_deny.html", 
+        "path": "geolocation-API/getCurrentPosition_permission_deny.html"
+      }, 
+      {
+        "url": "/geolocation-API/interfaces.html", 
+        "path": "geolocation-API/interfaces.html"
+      }, 
+      {
+        "url": "/geolocation-API/watchPosition_TypeError.html", 
+        "path": "geolocation-API/watchPosition_TypeError.html"
+      }, 
+      {
+        "url": "/geolocation-API/watchPosition_permission_deny.html", 
+        "path": "geolocation-API/watchPosition_permission_deny.html"
       }, 
       {
         "url": "/hr-time/basic.html", 
@@ -10238,6 +10291,10 @@
         "path": "html/semantics/embedded-content/media-elements/track/track-element/src-clear-cues.html"
       }, 
       {
+        "url": "/html/semantics/embedded-content/media-elements/track/track-element/track-api-texttracks.html", 
+        "path": "html/semantics/embedded-content/media-elements/track/track-element/track-api-texttracks.html"
+      }, 
+      {
         "url": "/html/semantics/embedded-content/media-elements/user-interface/muted.html", 
         "path": "html/semantics/embedded-content/media-elements/user-interface/muted.html"
       }, 
@@ -11943,6 +12000,22 @@
         "path": "js/builtins/WeakMap.prototype-properties.html"
       }, 
       {
+        "url": "/media-source/SourceBuffer-abort-readyState.html", 
+        "path": "media-source/SourceBuffer-abort-readyState.html"
+      }, 
+      {
+        "url": "/media-source/SourceBuffer-abort-removed.html", 
+        "path": "media-source/SourceBuffer-abort-removed.html"
+      }, 
+      {
+        "url": "/media-source/SourceBuffer-abort-updating.html", 
+        "path": "media-source/SourceBuffer-abort-updating.html"
+      }, 
+      {
+        "url": "/media-source/SourceBuffer-abort.html", 
+        "path": "media-source/SourceBuffer-abort.html"
+      }, 
+      {
         "url": "/media-source/URL-createObjectURL-null.html", 
         "path": "media-source/URL-createObjectURL-null.html"
       }, 
@@ -12865,6 +12938,198 @@
       {
         "url": "/performance-timeline/idlharness.html", 
         "path": "performance-timeline/idlharness.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_button_attribute_mouse.html", 
+        "path": "pointerevents/pointerevent_button_attribute_mouse.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_capture_mouse.html", 
+        "path": "pointerevents/pointerevent_capture_mouse.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_capture_suppressing_mouse.html", 
+        "path": "pointerevents/pointerevent_capture_suppressing_mouse.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_change-touch-action-onpointerdown_touch.html", 
+        "path": "pointerevents/pointerevent_change-touch-action-onpointerdown_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_gotpointercapture_before_first_pointerevent.html", 
+        "path": "pointerevents/pointerevent_gotpointercapture_before_first_pointerevent.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_lostpointercapture_is_first.html", 
+        "path": "pointerevents/pointerevent_lostpointercapture_is_first.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointercancel_touch.html", 
+        "path": "pointerevents/pointerevent_pointercancel_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerdown.html", 
+        "path": "pointerevents/pointerevent_pointerdown.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerenter.html", 
+        "path": "pointerevents/pointerevent_pointerenter.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerenter_does_not_bubble.html", 
+        "path": "pointerevents/pointerevent_pointerenter_does_not_bubble.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerenter_nohover.html", 
+        "path": "pointerevents/pointerevent_pointerenter_nohover.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerleave_descendant_over.html", 
+        "path": "pointerevents/pointerevent_pointerleave_descendant_over.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerleave_descendants.html", 
+        "path": "pointerevents/pointerevent_pointerleave_descendants.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerleave_does_not_bubble.html", 
+        "path": "pointerevents/pointerevent_pointerleave_does_not_bubble.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerleave_mouse.html", 
+        "path": "pointerevents/pointerevent_pointerleave_mouse.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerleave_pen.html", 
+        "path": "pointerevents/pointerevent_pointerleave_pen.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerleave_touch.html", 
+        "path": "pointerevents/pointerevent_pointerleave_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointermove_isprimary_same_as_pointerdown.html", 
+        "path": "pointerevents/pointerevent_pointermove_isprimary_same_as_pointerdown.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointermove_pointertype.html", 
+        "path": "pointerevents/pointerevent_pointermove_pointertype.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerout.html", 
+        "path": "pointerevents/pointerevent_pointerout.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerout_received_once.html", 
+        "path": "pointerevents/pointerevent_pointerout_received_once.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerover.html", 
+        "path": "pointerevents/pointerevent_pointerover.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointertype_mouse.html", 
+        "path": "pointerevents/pointerevent_pointertype_mouse.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointertype_pen.html", 
+        "path": "pointerevents/pointerevent_pointertype_pen.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointertype_touch.html", 
+        "path": "pointerevents/pointerevent_pointertype_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerup.html", 
+        "path": "pointerevents/pointerevent_pointerup.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_releasepointercapture_events_to_original_target.html", 
+        "path": "pointerevents/pointerevent_releasepointercapture_events_to_original_target.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_releasepointercapture_invalid_pointerid.html", 
+        "path": "pointerevents/pointerevent_releasepointercapture_invalid_pointerid.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_releasepointercapture_onpointercancel_touch.html", 
+        "path": "pointerevents/pointerevent_releasepointercapture_onpointercancel_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_releasepointercapture_onpointerup_mouse.html", 
+        "path": "pointerevents/pointerevent_releasepointercapture_onpointerup_mouse.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_setpointercapture_inactive_button_mouse.html", 
+        "path": "pointerevents/pointerevent_setpointercapture_inactive_button_mouse.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_setpointercapture_invalid_pointerid.html", 
+        "path": "pointerevents/pointerevent_setpointercapture_invalid_pointerid.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_setpointercapture_relatedtarget.html", 
+        "path": "pointerevents/pointerevent_setpointercapture_relatedtarget.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-auto-css_touch.html", 
+        "path": "pointerevents/pointerevent_touch-action-auto-css_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-illegal.html", 
+        "path": "pointerevents/pointerevent_touch-action-illegal.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-inherit_child-auto-child-none_touch.html", 
+        "path": "pointerevents/pointerevent_touch-action-inherit_child-auto-child-none_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-inherit_child-none_touch.html", 
+        "path": "pointerevents/pointerevent_touch-action-inherit_child-none_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-inherit_child-pan-x-child-pan-x_touch.html", 
+        "path": "pointerevents/pointerevent_touch-action-inherit_child-pan-x-child-pan-x_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-inherit_child-pan-x-child-pan-y_touch.html", 
+        "path": "pointerevents/pointerevent_touch-action-inherit_child-pan-x-child-pan-y_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-inherit_highest-parent-none_touch.html", 
+        "path": "pointerevents/pointerevent_touch-action-inherit_highest-parent-none_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-inherit_parent-none_touch.html", 
+        "path": "pointerevents/pointerevent_touch-action-inherit_parent-none_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-keyboard.html", 
+        "path": "pointerevents/pointerevent_touch-action-keyboard.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-mouse.html", 
+        "path": "pointerevents/pointerevent_touch-action-mouse.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-none-css_touch.html", 
+        "path": "pointerevents/pointerevent_touch-action-none-css_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-pan-x-css_touch.html", 
+        "path": "pointerevents/pointerevent_touch-action-pan-x-css_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-pan-x-pan-y-pan-y_touch.html", 
+        "path": "pointerevents/pointerevent_touch-action-pan-x-pan-y-pan-y_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-pan-x-pan-y_touch.html", 
+        "path": "pointerevents/pointerevent_touch-action-pan-x-pan-y_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-pan-y-css_touch.html", 
+        "path": "pointerevents/pointerevent_touch-action-pan-y-css_touch.html"
       }, 
       {
         "url": "/pointerlock/constructor.html", 
@@ -15773,6 +16038,22 @@
         "path": "battery-status/battery-unplugged-manual.html"
       }, 
       {
+        "url": "/geolocation-API/getCurrentPosition_permission-manual.html", 
+        "path": "geolocation-API/getCurrentPosition_permission-manual.html"
+      }, 
+      {
+        "url": "/geolocation-API/getCurrentPosition_permission_allow-manual.html", 
+        "path": "geolocation-API/getCurrentPosition_permission_allow-manual.html"
+      }, 
+      {
+        "url": "/geolocation-API/getCurrentPosition_permission_deny-manual.html", 
+        "path": "geolocation-API/getCurrentPosition_permission_deny-manual.html"
+      }, 
+      {
+        "url": "/geolocation-API/watchPosition_permission-manual.html", 
+        "path": "geolocation-API/watchPosition_permission-manual.html"
+      }, 
+      {
         "url": "/html-longdesc/data-uri-image-data-uri-description-manual.html", 
         "path": "html-longdesc/data-uri-image-data-uri-description-manual.html"
       }, 
@@ -15931,6 +16212,30 @@
       {
         "url": "/html/browsers/offline/section_network_online-manual.html", 
         "path": "html/browsers/offline/section_network_online-manual.html"
+      }, 
+      {
+        "url": "/html/browsers/the-window-object/the-windowproxy-object/test-window-proxy-locationbar-manual.html", 
+        "path": "html/browsers/the-window-object/the-windowproxy-object/test-window-proxy-locationbar-manual.html"
+      }, 
+      {
+        "url": "/html/browsers/the-window-object/the-windowproxy-object/test-window-proxy-menubar-manual.html", 
+        "path": "html/browsers/the-window-object/the-windowproxy-object/test-window-proxy-menubar-manual.html"
+      }, 
+      {
+        "url": "/html/browsers/the-window-object/the-windowproxy-object/test-window-proxy-personalbar-manual.html", 
+        "path": "html/browsers/the-window-object/the-windowproxy-object/test-window-proxy-personalbar-manual.html"
+      }, 
+      {
+        "url": "/html/browsers/the-window-object/the-windowproxy-object/test-window-proxy-scrollbars-manual.html", 
+        "path": "html/browsers/the-window-object/the-windowproxy-object/test-window-proxy-scrollbars-manual.html"
+      }, 
+      {
+        "url": "/html/browsers/the-window-object/the-windowproxy-object/test-window-proxy-statusbar-manual.html", 
+        "path": "html/browsers/the-window-object/the-windowproxy-object/test-window-proxy-statusbar-manual.html"
+      }, 
+      {
+        "url": "/html/browsers/the-window-object/the-windowproxy-object/test-window-proxy-toolbar-manual.html", 
+        "path": "html/browsers/the-window-object/the-windowproxy-object/test-window-proxy-toolbar-manual.html"
       }, 
       {
         "url": "/html/editing/dnd/datastore/015-manual.html", 
@@ -16193,8 +16498,8 @@
         "path": "vibration/cancel-with-0-manual.html"
       }, 
       {
-        "url": "/vibration/cancel-with-[]-manual.html", 
-        "path": "vibration/cancel-with-[]-manual.html"
+        "url": "/vibration/cancel-with-empty-array-manual.html", 
+        "path": "vibration/cancel-with-empty-array-manual.html"
       }, 
       {
         "url": "/vibration/cancel-with-new-manual.html", 
@@ -17515,6 +17820,10 @@
         "path": "XMLHttpRequest/resources/xmlhttprequest-timeout.js"
       }, 
       {
+        "url": "/XMLHttpRequest/resources/zlib.py", 
+        "path": "XMLHttpRequest/resources/zlib.py"
+      }, 
+      {
         "url": "/ambient-light/DeviceLightEvent_tests.js", 
         "path": "ambient-light/DeviceLightEvent_tests.js"
       }, 
@@ -17837,6 +18146,10 @@
       {
         "url": "/fonts/CanvasTest.ttf", 
         "path": "fonts/CanvasTest.ttf"
+      }, 
+      {
+        "url": "/geolocation-API/support.js", 
+        "path": "geolocation-API/support.js"
       }, 
       {
         "url": "/html-imports/html-link-element/resources/hello.css", 
@@ -18553,6 +18866,18 @@
       {
         "url": "/html/semantics/embedded-content/media-elements/track/track-element/cors/support/cors-tester.py", 
         "path": "html/semantics/embedded-content/media-elements/track/track-element/cors/support/cors-tester.py"
+      }, 
+      {
+        "url": "/html/semantics/embedded-content/media-elements/track/track-element/resources/track.de.vtt", 
+        "path": "html/semantics/embedded-content/media-elements/track/track-element/resources/track.de.vtt"
+      }, 
+      {
+        "url": "/html/semantics/embedded-content/media-elements/track/track-element/resources/track.en.vtt", 
+        "path": "html/semantics/embedded-content/media-elements/track/track-element/resources/track.en.vtt"
+      }, 
+      {
+        "url": "/html/semantics/embedded-content/media-elements/track/track-element/resources/track.fr.vtt", 
+        "path": "html/semantics/embedded-content/media-elements/track/track-element/resources/track.fr.vtt"
       }, 
       {
         "url": "/html/semantics/embedded-content/media-elements/track/track-element/resources/track.vtt", 
@@ -19641,10 +19966,6 @@
       {
         "url": "/vibration/TODO.txt", 
         "path": "vibration/TODO.txt"
-      }, 
-      {
-        "url": "/vibration/manifest.txt", 
-        "path": "vibration/manifest.txt"
       }, 
       {
         "url": "/web-animations/README.md", 
@@ -21357,5 +21678,5 @@
     ]
   }, 
   "local_changes": [], 
-  "rev": "37399dd8718445cf7399202a807d16cb8b91d13e"
+  "rev": "6150455c8b3f993ad779c6cc6292cc871d95f9ea"
 }
