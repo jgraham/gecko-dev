@@ -222,7 +222,7 @@ let FunctionCallActor = protocol.ActorClass({
       // If this argument matches the method's signature
       // and is an enum, change it to its constant name.
       if (enumArgs && enumArgs.indexOf(i) !== -1) {
-        return getEnumsLookupTable(global, caller)[arg] || arg;
+        return getBitToEnumValue(global, caller, arg);
       }
       return arg;
     });
@@ -318,6 +318,7 @@ let CallWatcherActor = exports.CallWatcherActor = protocol.ActorClass({
       return;
     }
     this._initialized = false;
+    this._finalized = true;
 
     this._contentObserver.stopListening();
     off(this._contentObserver, "global-created", this._onGlobalCreated);
@@ -534,6 +535,11 @@ let CallWatcherActor = exports.CallWatcherActor = protocol.ActorClass({
    * Invoked whenever an instrumented function is called.
    */
   _onContentFunctionCall: function(...details) {
+    // If the consuming tool has finalized call-watcher, ignore the
+    // still-instrumented calls.
+    if (this._finalized) {
+      return;
+    }
     let functionCall = new FunctionCallActor(this.conn, details, this._holdWeak);
     this._functionCalls.push(functionCall);
     this.onCall(functionCall);
@@ -635,19 +641,48 @@ CallWatcherFront.ENUM_METHODS[CallWatcherFront.CANVAS_WEBGL_CONTEXT] = {
 var gEnumRegex = /^[A-Z_]+$/;
 var gEnumsLookupTable = {};
 
-function getEnumsLookupTable(type, object) {
-  let cachedEnum = gEnumsLookupTable[type];
-  if (cachedEnum) {
-    return cachedEnum;
-  }
+// These values are returned from errors, or empty values,
+// and need to be ignored when checking arguments due to the bitwise math.
+var INVALID_ENUMS = [
+  "INVALID_ENUM", "NO_ERROR", "INVALID_VALUE", "OUT_OF_MEMORY", "NONE"
+];
 
-  let table = gEnumsLookupTable[type] = {};
+function getBitToEnumValue(type, object, arg) {
+  let table = gEnumsLookupTable[type];
 
-  for (let key in object) {
-    if (key.match(gEnumRegex)) {
-      table[object[key]] = key;
+  // If mapping not yet created, do it on the first run.
+  if (!table) {
+    table = gEnumsLookupTable[type] = {};
+
+    for (let key in object) {
+      if (key.match(gEnumRegex)) {
+        // Maps `16384` to `"COLOR_BUFFER_BIT"`, etc.
+        table[object[key]] = key;
+      }
     }
   }
 
-  return table;
+  // If a single bit value, just return it.
+  if (table[arg]) {
+    return table[arg];
+  }
+
+  // Otherwise, attempt to reduce it to the original bit flags:
+  // `16640` -> "COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT"
+  let flags = [];
+  for (let flag in table) {
+    if (INVALID_ENUMS.indexOf(table[flag]) !== -1) {
+      continue;
+    }
+
+    // Cast to integer as all values are stored as strings
+    // in `table`
+    flag = flag | 0;
+    if (flag && (arg & flag) === flag) {
+      flags.push(table[flag]);
+    }
+  }
+
+  // Cache the combined bitmask value
+  return table[arg] = flags.join(" | ") || arg;
 }

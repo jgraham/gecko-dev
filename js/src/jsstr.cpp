@@ -75,7 +75,6 @@ using mozilla::IsNegativeZero;
 using mozilla::IsSame;
 using mozilla::PodCopy;
 using mozilla::PodEqual;
-using mozilla::Range;
 using mozilla::RangedPtr;
 using mozilla::SafeCast;
 
@@ -244,7 +243,7 @@ Unhex2(const RangedPtr<const CharT> chars, jschar *result)
 
 template <typename CharT>
 static bool
-Unescape(StringBuffer &sb, const Range<const CharT> chars)
+Unescape(StringBuffer &sb, const mozilla::Range<const CharT> chars)
 {
     /*
      * NB: use signed integers for length/index to allow simple length
@@ -4343,7 +4342,7 @@ CanStoreCharsAsLatin1(const Latin1Char *s, size_t length)
 
 template <AllowGC allowGC>
 static MOZ_ALWAYS_INLINE JSInlineString *
-NewFatInlineStringDeflated(ThreadSafeContext *cx, Range<const jschar> chars)
+NewFatInlineStringDeflated(ThreadSafeContext *cx, mozilla::Range<const jschar> chars)
 {
     MOZ_ASSERT(EnableLatin1Strings);
 
@@ -4368,7 +4367,7 @@ NewStringDeflated(ThreadSafeContext *cx, const jschar *s, size_t n)
     MOZ_ASSERT(EnableLatin1Strings);
 
     if (JSFatInlineString::latin1LengthFits(n))
-        return NewFatInlineStringDeflated<allowGC>(cx, Range<const jschar>(s, n));
+        return NewFatInlineStringDeflated<allowGC>(cx, mozilla::Range<const jschar>(s, n));
 
     ScopedJSFreePtr<Latin1Char> news(cx->pod_malloc<Latin1Char>(n + 1));
     if (!news)
@@ -4469,7 +4468,7 @@ NewStringCopyNDontDeflate(ThreadSafeContext *cx, const CharT *s, size_t n)
 {
     if (EnableLatin1Strings) {
         if (JSFatInlineString::lengthFits<CharT>(n))
-            return NewFatInlineString<allowGC>(cx, Range<const CharT>(s, n));
+            return NewFatInlineString<allowGC>(cx, mozilla::Range<const CharT>(s, n));
 
         ScopedJSFreePtr<CharT> news(cx->pod_malloc<CharT>(n + 1));
         if (!news)
@@ -4487,7 +4486,7 @@ NewStringCopyNDontDeflate(ThreadSafeContext *cx, const CharT *s, size_t n)
     }
 
     if (JSFatInlineString::twoByteLengthFits(n))
-        return NewFatInlineString<allowGC>(cx, Range<const CharT>(s, n));
+        return NewFatInlineString<allowGC>(cx, mozilla::Range<const CharT>(s, n));
 
     ScopedJSFreePtr<jschar> news(cx->pod_malloc<jschar>(n + 1));
     if (!news)
@@ -4889,14 +4888,15 @@ js::InflateString(ThreadSafeContext *cx, const char *bytes, size_t *lengthp)
     return nullptr;
 }
 
+template <typename CharT>
 bool
-js::DeflateStringToBuffer(JSContext *maybecx, const jschar *src, size_t srclen,
+js::DeflateStringToBuffer(JSContext *maybecx, const CharT *src, size_t srclen,
                           char *dst, size_t *dstlenp)
 {
     size_t dstlen = *dstlenp;
     if (srclen > dstlen) {
         for (size_t i = 0; i < dstlen; i++)
-            dst[i] = (char) src[i];
+            dst[i] = char(src[i]);
         if (maybecx) {
             AutoSuppressGC suppress(maybecx);
             JS_ReportErrorNumber(maybecx, js_GetErrorMessage, nullptr,
@@ -4905,10 +4905,18 @@ js::DeflateStringToBuffer(JSContext *maybecx, const jschar *src, size_t srclen,
         return false;
     }
     for (size_t i = 0; i < srclen; i++)
-        dst[i] = (char) src[i];
+        dst[i] = char(src[i]);
     *dstlenp = srclen;
     return true;
 }
+
+template bool
+js::DeflateStringToBuffer(JSContext *maybecx, const Latin1Char *src, size_t srclen,
+                          char *dst, size_t *dstlenp);
+
+template bool
+js::DeflateStringToBuffer(JSContext *maybecx, const jschar *src, size_t srclen,
+                          char *dst, size_t *dstlenp);
 
 #define ____ false
 

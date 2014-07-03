@@ -3936,6 +3936,10 @@ class MMinMax
         return AliasSet::None();
     }
     void computeRange(TempAllocator &alloc);
+    bool writeRecoverData(CompactBufferWriter &writer) const;
+    bool canRecoverOnBailout() const {
+        return true;
+    }
 };
 
 class MAbs
@@ -6243,6 +6247,14 @@ class MNot
 #endif
     bool congruentTo(const MDefinition *ins) const {
         return congruentIfOperandsEqual(ins);
+    }
+    bool writeRecoverData(CompactBufferWriter &writer) const;
+    bool canRecoverOnBailout() const {
+        // Non objects are recoverable and objects that cannot emulate
+        // undefined get folded into 'true' by GVN.
+        // So the only way to reach this function with an operand that
+        // is an object is when that object might emulate undefined.
+        return !operandMightEmulateUndefined_;
     }
 };
 

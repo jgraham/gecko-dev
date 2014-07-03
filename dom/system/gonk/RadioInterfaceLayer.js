@@ -1576,6 +1576,15 @@ RadioInterfaceLayer.prototype = {
     return this.radioInterfaces[clientId];
   },
 
+  getClientIdForEmergencyCall: function() {
+    for (let cid = 0; cid < this.numRadioInterfaces; ++cid) {
+      if (gRadioEnabledController._isRadioAbleToEnableAtClient(cid)) {
+        return cid;
+      }
+    }
+    return -1;
+  },
+
   setMicrophoneMuted: function(muted) {
     for (let clientId = 0; clientId < this.numRadioInterfaces; clientId++) {
       let radioInterface = this.radioInterfaces[clientId];
@@ -2294,17 +2303,27 @@ RadioInterface.prototype = {
     if (!message || !message.mvnoType || !message.mvnoData) {
       message.errorMsg = RIL.GECKO_ERROR_INVALID_PARAMETER;
     }
-    // Currently we only support imsi matching.
-    if (message.mvnoType != "imsi") {
-      message.errorMsg = RIL.GECKO_ERROR_MODE_NOT_SUPPORTED;
-    }
-    // Fire error if mvnoType is imsi but imsi is not available.
-    if (!this.rilContext.imsi) {
-      message.errorMsg = RIL.GECKO_ERROR_GENERIC_FAILURE;
-    }
 
     if (!message.errorMsg) {
-      message.result = this.isImsiMatches(message.mvnoData);
+      switch (message.mvnoType) {
+        case "imsi":
+          if (!this.rilContext.imsi) {
+            message.errorMsg = RIL.GECKO_ERROR_GENERIC_FAILURE;
+            break;
+          }
+          message.result = this.isImsiMatches(message.mvnoData);
+          break;
+        case "spn":
+          let spn = this.rilContext.iccInfo && this.rilContext.iccInfo.spn;
+          if (!spn) {
+            message.errorMsg = RIL.GECKO_ERROR_GENERIC_FAILURE;
+            break;
+          }
+          message.result = spn == message.mvnoData;
+          break;
+        default:
+          message.errorMsg = RIL.GECKO_ERROR_MODE_NOT_SUPPORTED;
+      }
     }
 
     target.sendAsyncMessage("RIL:MatchMvno", {

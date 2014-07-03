@@ -116,17 +116,18 @@ class Emulator(Device):
             devices = set(self._get_online_devices())
         devices = devices - original_devices
         self.serial = devices.pop()
+        self.connect()
 
     def _get_online_devices(self):
         return set([d[0] for d in self.dm.devices() if d[1] != 'offline' if d[0].startswith('emulator')])
 
     def connect(self):
         """
-        Connects to an already running device. If no serial was specified in the
-        constructor, creates a new emulator.
+        Connects to a running device. If no serial was specified in the
+        constructor, defaults to the first entry in `adb devices`.
         """
-        if not self.serial:
-            self.start()
+        if self.connected:
+            return
 
         Device.connect(self)
 

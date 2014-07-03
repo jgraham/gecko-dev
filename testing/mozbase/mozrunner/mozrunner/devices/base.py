@@ -17,6 +17,8 @@ from mozdevice import DMError
 from mozprocess import ProcessHandler
 
 class Device(object):
+    connected = False
+
     def __init__(self, app_ctx, logdir=None, serial=None, restore=True):
         self.app_ctx = app_ctx
         self.dm = self.app_ctx.dm
@@ -119,12 +121,13 @@ class Device(object):
         Connects to a running device. If no serial was specified in the
         constructor, defaults to the first entry in `adb devices`.
         """
-        if self.dm.connected:
+        if self.connected:
             return
 
         serial = self.serial or self._get_online_devices()[0]
         self.dm._deviceSerial = serial
         self.dm.connect()
+        self.connected = True
 
         if self.logdir:
             # save logcat
@@ -135,6 +138,12 @@ class Device(object):
                            'logcat', '-v', 'threadtime']
             self.logcat_proc = ProcessHandler(logcat_args, logfile=logcat_log)
             self.logcat_proc.run()
+
+    def reboot(self):
+        """
+        Reboots the device via adb.
+        """
+        self.dm.reboot(wait=True)
 
     def install_busybox(self, busybox):
         """
@@ -177,7 +186,7 @@ class Device(object):
             proc.stdout.readline() # ignore first line
             line = proc.stdout.readline()
             while line != "":
-                if (re.search(r'UP\s+(?:[0-9]{1,3}\.){3}[0-9]{1,3}', line)):
+                if (re.search(r'UP\s+[1-9]\d{0,2}\.\d{1,3}\.\d{1,3}\.\d{1,3}', line)):
                     active = True
                     break
                 line = proc.stdout.readline()

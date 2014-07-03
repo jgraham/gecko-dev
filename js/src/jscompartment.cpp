@@ -556,8 +556,7 @@ JSCompartment::markCrossCompartmentWrappers(JSTracer *trc)
 void
 JSCompartment::trace(JSTracer *trc)
 {
-    // At the moment, this is merely ceremonial, but any live-compartment-only tracing should go
-    // here.
+    savedStacks_.trace(trc);
 }
 
 void
@@ -924,7 +923,7 @@ JSCompartment::removeDebuggeeUnderGC(FreeOp *fop,
 }
 
 void
-JSCompartment::clearBreakpointsIn(FreeOp *fop, js::Debugger *dbg, JSObject *handler)
+JSCompartment::clearBreakpointsIn(FreeOp *fop, js::Debugger *dbg, HandleObject handler)
 {
     for (gc::ZoneCellIter i(zone(), gc::FINALIZE_SCRIPT); !i.done(); i.next()) {
         JSScript *script = i.get<JSScript>();

@@ -6,7 +6,6 @@ from distutils.spawn import find_executable
 import glob
 import os
 import posixpath
-import sys
 
 from mozdevice import DeviceManagerADB
 from mozprofile import (
@@ -103,13 +102,12 @@ class B2GContext(object):
 
 
     def which(self, binary):
-        if self.bindir is not None and self.bindir not in sys.path:
-            sys.path.insert(0, self.bindir)
+        paths = os.environ.get('PATH', {}).split(os.pathsep)
+        if self.bindir is not None and os.path.abspath(self.bindir) not in paths:
+            paths.insert(0, os.path.abspath(self.bindir))
+            os.environ['PATH'] = os.pathsep.join(paths)
 
-        rv = find_executable(binary, os.pathsep.join(sys.path))
-        if not rv:
-            rv = find_executable(binary, os.environ.get("PATH"))
-        return rv
+        return find_executable(binary)
 
     def stop_application(self):
         if self.bindir is None:

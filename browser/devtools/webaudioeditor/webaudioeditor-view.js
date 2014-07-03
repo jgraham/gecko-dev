@@ -161,7 +161,7 @@ let WebAudioGraphView = {
       // Add all of the connections from this node to the edge array to be added
       // after all the nodes are added, otherwise edges will attempted to be created
       // for nodes that have not yet been added
-      AudioNodeConnections.get(node, []).forEach(dest => edges.push([node, dest]));
+      AudioNodeConnections.get(node, new Set()).forEach(dest => edges.push([node, dest]));
     });
 
     edges.forEach(([node, dest]) => graph.addEdge(null, node.id, dest.id, {
@@ -203,7 +203,7 @@ let WebAudioGraphView = {
 
     // Override Dagre-d3's post render function by passing in our own.
     // This way we can leave styles out of it.
-    renderer.postRender(function (graph, root) {
+    renderer.postRender((graph, root) => {
       // We have to manually set the marker styling since we cannot
       // do this currently with CSS, although it is in spec for SVG2
       // https://svgwg.org/svg2-draft/painting.html#VertexMarkerProperties
@@ -227,6 +227,12 @@ let WebAudioGraphView = {
           .attr("style", "fill: " + markerColor)
           .append("svg:path")
           .attr("d", "M 0 0 L 10 5 L 0 10 z");
+      }
+
+      // Reselect the previously selected audio node
+      let currentNode = WebAudioInspectorView.getCurrentAudioNode();
+      if (currentNode) {
+        this.focusNode(currentNode.id);
       }
 
       // Fire an event upon completed rendering
@@ -425,7 +431,7 @@ let WebAudioInspectorView = {
   /**
    * Returns the current AudioNodeView.
    */
-  getCurrentNode: function () {
+  getCurrentAudioNode: function () {
     return this._currentNode;
   },
 
