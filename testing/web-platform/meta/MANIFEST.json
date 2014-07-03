@@ -11356,6 +11356,10 @@
         "path": "html/semantics/selectors/pseudo-classes/link.html"
       }, 
       {
+        "url": "/html/semantics/selectors/pseudo-classes/readwrite-readonly.html", 
+        "path": "html/semantics/selectors/pseudo-classes/readwrite-readonly.html"
+      }, 
+      {
         "url": "/html/semantics/selectors/pseudo-classes/required-optional.html", 
         "path": "html/semantics/selectors/pseudo-classes/required-optional.html"
       }, 
@@ -12940,196 +12944,8 @@
         "path": "performance-timeline/idlharness.html"
       }, 
       {
-        "url": "/pointerevents/pointerevent_button_attribute_mouse.html", 
-        "path": "pointerevents/pointerevent_button_attribute_mouse.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_capture_mouse.html", 
-        "path": "pointerevents/pointerevent_capture_mouse.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_capture_suppressing_mouse.html", 
-        "path": "pointerevents/pointerevent_capture_suppressing_mouse.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_change-touch-action-onpointerdown_touch.html", 
-        "path": "pointerevents/pointerevent_change-touch-action-onpointerdown_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_gotpointercapture_before_first_pointerevent.html", 
-        "path": "pointerevents/pointerevent_gotpointercapture_before_first_pointerevent.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_lostpointercapture_is_first.html", 
-        "path": "pointerevents/pointerevent_lostpointercapture_is_first.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointercancel_touch.html", 
-        "path": "pointerevents/pointerevent_pointercancel_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerdown.html", 
-        "path": "pointerevents/pointerevent_pointerdown.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerenter.html", 
-        "path": "pointerevents/pointerevent_pointerenter.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerenter_does_not_bubble.html", 
-        "path": "pointerevents/pointerevent_pointerenter_does_not_bubble.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerenter_nohover.html", 
-        "path": "pointerevents/pointerevent_pointerenter_nohover.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerleave_descendant_over.html", 
-        "path": "pointerevents/pointerevent_pointerleave_descendant_over.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerleave_descendants.html", 
-        "path": "pointerevents/pointerevent_pointerleave_descendants.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerleave_does_not_bubble.html", 
-        "path": "pointerevents/pointerevent_pointerleave_does_not_bubble.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerleave_mouse.html", 
-        "path": "pointerevents/pointerevent_pointerleave_mouse.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerleave_pen.html", 
-        "path": "pointerevents/pointerevent_pointerleave_pen.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerleave_touch.html", 
-        "path": "pointerevents/pointerevent_pointerleave_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointermove_isprimary_same_as_pointerdown.html", 
-        "path": "pointerevents/pointerevent_pointermove_isprimary_same_as_pointerdown.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointermove_pointertype.html", 
-        "path": "pointerevents/pointerevent_pointermove_pointertype.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerout.html", 
-        "path": "pointerevents/pointerevent_pointerout.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerout_received_once.html", 
-        "path": "pointerevents/pointerevent_pointerout_received_once.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerover.html", 
-        "path": "pointerevents/pointerevent_pointerover.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointertype_mouse.html", 
-        "path": "pointerevents/pointerevent_pointertype_mouse.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointertype_pen.html", 
-        "path": "pointerevents/pointerevent_pointertype_pen.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointertype_touch.html", 
-        "path": "pointerevents/pointerevent_pointertype_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_pointerup.html", 
-        "path": "pointerevents/pointerevent_pointerup.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_releasepointercapture_events_to_original_target.html", 
-        "path": "pointerevents/pointerevent_releasepointercapture_events_to_original_target.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_releasepointercapture_invalid_pointerid.html", 
-        "path": "pointerevents/pointerevent_releasepointercapture_invalid_pointerid.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_releasepointercapture_onpointercancel_touch.html", 
-        "path": "pointerevents/pointerevent_releasepointercapture_onpointercancel_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_releasepointercapture_onpointerup_mouse.html", 
-        "path": "pointerevents/pointerevent_releasepointercapture_onpointerup_mouse.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_setpointercapture_inactive_button_mouse.html", 
-        "path": "pointerevents/pointerevent_setpointercapture_inactive_button_mouse.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_setpointercapture_invalid_pointerid.html", 
-        "path": "pointerevents/pointerevent_setpointercapture_invalid_pointerid.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_setpointercapture_relatedtarget.html", 
-        "path": "pointerevents/pointerevent_setpointercapture_relatedtarget.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-auto-css_touch.html", 
-        "path": "pointerevents/pointerevent_touch-action-auto-css_touch.html"
-      }, 
-      {
         "url": "/pointerevents/pointerevent_touch-action-illegal.html", 
         "path": "pointerevents/pointerevent_touch-action-illegal.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-inherit_child-auto-child-none_touch.html", 
-        "path": "pointerevents/pointerevent_touch-action-inherit_child-auto-child-none_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-inherit_child-none_touch.html", 
-        "path": "pointerevents/pointerevent_touch-action-inherit_child-none_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-inherit_child-pan-x-child-pan-x_touch.html", 
-        "path": "pointerevents/pointerevent_touch-action-inherit_child-pan-x-child-pan-x_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-inherit_child-pan-x-child-pan-y_touch.html", 
-        "path": "pointerevents/pointerevent_touch-action-inherit_child-pan-x-child-pan-y_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-inherit_highest-parent-none_touch.html", 
-        "path": "pointerevents/pointerevent_touch-action-inherit_highest-parent-none_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-inherit_parent-none_touch.html", 
-        "path": "pointerevents/pointerevent_touch-action-inherit_parent-none_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-keyboard.html", 
-        "path": "pointerevents/pointerevent_touch-action-keyboard.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-mouse.html", 
-        "path": "pointerevents/pointerevent_touch-action-mouse.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-none-css_touch.html", 
-        "path": "pointerevents/pointerevent_touch-action-none-css_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-pan-x-css_touch.html", 
-        "path": "pointerevents/pointerevent_touch-action-pan-x-css_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-pan-x-pan-y-pan-y_touch.html", 
-        "path": "pointerevents/pointerevent_touch-action-pan-x-pan-y-pan-y_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-pan-x-pan-y_touch.html", 
-        "path": "pointerevents/pointerevent_touch-action-pan-x-pan-y_touch.html"
-      }, 
-      {
-        "url": "/pointerevents/pointerevent_touch-action-pan-y-css_touch.html", 
-        "path": "pointerevents/pointerevent_touch-action-pan-y-css_touch.html"
       }, 
       {
         "url": "/pointerlock/constructor.html", 
@@ -14302,10 +14118,6 @@
       {
         "url": "/websockets/Create-Secure-valid-url.htm", 
         "path": "websockets/Create-Secure-valid-url.htm"
-      }, 
-      {
-        "url": "/websockets/Create-Secure-verify-url-set-default-port.htm", 
-        "path": "websockets/Create-Secure-verify-url-set-default-port.htm"
       }, 
       {
         "url": "/websockets/Create-Secure-verify-url-set-non-default-port.htm", 
@@ -16480,6 +16292,194 @@
       {
         "url": "/page-visibility/test_tab_state_change-manual.html", 
         "path": "page-visibility/test_tab_state_change-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_button_attribute_mouse-manual.html", 
+        "path": "pointerevents/pointerevent_button_attribute_mouse-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_capture_mouse-manual.html", 
+        "path": "pointerevents/pointerevent_capture_mouse-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_capture_suppressing_mouse-manual.html", 
+        "path": "pointerevents/pointerevent_capture_suppressing_mouse-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_change-touch-action-onpointerdown_touch-manual.html", 
+        "path": "pointerevents/pointerevent_change-touch-action-onpointerdown_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_gotpointercapture_before_first_pointerevent-manual.html", 
+        "path": "pointerevents/pointerevent_gotpointercapture_before_first_pointerevent-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_lostpointercapture_is_first-manual.html", 
+        "path": "pointerevents/pointerevent_lostpointercapture_is_first-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointercancel_touch-manual.html", 
+        "path": "pointerevents/pointerevent_pointercancel_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerdown-manual.html", 
+        "path": "pointerevents/pointerevent_pointerdown-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerenter-manual.html", 
+        "path": "pointerevents/pointerevent_pointerenter-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerenter_does_not_bubble-manual.html", 
+        "path": "pointerevents/pointerevent_pointerenter_does_not_bubble-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerenter_nohover-manual.html", 
+        "path": "pointerevents/pointerevent_pointerenter_nohover-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerleave_descendant_over-manual.html", 
+        "path": "pointerevents/pointerevent_pointerleave_descendant_over-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerleave_descendants-manual.html", 
+        "path": "pointerevents/pointerevent_pointerleave_descendants-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerleave_does_not_bubble-manual.html", 
+        "path": "pointerevents/pointerevent_pointerleave_does_not_bubble-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerleave_mouse-manual.html", 
+        "path": "pointerevents/pointerevent_pointerleave_mouse-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerleave_pen-manual.html", 
+        "path": "pointerevents/pointerevent_pointerleave_pen-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerleave_touch-manual.html", 
+        "path": "pointerevents/pointerevent_pointerleave_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointermove_isprimary_same_as_pointerdown-manual.html", 
+        "path": "pointerevents/pointerevent_pointermove_isprimary_same_as_pointerdown-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointermove_pointertype-manual.html", 
+        "path": "pointerevents/pointerevent_pointermove_pointertype-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerout-manual.html", 
+        "path": "pointerevents/pointerevent_pointerout-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerout_received_once-manual.html", 
+        "path": "pointerevents/pointerevent_pointerout_received_once-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerover-manual.html", 
+        "path": "pointerevents/pointerevent_pointerover-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointertype_mouse-manual.html", 
+        "path": "pointerevents/pointerevent_pointertype_mouse-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointertype_pen-manual.html", 
+        "path": "pointerevents/pointerevent_pointertype_pen-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointertype_touch-manual.html", 
+        "path": "pointerevents/pointerevent_pointertype_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerup-manual.html", 
+        "path": "pointerevents/pointerevent_pointerup-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_releasepointercapture_events_to_original_target-manual.html", 
+        "path": "pointerevents/pointerevent_releasepointercapture_events_to_original_target-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_releasepointercapture_invalid_pointerid-manual.html", 
+        "path": "pointerevents/pointerevent_releasepointercapture_invalid_pointerid-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_releasepointercapture_onpointercancel_touch-manual.html", 
+        "path": "pointerevents/pointerevent_releasepointercapture_onpointercancel_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_releasepointercapture_onpointerup_mouse-manual.html", 
+        "path": "pointerevents/pointerevent_releasepointercapture_onpointerup_mouse-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_setpointercapture_inactive_button_mouse-manual.html", 
+        "path": "pointerevents/pointerevent_setpointercapture_inactive_button_mouse-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_setpointercapture_invalid_pointerid-manual.html", 
+        "path": "pointerevents/pointerevent_setpointercapture_invalid_pointerid-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_setpointercapture_relatedtarget-manual.html", 
+        "path": "pointerevents/pointerevent_setpointercapture_relatedtarget-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-auto-css_touch-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-auto-css_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-inherit_child-auto-child-none_touch-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-inherit_child-auto-child-none_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-inherit_child-none_touch-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-inherit_child-none_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-inherit_child-pan-x-child-pan-x_touch-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-inherit_child-pan-x-child-pan-x_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-inherit_child-pan-x-child-pan-y_touch-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-inherit_child-pan-x-child-pan-y_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-inherit_highest-parent-none_touch-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-inherit_highest-parent-none_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-inherit_parent-none_touch-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-inherit_parent-none_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-keyboard-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-keyboard-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-mouse-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-mouse-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-none-css_touch-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-none-css_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-pan-x-css_touch-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-pan-x-css_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-pan-x-pan-y-pan-y_touch-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-pan-x-pan-y-pan-y_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-pan-x-pan-y_touch-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-pan-x-pan-y_touch-manual.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_touch-action-pan-y-css_touch-manual.html", 
+        "path": "pointerevents/pointerevent_touch-action-pan-y-css_touch-manual.html"
       }, 
       {
         "url": "/touch-events/multi-touch-interactions-manual.html", 
@@ -21678,5 +21678,5 @@
     ]
   }, 
   "local_changes": [], 
-  "rev": "6150455c8b3f993ad779c6cc6292cc871d95f9ea"
+  "rev": "6b68f3a004805ceb471a9d9032f5e1f5f380ebe1"
 }
