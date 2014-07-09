@@ -1,12 +1,13 @@
-import socket
+import hashlib
 import os
+import socket
+import sys
+import threading
+import time
+import traceback
+import urlparse
 import uuid
 from collections import defaultdict
-import time
-import urlparse
-import threading
-import hashlib
-import traceback
 
 marionette = None
 
@@ -76,7 +77,7 @@ class MarionetteTestExecutor(TestExecutor):
         try:
             self.marionette.delete_session()
         except:
-            pass
+            print >> sys.stderr, traceback.format_exc()
         del self.marionette
 
     def is_alive(self):

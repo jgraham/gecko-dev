@@ -44,8 +44,6 @@ class Reducer(object):
     def __init__(self, target, **kwargs):
         self.target = target
 
-        print kwargs
-
         self.test_type = kwargs["test_types"][0]
         run_info = wpttest.get_run_info(kwargs["product"], debug=False)
         test_filter = wptrunner.TestFilter(include=kwargs["include"])
@@ -136,8 +134,8 @@ class Reducer(object):
 
             sys.stdout, sys.stderr = stdout, stderr
 
-        logger.debug("Result %s unstable with chunk removed" %
-                     ("was" if is_unstable else "was not"))
+        logger.debug("Result was unstable with chunk removed"
+                     if is_unstable else "stable")
 
         return is_unstable
 

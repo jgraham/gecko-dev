@@ -140,6 +140,7 @@ class TestEnvironment(object):
                 shutil.copy2(source_path, dest_path)
 
     def ensure_started(self):
+        # Pause for a while to ensure that the server has a chance to start
         time.sleep(2)
         for scheme, servers in self.servers.iteritems():
             for port, server in servers:
@@ -265,15 +266,15 @@ class EqualTimeChunker(TestChunker):
 
             def add_path(self, path_data):
                 sum_time = self.current_chunk.time + path_data.time
-                if sum_time > self.time_per_chunk:
+                if sum_time > self.time_per_chunk and self.remaining_chunks > 0:
                     overshoot = sum_time - self.time_per_chunk
                     undershoot = self.time_per_chunk - self.current_chunk.time
                     if overshoot < undershoot:
                         self.create()
                         self.current_chunk.append(path_data)
                     else:
-                        self.create()
                         self.current_chunk.append(path_data)
+                        self.create()
                 else:
                     self.current_chunk.append(path_data)
 
@@ -466,9 +467,7 @@ class LogThread(threading.Thread):
         while True:
             try:
                 msg = self.queue.get()
-            except EOFError:
-                break
-            except IOError:
+            except (EOFError, IOError):
                 break
             if msg is None:
                 break

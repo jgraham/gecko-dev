@@ -1,10 +1,11 @@
 import json
 import os
+from abc import ABCMeta, abstractmethod
 
 here = os.path.split(__file__)[0]
 
 
-def get_executor_kwargs(http_server_url, **kwargs):
+def executor_kwargs(http_server_url, **kwargs):
     timeout_multiplier = kwargs["timeout_multiplier"]
     if timeout_multiplier is None:
         timeout_multiplier = 1
@@ -40,6 +41,8 @@ def reftest_result_converter(self, test, result):
 
 
 class TestExecutor(object):
+    __metaclass__ = ABCMeta
+
     convert_result = None
 
     def __init__(self, browser, http_server_url, timeout_multiplier=1):
@@ -64,11 +67,13 @@ class TestExecutor(object):
         if self.runner is not None:
             return self.runner.logger
 
+    @abstractmethod
     def setup(self, runner):
-        raise NotImplementedError
+        pass
 
     def teardown(self):
         pass
 
+    @abstractmethod
     def run_test(self):
-        raise NotImplementedError
+        pass

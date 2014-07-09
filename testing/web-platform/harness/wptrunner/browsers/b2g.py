@@ -4,10 +4,11 @@ import tempfile
 import shutil
 import subprocess
 
-from mozprofile import FirefoxProfile, Preferences
-from mozrunner import B2GDeviceRunner
+import fxos_appgen
 import mozdevice
 import moznetwork
+from mozprofile import FirefoxProfile, Preferences
+from mozrunner import B2GDeviceRunner
 
 from .base import get_free_port, BrowserError, Browser, ExecutorBrowser
 from ..executors.executormarionette import MarionetteTestharnessExecutor, required_files
@@ -19,7 +20,7 @@ __wptrunner__ = {"product": "b2g",
                  "browser": "B2GBrowser",
                  "executor": {"testharness": "B2GMarionetteTestharnessExecutor"},
                  "browser_kwargs": "browser_kwargs",
-                 "executor_kwargs": "get_executor_kwargs",
+                 "executor_kwargs": "executor_kwargs",
                  "env_options": "env_options"}
 
 
@@ -32,7 +33,7 @@ def browser_kwargs(**kwargs):
             "no_backup": kwargs.get("b2g_no_backup", False)}
 
 
-def get_executor_kwargs(http_server_url, **kwargs):
+def executor_kwargs(http_server_url, **kwargs):
     timeout_multiplier = kwargs["timeout_multiplier"]
     if timeout_multiplier is None:
         timeout_multiplier = 2
@@ -74,7 +75,7 @@ class B2GBrowser(Browser):
         self.logger.info("Running B2G setup")
         self.backup_path = tempfile.mkdtemp()
 
-        self.logger.debug(self.backup_path)
+        self.logger.debug("Backing up device to %s"  % (self.backup_path,))
 
         if not self.no_backup:
             self.backup_dirs = [("/data/local", os.path.join(self.backup_path, "local")),
@@ -93,19 +94,12 @@ class B2GBrowser(Browser):
     def start(self):
         profile = FirefoxProfile()
 
-        profile.set_preferences({"dom.disable_open_during_load": False,
-                                 # "dom.mozBrowserFramesEnabled": True,
-                                 # "dom.ipc.tabs.disabled": False,
-                                 # "dom.ipc.browser_frames.oop_by_default": False,
-                                 # "marionette.force-local": True,
-                                 # "dom.testing.datastore_enabled_for_hosted_apps": True
-                                 })
+        profile.set_preferences({"dom.disable_open_during_load": False})
 
         self.logger.debug("Creating device runner")
         self.runner = B2GDeviceRunner(profile=profile)
         self.logger.debug("Starting device runner")
         self.runner.start()
-        self.wait_for_net()
         self.logger.debug("Device runner started")
 
     def setup_hosts(self):
@@ -181,6 +175,9 @@ class B2GBrowser(Browser):
     def stop(self):
         pass
 
+    def on_output(self):
+        raise NotImplementedError
+
     def cleanup(self):
         self.logger.debug("Running browser cleanup steps")
 
@@ -211,10 +208,8 @@ class B2GExecutorBrowser(ExecutorBrowser):
         ExecutorBrowser.__init__(self, *args, **kwargs)
         self.device = mozdevice.DeviceManagerADB()
         self.executor = None
-        subprocess.check_call([self.device._adbPath,
-                               'forward',
-                               'tcp:%s' % self.marionette_port,
-                               'tcp:2828'])
+        self.device.forward('tcp:%s' % self.marionette_port,
+                            'tcp:2828')
 
     def after_connect(self, executor):
         self.executor = executor
@@ -229,17 +224,9 @@ class B2GExecutorBrowser(ExecutorBrowser):
             self.executor.logger.info("certtest_app is already installed")
             return
         self.executor.logger.info("Installing certtest_app")
-        self.device.pushFile(os.path.join(here, "b2g_setup", "certtest_app.zip"),
-                             "/data/local/certtest_app.zip")
-
-        self.executor.logger.debug("Running install script")
-        with open(os.path.join(here, "b2g_setup", "app_install.js"), "r") as f:
-            script = f.read()
-
-        marionette.set_context("chrome")
-        marionette.set_script_timeout(5000)
-        marionette.execute_async_script(script)
-        self.executor.logger.debug("Install script complete")
+        app_path = os.path.join(here, "b2g_setup", "certtest_app.zip")
+        fxos_appgen.install_app('CertTest App', app_path, marionette=self.executor.marionette)
+        self.executor.logger.debug("Install complete")
 
     def use_cert_app(self):
         marionette = self.executor.marionette
