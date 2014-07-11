@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this file,
+# You can obtain one at http://mozilla.org/MPL/2.0/.
+
 import os
 import time
 import tempfile
@@ -219,6 +223,8 @@ class B2GExecutorBrowser(ExecutorBrowser):
         self.wait_for_net()
 
     def install_cert_app(self):
+        """Install the container app used to run the tests"""
+
         marionette = self.executor.marionette
         if self.device.dirExists("/data/local/webapps/certtest-app"):
             self.executor.logger.info("certtest_app is already installed")
@@ -229,6 +235,7 @@ class B2GExecutorBrowser(ExecutorBrowser):
         self.executor.logger.debug("Install complete")
 
     def use_cert_app(self):
+        """Start the app used to run the tests"""
         marionette = self.executor.marionette
 
         self.wait_for_homescreen(marionette)
@@ -269,6 +276,8 @@ class B2GExecutorBrowser(ExecutorBrowser):
             time.sleep(1)
 
     def wait_for_homescreen(self, marionette):
+        """Wait for the Gaia homescreen to load"""
+
         self.executor.logger.info("Waiting for homescreen to load")
         marionette.set_context(marionette.CONTEXT_CONTENT)
         marionette.execute_async_script("""

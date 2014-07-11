@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this file,
+# You can obtain one at http://mozilla.org/MPL/2.0/.
+
 import operator
 
 from ..node import NodeVisitor, DataNode, ConditionalNode, KeyValueNode, ValueNode
@@ -39,6 +43,17 @@ class ConditionalValue(object):
 
 class Compiler(NodeVisitor):
     def compile(self, tree, data_cls_getter=None, **kwargs):
+        """Compile a raw AST into a form where conditional expressions
+        are represented by ConditionalValue objects that can be evaluated
+        at runtime.
+
+        tree - The root node of the wptmanifest AST to compile
+
+        data_cls_getter - A function taking two parameters; the previous
+                          output node and the current ast node and returning
+                          the class of the output node to use for the current
+                          ast node
+        """
         if data_cls_getter is None:
             self.data_cls_getter = lambda x, y: ManifestItem
         else:

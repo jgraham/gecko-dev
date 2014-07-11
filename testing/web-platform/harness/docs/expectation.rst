@@ -1,8 +1,8 @@
 Expectation Data
 ================
 
-Introdution
------------
+Introduction
+------------
 
 For use in continuous integration systems, and other scenarios where
 regression tracking is required, wptrunner supports storing and
@@ -45,7 +45,7 @@ directory passed to the test runner. The directory layout follows that
 of web-platform-tests with each test path having a corresponding
 manifest file. Tests that differ only by query string, or reftests
 with the same test path but different ref paths share the same
-reference file. The file name is taken from the last /-seperated part
+reference file. The file name is taken from the last /-separated part
 of the path, suffixed with ``.ini``.
 
 As an optimisation, files which produce only default results
@@ -60,26 +60,92 @@ would have an expectation file ::
   metadata/spec/section/file.html.ini
 
 
+.. _wptupdate-label:
+
 Generating Expectation Files
 ----------------------------
 
 wptrunner provides the tool ``wptupdate`` to generate expectation
-files from the results of a set of baseline test runs.
+files from the results of a set of baseline test runs. The basic
+syntax for this is::
 
-[...]
+  wptupdate [options] config data_root [logfile]...
+
+``config`` is an ini file containing information about the remote used
+for updates, and the structure of the local directories. For example::
+
+  [web-platform-tests]
+  remote_url = https://github.com/w3c/web-platform-tests.git
+  branch = master
+  sync_path = sync
+
+  [local]
+  test_path = tests
+  metadata_path = metadata
+
+``data_root`` is the path to the root directory relative to which the
+local paths in ``config.ini`` should be resolved. For example if the
+tests are in ``/home/user/web-platform/tests`` and the metadata is in
+``/home/user/web-platform/metadata`` then the ``data_root`` would be
+``/home/user/web-platform``.
+
+Each ``logfile`` is a structured log file from a previous run. These
+can be generated from wptrunner using the ``--log-raw`` option
+e.g. ``--log-raw=structured.log``. The default behaviour is to update
+all the test data for the particular combination of hardware and OS
+used in the run corresponding to the log data, whilst leaving any
+other expectations untouched.
+
+wptupdate takes several useful options:
+
+``--sync``
+  Pull the latest version of web-platform-tests from the
+  upstream specified in the config file. If this is specified in
+  combination with logfiles, it is assumed that the results in the log
+  files apply to the post-update tests.
+
+``--no-check-clean``
+  Don't attempt to check if the working directory is clean before
+  doing the update (assuming that the working directory is a git or
+  mercurial tree).
+
+``--patch``
+  Create a branch containing a git commit, or a mq patch with the
+  changes made by wptupdate.
+
+``--ignore-existing``
+  Overwrite all the expectation data for any tests that have a result
+  in the passed log files, not just data for the same platform.
+
+Examples
+~~~~~~~~
+
+Update the local copy of web-platform-tests without changing the
+expectation data and commit (or create a mq patch for) the result::
+
+  wptupdate config.ini . --patch --sync
+
+Update all the expectations from a set of cross-platform test runs::
+
+  wptupdate config.ini . --no-check-clean --patch osx.log linux.log windows.log
+
+Add expectation data for some new tests that are expected to be
+platform-independent::
+
+  wptupdate config.ini . --no-check-clean --patch --ignore-existing tests.log
 
 Manifest Format
 ---------------
 The format of the manifest files is based on the ini format. Files are
-divided into sections, each (part from the root section) having a
+divided into sections, each (apart from the root section) having a
 heading enclosed in square braces. Within each section are key-value
 pairs. There are several notable differences from standard .ini files,
 however:
 
- * Sections may be heirachically nested, with significant whitespace
+ * Sections may be hierarchically nested, with significant whitespace
    indicating nesting depth.
 
- * Only ``:`` is valid as a key/value seperator
+ * Only ``:`` is valid as a key/value separator
 
 A simple example of a manifest file is::
 
@@ -119,7 +185,7 @@ can either be variables, corresponding to data passed in, numbers
 (integer or floating point; exponential notation is not supported) or
 quote-delimited strings. Equality is tested using ``==`` and
 inequality by ``!=``. The operators ``and``, ``or`` and ``not`` are
-used in the expected way. Parenthesis can also be used for
+used in the expected way. Parentheses can also be used for
 grouping. For example::
 
   key:
@@ -127,7 +193,7 @@ grouping. For example::
     if a == 1 or b != "abc": value2
     value3
 
-Here ``a`` and ``b`` are varaibles, the value of which will be
+Here ``a`` and ``b`` are variables, the value of which will be
 supplied when the manifest is used.
 
 Expectation Manifests
@@ -137,7 +203,8 @@ When used for expectation data, manifests have the following format:
 
  * A section per test URL described by the manifest, with the section
    heading being the part of the test URL following the last ``/`` in
-   the path.
+   the path (this allows multiple tests in a single manifest file with
+   the same path part of the URL, but different query parts).
 
  * A subsection per subtest, with the heading being the title of the
    subtest.
@@ -193,4 +260,4 @@ A more complex manifest with conditional properties might be::
       PASS
 
 Note that ``PASS`` in the above works, but is unnecessary; ``PASS``
-(or ``OK``)is always the default expectation for (sub)tests.
+(or ``OK``) is always the default expectation for (sub)tests.

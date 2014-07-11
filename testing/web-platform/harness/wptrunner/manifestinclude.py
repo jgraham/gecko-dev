@@ -1,3 +1,14 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this file,
+# You can obtain one at http://mozilla.org/MPL/2.0/.
+
+"""Manifest structure used to store paths that should be included in a test run.
+
+The manifest is represented by a tree of IncludeManifest objects, the root
+representing the file and each subnode representing a subdirectory that should
+be included or excluded.
+"""
+
 from wptmanifest.node import DataNode
 from wptmanifest.backends import conditional
 from wptmanifest.backends.conditional import ManifestItem
@@ -5,11 +16,17 @@ from wptmanifest.backends.conditional import ManifestItem
 
 class IncludeManifest(ManifestItem):
     def __init__(self, node):
+        """Node in a tree structure representing the paths
+        that should be included or excluded from the test run.
+
+        :param node: AST Node corresponding to this Node.
+        """
         ManifestItem.__init__(self, node)
         self.child_map = {}
 
     @classmethod
     def create(cls):
+        """Create an empty IncludeManifest tree"""
         node = DataNode(None)
         return cls(node)
 
@@ -19,6 +36,11 @@ class IncludeManifest(ManifestItem):
         assert len(self.child_map) == len(self.children)
 
     def include(self, test):
+        """Return a boolean indicating whether a particular test should be
+        included in a test run, based on the IncludeManifest tree rooted on
+        this object.
+
+        :param test: The test object"""
         path_components = self._get_path_components(test)
         return self._include(test, path_components)
 
@@ -62,11 +84,21 @@ class IncludeManifest(ManifestItem):
         skip = False if direction == "include" else True
         node.set("skip", str(skip))
 
-    def add_include(self, url):
-        return self._add_rule(url, "include")
+    def add_include(self, url_prefix):
+        """Add a rule indicating that tests under a url path
+        should be included in test runs
 
-    def _add_exclude(self, url):
-        return self._add_rule(url, "exclude")
+        :param url_prefix: The url prefix to include
+        """
+        return self._add_rule(url_prefix, "include")
+
+    def add_exclude(self, url_prefix):
+        """Add a rule indicating that tests under a url path
+        should be excluded from test runs
+
+        :param url_prefix: The url prefix to exclude
+        """
+        return self._add_rule(url_prefix, "exclude")
 
 
 def get_manifest(manifest_path):

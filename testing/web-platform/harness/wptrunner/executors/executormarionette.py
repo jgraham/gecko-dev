@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this file,
+# You can obtain one at http://mozilla.org/MPL/2.0/.
+
 import hashlib
 import os
 import socket
@@ -81,6 +85,7 @@ class MarionetteTestExecutor(TestExecutor):
         del self.marionette
 
     def is_alive(self):
+        """Check if the marionette connection is still active"""
         try:
             # Get a simple property over the connection
             self.marionette.current_window_handle
@@ -91,7 +96,7 @@ class MarionetteTestExecutor(TestExecutor):
     def after_connect(self):
         url = urlparse.urljoin(
             self.http_server_url, "/testharness_runner.html")
-        self.logger.debug(url)
+        self.logger.debug("Loading %s" % url)
         try:
             self.marionette.navigate(url)
         except:
@@ -102,7 +107,7 @@ class MarionetteTestExecutor(TestExecutor):
                 "prevent access." % url)
             raise
         self.marionette.execute_script(
-            "document.title = '%s'" % threading.current_thread().name)
+            "document.title = '%s'" % threading.current_thread().name.replace("'", '"'))
 
     def run_test(self, test):
         """Run a single test.
@@ -173,11 +178,19 @@ class MarionetteTestExecutor(TestExecutor):
             if result:
                 self.runner.send_message("test_ended", test, result)
 
+    def do_test(self, test, timeout):
+        """Run the steps specific to a given test type for Marionette-based tests.
+
+        :param test: - the Test being run
+        :param timeout: - the timeout in seconds to give the test
+        """
+        raise NotImplementedError
 
 class MarionetteTestharnessExecutor(MarionetteTestExecutor):
     convert_result = testharness_result_converter
 
     def __init__(self, *args, **kwargs):
+        """Marionette-based executor for testharness.js tests"""
         MarionetteTestExecutor.__init__(self, *args, **kwargs)
         self.script = open(os.path.join(here, "testharness_marionette.js")).read()
 
@@ -199,6 +212,7 @@ class MarionetteReftestExecutor(MarionetteTestExecutor):
     convert_result = reftest_result_converter
 
     def __init__(self, *args, **kwargs):
+        """Marionette-based executor for reftests"""
         MarionetteTestExecutor.__init__(self, *args, **kwargs)
         with open(os.path.join(here, "reftest.js")) as f:
             self.script = f.read()

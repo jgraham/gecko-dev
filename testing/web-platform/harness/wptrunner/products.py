@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this file,
+# You can obtain one at http://mozilla.org/MPL/2.0/.
+
 import os
 import importlib
 
@@ -32,8 +36,7 @@ def load_product(product):
                 executor_classes[test_type] = cls
 
             break
-
-    if browser_cls is None:
+    else:
         raise ValueError("Unknown product %s" % product)
 
     return check_args, browser_cls, browser_kwargs, executor_classes, executor_kwargs, env_options
