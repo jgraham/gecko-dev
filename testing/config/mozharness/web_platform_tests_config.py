@@ -6,7 +6,6 @@ config = {
     "options": [
         "--prefs-root=%(test_path)s/prefs",
         "--processes=1",
-        "%(test_path)s/meta",
-        "%(test_path)s/tests"
+        "--config=%(test_path)s/wptrunner.ini",
     ],
 }
