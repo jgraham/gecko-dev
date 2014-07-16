@@ -6,6 +6,7 @@ import argparse
 import os
 import sys
 
+import config
 
 def abs_path(path):
     return os.path.abspath(os.path.expanduser(path))
@@ -26,27 +27,27 @@ def require_arg(kwargs, name, value_func=None):
         sys.exit(1)
 
 
-def create_parser(allow_mandatory=True):
+def create_parser(product_choices=None):
     from mozlog.structured import commandline
-    import browsers
 
-    if not allow_mandatory:
-        prefix = "--"
-    else:
-        prefix = ""
+    import products
+
+    if product_choices is None:
+        config_data = config.load()
+        product_choices = products.products_enabled(config_data)
+
     parser = argparse.ArgumentParser("web-platform-tests",
                                      description="Runner for web-platform-tests tests.")
-    parser.add_argument("--binary", action="store",
-                        type=abs_path,
-                        help="Binary to run tests against")
-    parser.add_argument(prefix + "metadata_root",
-                        action="store", type=abs_path,
+    parser.add_argument("--metadata", action="store", type=abs_path, dest="metadata_root",
                         help="Path to the folder containing test metadata"),
-    parser.add_argument(prefix + "tests_root", action="store", type=abs_path,
+    parser.add_argument("--tests", action="store", type=abs_path, dest="tests_root",
                         help="Path to web-platform-tests"),
-    parser.add_argument("--prefs-root", dest="prefs_root",
-                        action="store", type=abs_path,
+    parser.add_argument("--prefs-root", dest="prefs_root", action="store", type=abs_path,
                         help="Path to the folder containing browser prefs"),
+    parser.add_argument("--config", action="store", type=abs_path,
+                        help="Path to config file")
+    parser.add_argument("--binary", action="store",
+                        type=abs_path, help="Binary to run tests against")
     parser.add_argument("--test-types", action="store",
                         nargs="*", default=["testharness", "reftest"],
                         choices=["testharness", "reftest"],
@@ -82,8 +83,8 @@ def create_parser(allow_mandatory=True):
     parser.add_argument("--no-capture-stdio", action="store_true", default=False,
                         help="Don't capture stdio and write to logging")
 
-    parser.add_argument("--product", action="store", choices=browsers.product_list,
-                        default="firefox")
+    parser.add_argument("--product", action="store", choices=product_choices,
+                        default="firefox", help="Browser against which to run tests")
 
     parser.add_argument('--debugger',
                         help="run under a debugger, e.g. gdb or valgrind")
@@ -98,8 +99,30 @@ def create_parser(allow_mandatory=True):
     return parser
 
 
+def set_from_config(kwargs):
+    kwargs["config"] = config.read(kwargs["config"])
+
+    keys = {"paths": [("tests", "tests_root", True), ("metadata", "metadata_root", True)],
+            "web-platform-tests": ["remote_url", "branch", ("sync_path", "sync_path", True)]}
+
+    for section, values in keys.iteritems():
+        for value in values:
+            if type(value) in (str, unicode):
+                config_value, kw_value, is_path = value, value, False
+            else:
+                config_value, kw_value, is_path = value
+
+            if kw_value in kwargs and kwargs[kw_value] is None:
+                if not is_path:
+                    new_value = kwargs["config"].get(section, {}).get(config_value, None)
+                else:
+                    new_value = kwargs["config"].get(section, {}).get_path(config_value)
+                kwargs[kw_value] = new_value
+
 def check_args(kwargs):
     from mozrunner import cli
+
+    set_from_config(kwargs)
 
     if kwargs["this_chunk"] > 1:
         require_arg(kwargs, "total_chunks", lambda x: x >= kwargs["this_chunk"])
@@ -122,18 +145,20 @@ def check_args(kwargs):
     return kwargs
 
 
-def create_parser_update(allow_mandatory=True):
-    if not allow_mandatory:
-        prefix = "--"
-    else:
-        prefix = ""
-
+def create_parser_update():
     parser = argparse.ArgumentParser("web-platform-tests-update",
                                      description="Update script for web-platform-tests tests.")
-    parser.add_argument(prefix + "config", action="store", type=abs_path,
-                        help="Path to config file")
-    parser.add_argument(prefix + "data_root", action="store", type=abs_path,
-                        help="Base path for data files")
+    parser.add_argument("--metadata", action="store", type=abs_path, dest="metadata_root",
+                        help="Path to the folder containing test metadata"),
+    parser.add_argument("--tests", action="store", type=abs_path, dest="tests_root",
+                        help="Path to web-platform-tests"),
+    parser.add_argument("--sync-path", action="store", type=abs_path,
+                        help="Path to store git checkout of web-platform-tests during update"),
+    parser.add_argument("--remote_url", action="store",
+                        help="URL of web-platfrom-tests repository to sync against"),
+    parser.add_argument("--branch", action="store", type=abs_path,
+                        help="Remote branch to sync against")
+    parser.add_argument("--config", action="store", type=abs_path, help="Path to config file")
     parser.add_argument("--rev", action="store", help="Revision to sync to")
     parser.add_argument("--no-check-clean", action="store_true", default=False,
                         help="Don't check the working directory is clean before updating")
@@ -148,14 +173,26 @@ def create_parser_update(allow_mandatory=True):
     return parser
 
 
-def create_parser_reduce(allow_mandatory=True):
-    parser = create_parser(allow_mandatory)
+def create_parser_reduce(product_choices=None):
+    parser = create_parser(product_choices)
     parser.add_argument("target", action="store", help="Test id that is unstable")
     return parser
 
 
 def parse_args():
     parser = create_parser()
+    rv = vars(parser.parse_args())
+    check_args(rv)
+    return rv
+
+def parse_args_update():
+    parser = create_parser_update()
+    rv = vars(parser.parse_args())
+    set_from_config(rv)
+    return rv
+
+def parse_args_reduce():
+    parser = create_parser_reduce()
     rv = vars(parser.parse_args())
     check_args(rv)
     return rv
