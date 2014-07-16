@@ -9848,8 +9848,24 @@
         "path": "navigation-timing/test_unique_performance_objects.html"
       }, 
       {
+        "url": "/notifications/Notification-permission.html", 
+        "path": "notifications/Notification-permission.html"
+      }, 
+      {
+        "url": "/notifications/event-onshow.html", 
+        "path": "notifications/event-onshow.html"
+      }, 
+      {
         "url": "/notifications/interfaces.html", 
         "path": "notifications/interfaces.html"
+      }, 
+      {
+        "url": "/notifications/notification-constructor-basic.html", 
+        "path": "notifications/notification-constructor-basic.html"
+      }, 
+      {
+        "url": "/notifications/notification-constructor-invalid.html", 
+        "path": "notifications/notification-constructor-invalid.html"
       }, 
       {
         "url": "/old-tests/submission/Microsoft/dragdrop/dragdrop_004.htm", 
@@ -11230,6 +11246,30 @@
       {
         "url": "/touch-events/create-touch-touchlist.html", 
         "path": "touch-events/create-touch-touchlist.html"
+      }, 
+      {
+        "url": "/typedarrays/ArrayBuffer_constructor.html", 
+        "path": "typedarrays/ArrayBuffer_constructor.html"
+      }, 
+      {
+        "url": "/typedarrays/ArrayBuffer_properties.html", 
+        "path": "typedarrays/ArrayBuffer_properties.html"
+      }, 
+      {
+        "url": "/typedarrays/Uint8ClampedArray_constructor.html", 
+        "path": "typedarrays/Uint8ClampedArray_constructor.html"
+      }, 
+      {
+        "url": "/typedarrays/Uint8ClampedArray_length.html", 
+        "path": "typedarrays/Uint8ClampedArray_length.html"
+      }, 
+      {
+        "url": "/typedarrays/Uint8ClampedArray_setter_getter.html", 
+        "path": "typedarrays/Uint8ClampedArray_setter_getter.html"
+      }, 
+      {
+        "url": "/typedarrays/Uint8ClampedArray_subarray.html", 
+        "path": "typedarrays/Uint8ClampedArray_subarray.html"
       }, 
       {
         "url": "/typedarrays/constructors.html", 
@@ -21415,6 +21455,54 @@
         "path": "mediacapture-streams/stream-api/mediastream/mediastream-id-manual.html"
       }, 
       {
+        "url": "/notifications/Notification-requestPermission-denied-manual.html", 
+        "path": "notifications/Notification-requestPermission-denied-manual.html"
+      }, 
+      {
+        "url": "/notifications/Notification-requestPermission-granted-manual.html", 
+        "path": "notifications/Notification-requestPermission-granted-manual.html"
+      }, 
+      {
+        "url": "/notifications/notification-body-basic-manual.html", 
+        "path": "notifications/notification-body-basic-manual.html"
+      }, 
+      {
+        "url": "/notifications/notification-body-empty-manual.html", 
+        "path": "notifications/notification-body-empty-manual.html"
+      }, 
+      {
+        "url": "/notifications/notification-close-manual.html", 
+        "path": "notifications/notification-close-manual.html"
+      }, 
+      {
+        "url": "/notifications/notification-dir-auto-manual.html", 
+        "path": "notifications/notification-dir-auto-manual.html"
+      }, 
+      {
+        "url": "/notifications/notification-dir-ltr-manual.html", 
+        "path": "notifications/notification-dir-ltr-manual.html"
+      }, 
+      {
+        "url": "/notifications/notification-dir-rtl-manual.html", 
+        "path": "notifications/notification-dir-rtl-manual.html"
+      }, 
+      {
+        "url": "/notifications/notification-icon-basic-manual.html", 
+        "path": "notifications/notification-icon-basic-manual.html"
+      }, 
+      {
+        "url": "/notifications/notification-icon-empty-manual.html", 
+        "path": "notifications/notification-icon-empty-manual.html"
+      }, 
+      {
+        "url": "/notifications/notification-tag-different-manual.html", 
+        "path": "notifications/notification-tag-different-manual.html"
+      }, 
+      {
+        "url": "/notifications/notification-tag-same-manual.html", 
+        "path": "notifications/notification-tag-same-manual.html"
+      }, 
+      {
         "url": "/page-visibility/test_minimize-manual.html", 
         "path": "page-visibility/test_minimize-manual.html"
       }, 
@@ -21855,5 +21943,5 @@
     ]
   }, 
   "local_changes": [], 
-  "rev": "c216bbbdfa5658effe83d71689bef69f8a62c645"
+  "rev": "0e6ff97259478d128d7ef74171b44a425f4e3d9b"
 }
