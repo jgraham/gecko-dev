@@ -3571,6 +3571,18 @@
         "path": "IndexedDB/idbindex_getKey4.htm"
       }, 
       {
+        "url": "/IndexedDB/idbindex_getKey5.htm", 
+        "path": "IndexedDB/idbindex_getKey5.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbindex_getKey6.htm", 
+        "path": "IndexedDB/idbindex_getKey6.htm"
+      }, 
+      {
+        "url": "/IndexedDB/idbindex_getKey7.htm", 
+        "path": "IndexedDB/idbindex_getKey7.htm"
+      }, 
+      {
         "url": "/IndexedDB/idbindex_indexNames.htm", 
         "path": "IndexedDB/idbindex_indexNames.htm"
       }, 
@@ -14806,10 +14818,6 @@
         "path": "battery-status/countdown.js"
       }, 
       {
-        "url": "/battery-status/manifest.txt", 
-        "path": "battery-status/manifest.txt"
-      }, 
-      {
         "url": "/battery-status/prime.js", 
         "path": "battery-status/prime.js"
       }, 
@@ -17044,10 +17052,6 @@
       {
         "url": "/webmessaging/README.md", 
         "path": "webmessaging/README.md"
-      }, 
-      {
-        "url": "/webmessaging/manifest.txt", 
-        "path": "webmessaging/manifest.txt"
       }, 
       {
         "url": "/webmessaging/without-ports/025-1.js", 
@@ -21943,5 +21947,5 @@
     ]
   }, 
   "local_changes": [], 
-  "rev": "0e6ff97259478d128d7ef74171b44a425f4e3d9b"
+  "rev": "b010fb85e75b94894d7f92aab2169d858955d661"
 }
