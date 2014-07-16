@@ -48,17 +48,16 @@ class WebPlatformTestsRunner(MozbuildObject):
         if build_path not in sys.path:
             sys.path.append(build_path)
 
+        if kwargs["config"] is None:
+            kwargs["config"] = os.path.join(self.topsrcdir, 'testing', 'web-platform', 'wptrunner.ini')
+
         if kwargs["binary"] is None:
             kwargs["binary"] = os.path.join(self.get_binary_path('app'))
 
-        if kwargs["tests_root"] is None:
-            kwargs["tests_root"] = os.path.join(self.topobjdir, '_tests', 'web-platform', "tests")
-
-        if kwargs["metadata_root"] is None:
-            kwargs["metadata_root"] = os.path.join(self.topobjdir, '_tests', 'web-platform', "meta")
-
         if kwargs["prefs_root"] is None:
             kwargs["prefs_root"] = os.path.join(self.topobjdir, '_tests', 'web-platform', "prefs")
+
+        kwargs["capture_stdio"] = True
 
         kwargs = wptcommandline.check_args(kwargs)
 
@@ -67,7 +66,6 @@ class WebPlatformTestsRunner(MozbuildObject):
 
         self.setup_kwargs(kwargs)
 
-        kwargs["capture_stdio"] = True
         logger = wptrunner.setup_logging(kwargs, {})
         self.log_manager.register_structured_logger(wptrunner.logger)
         self.log_manager.add_terminal_logging()
@@ -96,11 +94,10 @@ class WebPlatformTestsUpdater(MozbuildObject):
     def run_update(self, **kwargs):
         from wptrunner import update
 
-        if kwargs["data_root"] is None:
-            kwargs["data_root"] = os.path.join(self.topsrcdir, 'testing', 'web-platform')
-
         if kwargs["config"] is None:
-            kwargs["config"] = os.path.join(self.topsrcdir, 'testing', 'web-platform', 'config.ini')
+            kwargs["config"] = os.path.join(self.topsrcdir, 'testing', 'web-platform', 'wptrunner.ini')
+
+        wptcommandline.set_from_config(kwargs)
 
         update.run_update(**kwargs)
 
@@ -130,7 +127,7 @@ class MachCommands(MachCommandBase):
     @Command("web-platform-tests",
              category="testing",
              conditions=[conditions.is_firefox],
-             parser=wptcommandline.create_parser(False))
+             parser=wptcommandline.create_parser(["firefox"]))
     def run_web_platform_tests(self, **params):
         self.setup()
         wpt_runner = self._spawn(WebPlatformTestsRunner)
@@ -143,7 +140,7 @@ class MachCommands(MachCommandBase):
     @Command("web-platform-tests-update",
              category="testing",
              conditions=[conditions.is_firefox],
-             parser=wptcommandline.create_parser_update(False))
+             parser=wptcommandline.create_parser_update())
     def update_web_platform_tests(self, **params):
         self.setup()
         self.virtualenv_manager.install_pip_package('html5lib==0.99')
@@ -157,7 +154,7 @@ class MachCommands(MachCommandBase):
     @Command("web-platform-tests-reduce",
              category="testing",
              conditions=[conditions.is_firefox],
-             parser=wptcommandline.create_parser_reduce(False))
+             parser=wptcommandline.create_parser_reduce(["firefox"]))
     def unstable_web_platform_tests(self, **params):
         self.setup()
         wpt_reduce = self._spawn(WebPlatformTestsReduce)

@@ -20,6 +20,7 @@ PKG_STAGE = $(DIST)/test-stage
 
 libs::
 	$(INSTALL) $(topsrcdir)/testing/web-platform/runtests.py $(_DEST_DIR)
+	$(INSTALL) $(topsrcdir)/testing/web-platform/wptrunner.ini $(_DEST_DIR)
 	$(INSTALL) $(topsrcdir)/testing/web-platform/harness/wptrunner $(_DEST_DIR)
 libs:: $(WPT_TESTS)
 	$(INSTALL) $(foreach f,$^,"$f") $(_DEST_DIR)
