@@ -76,9 +76,10 @@ namespace {
         (loadFlags & (nsIRequest::LOAD_BYPASS_CACHE | \
                       nsICachingChannel::LOAD_BYPASS_LOCAL_CACHE))
 
-#define CACHE_FILE_GONE(result) \
+#define RECOVER_FROM_CACHE_FILE_ERROR(result) \
         ((result) == NS_ERROR_FILE_NOT_FOUND || \
-         (result) == NS_ERROR_FILE_CORRUPTED)
+         (result) == NS_ERROR_FILE_CORRUPTED || \
+         (result) == NS_ERROR_OUT_OF_MEMORY)
 
 static NS_DEFINE_CID(kStreamListenerTeeCID, NS_STREAMLISTENERTEE_CID);
 static NS_DEFINE_CID(kStreamTransportServiceCID,
@@ -2739,7 +2740,7 @@ nsHttpChannel::OnCacheEntryCheck(nsICacheEntry* entry, nsIApplicationCache* appC
         (appCache ||
          (mCacheEntryIsReadOnly && !(mLoadFlags & nsIRequest::INHIBIT_CACHING)) ||
          mFallbackChannel)) {
-        rv = OpenCacheInputStream(entry, true);
+        rv = OpenCacheInputStream(entry, true, !!appCache);
         if (NS_SUCCEEDED(rv)) {
             mCachedContentIsValid = true;
             entry->MaybeMarkValid();
@@ -2790,7 +2791,7 @@ nsHttpChannel::OnCacheEntryCheck(nsICacheEntry* entry, nsIApplicationCache* appC
             rv = MaybeSetupByteRangeRequest(size, contentLength);
             mCachedContentIsPartial = NS_SUCCEEDED(rv) && mIsPartialRequest;
             if (mCachedContentIsPartial) {
-                rv = OpenCacheInputStream(entry, false);
+                rv = OpenCacheInputStream(entry, false, !!appCache);
                 *aResult = ENTRY_NEEDS_REVALIDATION;
             }
             return rv;
@@ -2986,7 +2987,7 @@ nsHttpChannel::OnCacheEntryCheck(nsICacheEntry* entry, nsIApplicationCache* appC
     }
 
     if (mCachedContentIsValid || mDidReval) {
-        rv = OpenCacheInputStream(entry, mCachedContentIsValid);
+        rv = OpenCacheInputStream(entry, mCachedContentIsValid, !!appCache);
         if (NS_FAILED(rv)) {
             // If we can't get the entity then we have to act as though we
             // don't have the cache entry.
@@ -3378,7 +3379,8 @@ nsHttpChannel::ShouldUpdateOfflineCacheEntry()
 }
 
 nsresult
-nsHttpChannel::OpenCacheInputStream(nsICacheEntry* cacheEntry, bool startBuffering)
+nsHttpChannel::OpenCacheInputStream(nsICacheEntry* cacheEntry, bool startBuffering,
+                                    bool checkingAppCacheEntry)
 {
     nsresult rv;
 
@@ -3398,8 +3400,9 @@ nsHttpChannel::OpenCacheInputStream(nsICacheEntry* cacheEntry, bool startBufferi
 
         // XXX: We should not be skilling this check in the offline cache
         // case, but we have to do so now to work around bug 794507.
-        MOZ_ASSERT(mCachedSecurityInfo || mLoadedFromApplicationCache);
-        if (!mCachedSecurityInfo && !mLoadedFromApplicationCache) {
+        bool mustHaveSecurityInfo = !mLoadedFromApplicationCache && !checkingAppCacheEntry;
+        MOZ_ASSERT(mCachedSecurityInfo || !mustHaveSecurityInfo);
+        if (!mCachedSecurityInfo && mustHaveSecurityInfo) {
             LOG(("mCacheEntry->GetSecurityInfo returned success but did not "
                  "return the security info [channel=%p, entry=%p]",
                  this, cacheEntry));
@@ -4927,9 +4930,10 @@ nsHttpChannel::OnStartRequest(nsIRequest *request, nsISupports *ctxt)
         NS_WARNING("No response head in OnStartRequest");
     }
 
-    // cache file could be deleted on our behalf, reload from network here.
-    if (mCacheEntry && mCachePump && CACHE_FILE_GONE(mStatus)) {
-        LOG(("  cache file gone, reloading from server"));
+    // cache file could be deleted on our behalf, it could contain errors or
+    // it failed to allocate memory, reload from network here.
+    if (mCacheEntry && mCachePump && RECOVER_FROM_CACHE_FILE_ERROR(mStatus)) {
+        LOG(("  cache file error, reloading from server"));
         mCacheEntry->AsyncDoom(nullptr);
         nsresult rv = StartRedirectChannelToURI(mURI, nsIChannelEventSink::REDIRECT_INTERNAL);
         if (NS_SUCCEEDED(rv))

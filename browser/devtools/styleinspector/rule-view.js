@@ -442,7 +442,7 @@ Rule.prototype = {
       return this._title;
     }
     this._title = CssLogic.shortSource(this.sheet);
-    if (this.domRule.type !== ELEMENT_STYLE) {
+    if (this.domRule.type !== ELEMENT_STYLE && this.ruleLine > 0) {
       this._title += ":" + this.ruleLine;
     }
 
@@ -689,6 +689,8 @@ Rule.prototype = {
    *        The property's priority (either "important" or an empty string).
    */
   previewPropertyValue: function(aProperty, aValue, aPriority) {
+    aProperty.value = aValue;
+
     let modifications = this.style.startModifyingProperties();
     modifications.setProperty(aProperty.name, aValue, aPriority);
     modifications.apply();
@@ -1076,6 +1078,7 @@ function CssRuleView(aInspector, aDoc, aStore, aPageStyle) {
 
   this._buildContextMenu = this._buildContextMenu.bind(this);
   this._contextMenuUpdate = this._contextMenuUpdate.bind(this);
+  this._onAddRule = this._onAddRule.bind(this);
   this._onSelectAll = this._onSelectAll.bind(this);
   this._onCopy = this._onCopy.bind(this);
   this._onCopyColor = this._onCopyColor.bind(this);
@@ -1125,6 +1128,11 @@ CssRuleView.prototype = {
     this._contextmenu.addEventListener("popupshowing", this._contextMenuUpdate);
     this._contextmenu.id = "rule-view-context-menu";
 
+    this.menuitemAddRule = createMenuItem(this._contextmenu, {
+      label: "ruleView.contextmenu.addRule",
+      accesskey: "ruleView.contextmenu.addRule.accessKey",
+      command: this._onAddRule
+    });
     this.menuitemSelectAll = createMenuItem(this._contextmenu, {
       label: "ruleView.contextmenu.selectAll",
       accesskey: "ruleView.contextmenu.selectAll.accessKey",
@@ -1140,7 +1148,7 @@ CssRuleView.prototype = {
       accesskey: "ruleView.contextmenu.copyColor.accessKey",
       command: this._onCopyColor
     });
-    this.menuitemSources= createMenuItem(this._contextmenu, {
+    this.menuitemSources = createMenuItem(this._contextmenu, {
       label: "ruleView.contextmenu.showOrigSources",
       accesskey: "ruleView.contextmenu.showOrigSources.accessKey",
       command: this._onToggleOrigSources
@@ -1354,6 +1362,43 @@ CssRuleView.prototype = {
     Services.prefs.setBoolPref(PREF_ORIG_SOURCES, !isEnabled);
   },
 
+  /**
+   * Add a new rule to the current element.
+   */
+  _onAddRule: function() {
+    let elementStyle = this._elementStyle;
+    let element = elementStyle.element;
+    let rules = elementStyle.rules;
+    let client = this.inspector.toolbox._target.client;
+
+    if (!client.traits.addNewRule) {
+      return;
+    }
+
+    this.pageStyle.addNewRule(element).then(options => {
+      let newRule = new Rule(elementStyle, options);
+      rules.push(newRule);
+      let editor = new RuleEditor(this, newRule);
+
+      // Insert the new rule editor after the inline element rule
+      if (rules.length <= 1) {
+        this.element.appendChild(editor.element);
+      } else {
+        for (let rule of rules) {
+          if (rule.selectorText === "element") {
+            let referenceElement = rule.editor.element.nextSibling;
+            this.element.insertBefore(editor.element, referenceElement);
+            break;
+          }
+        }
+      }
+
+      // Focus and make the new rule's selector editable
+      editor.selectorText.click();
+      elementStyle._changed();
+    });
+  },
+
   setPageStyle: function(aPageStyle) {
     this.pageStyle = aPageStyle;
   },
@@ -1363,7 +1408,7 @@ CssRuleView.prototype = {
    */
   get isEditing() {
     return this.element.querySelectorAll(".styleinspector-propertyeditor").length > 0
-      || this.tooltips.colorPicker.tooltip.isShown();
+      || this.tooltips.isEditing;
   },
 
   _handlePrefChange: function(pref) {
@@ -1852,6 +1897,9 @@ RuleEditor.prototype = {
       }
     } else {
       sourceLabel.setAttribute("value", this.rule.title);
+      if (this.rule.ruleLine == -1 && this.rule.domRule.parentStyleSheet) {
+        sourceLabel.parentNode.setAttribute("unselectable", "true");
+      }
     }
 
     let showOrig = Services.prefs.getBoolPref(PREF_ORIG_SOURCES);
@@ -2122,9 +2170,7 @@ TextPropertyEditor.prototype = {
    */
   get editing() {
     return !!(this.nameSpan.inplaceEditor || this.valueSpan.inplaceEditor ||
-      this.ruleEditor.ruleView.tooltips.colorPicker.tooltip.isShown() ||
-      this.ruleEditor.ruleView.tooltips.colorPicker.eyedropperOpen) ||
-      this.popup.isOpen;
+      this.ruleEditor.ruleView.tooltips.isEditing) || this.popup.isOpen;
   },
 
   /**
@@ -2359,11 +2405,15 @@ TextPropertyEditor.prototype = {
       this.element.removeAttribute("dirty");
     }
 
-    let swatchClass = "ruleview-colorswatch";
+    let colorSwatchClass = "ruleview-colorswatch";
+    let bezierSwatchClass = "ruleview-bezierswatch";
+
     let outputParser = this.ruleEditor.ruleView._outputParser;
     let frag = outputParser.parseCssProperty(name, val, {
-      colorSwatchClass: swatchClass,
+      colorSwatchClass: colorSwatchClass,
       colorClass: "ruleview-color",
+      bezierSwatchClass: bezierSwatchClass,
+      bezierClass: "ruleview-bezier",
       defaultColorType: !propDirty,
       urlClass: "theme-link",
       baseURI: this.sheetURI
@@ -2372,13 +2422,28 @@ TextPropertyEditor.prototype = {
     this.valueSpan.appendChild(frag);
 
     // Attach the color picker tooltip to the color swatches
-    this._swatchSpans = this.valueSpan.querySelectorAll("." + swatchClass);
+    this._colorSwatchSpans = this.valueSpan.querySelectorAll("." + colorSwatchClass);
     if (this.ruleEditor.isEditable) {
-      for (let span of this._swatchSpans) {
+      for (let span of this._colorSwatchSpans) {
         // Capture the original declaration value to be able to revert later
         let originalValue = this.valueSpan.textContent;
         // Adding this swatch to the list of swatches our colorpicker knows about
         this.ruleEditor.ruleView.tooltips.colorPicker.addSwatch(span, {
+          onPreview: () => this._previewValue(this.valueSpan.textContent),
+          onCommit: () => this._applyNewValue(this.valueSpan.textContent),
+          onRevert: () => this._applyNewValue(originalValue)
+        });
+      }
+    }
+
+    // Attach the cubic-bezier tooltip to the bezier swatches
+    this._bezierSwatchSpans = this.valueSpan.querySelectorAll("." + bezierSwatchClass);
+    if (this.ruleEditor.isEditable) {
+      for (let span of this._bezierSwatchSpans) {
+        // Capture the original declaration value to be able to revert later
+        let originalValue = this.valueSpan.textContent;
+        // Adding this swatch to the list of swatches our colorpicker knows about
+        this.ruleEditor.ruleView.tooltips.cubicBezier.addSwatch(span, {
           onPreview: () => this._previewValue(this.valueSpan.textContent),
           onCommit: () => this._applyNewValue(this.valueSpan.textContent),
           onRevert: () => this._applyNewValue(originalValue)
@@ -2517,8 +2582,8 @@ TextPropertyEditor.prototype = {
    * Begin editing next available property.
    */
   remove: function() {
-    if (this._swatchSpans && this._swatchSpans.length) {
-      for (let span of this._swatchSpans) {
+    if (this._colorSwatchSpans && this._colorSwatchSpans.length) {
+      for (let span of this._colorSwatchSpans) {
         this.ruleEditor.ruleView.tooltips.colorPicker.removeSwatch(span);
       }
     }

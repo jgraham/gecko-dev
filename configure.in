@@ -481,16 +481,24 @@ case "$target" in
         if test "$_CC_MAJOR_VERSION" = "16"; then
             _CC_SUITE=10
             MSVS_VERSION=2010
+            MSVC_C_RUNTIME_DLL=msvcr100.dll
+            MSVC_CXX_RUNTIME_DLL=msvcp100.dll
         elif test "$_CC_MAJOR_VERSION" = "17"; then
             _CC_SUITE=11
             MSVS_VERSION=2012
+            MSVC_C_RUNTIME_DLL=msvcr110.dll
+            MSVC_CXX_RUNTIME_DLL=msvcp110.dll
         elif test "$_CC_MAJOR_VERSION" = "18"; then
             _CC_SUITE=12
             MSVS_VERSION=2013
+            MSVC_C_RUNTIME_DLL=msvcr120.dll
+            MSVC_CXX_RUNTIME_DLL=msvcp120.dll
         else
             AC_MSG_ERROR([This version ($CC_VERSION) of the MSVC compiler is unsupported. See https://developer.mozilla.org/en/Windows_Build_Prerequisites.])
         fi
         AC_SUBST(MSVS_VERSION)
+        AC_SUBST(MSVC_C_RUNTIME_DLL)
+        AC_SUBST(MSVC_CXX_RUNTIME_DLL)
 
         # Disable SEH on clang-cl because it doesn't implement them yet.
         if test -z "$CLANG_CL"; then
@@ -1312,8 +1320,8 @@ if test "$GNU_CC"; then
     fi
     # FIXME: Let us build with strict aliasing. bug 414641.
     CFLAGS="$CFLAGS -fno-strict-aliasing"
-    MKSHLIB='$(CXX) $(CXXFLAGS) $(DSO_PIC_CFLAGS) $(DSO_LDOPTS) -Wl,-h,$(notdir $@) -o $@'
-    MKCSHLIB='$(CC) $(CFLAGS) $(DSO_PIC_CFLAGS) $(DSO_LDOPTS) -Wl,-h,$(notdir $@) -o $@'
+    MKSHLIB='$(CXX) $(CXXFLAGS) $(DSO_PIC_CFLAGS) $(DSO_LDOPTS) -Wl,-h,$(DSO_SONAME) -o $@'
+    MKCSHLIB='$(CC) $(CFLAGS) $(DSO_PIC_CFLAGS) $(DSO_LDOPTS) -Wl,-h,$(DSO_SONAME) -o $@'
     WARNINGS_AS_ERRORS='-Werror'
     DSO_CFLAGS=''
     DSO_PIC_CFLAGS='-fPIC'
@@ -1461,8 +1469,8 @@ elif test "$SOLARIS_SUNPRO_CC"; then
     fi
     _DEFINES_CFLAGS='$(ACDEFINES) -D_MOZILLA_CONFIG_H_ -DMOZILLA_CLIENT'
 else
-    MKSHLIB='$(LD) $(DSO_LDOPTS) -h $(notdir $@) -o $@'
-    MKCSHLIB='$(LD) $(DSO_LDOPTS) -h $(notdir $@) -o $@'
+    MKSHLIB='$(LD) $(DSO_LDOPTS) -h $(DSO_SONAME) -o $@'
+    MKCSHLIB='$(LD) $(DSO_LDOPTS) -h $(DSO_SONAME) -o $@'
 
     DSO_LDOPTS='-shared'
     if test "$GNU_LD"; then
@@ -2110,6 +2118,11 @@ ia64*-hpux*)
         _DEFINES_CXXFLAGS='-FI $(DEPTH)/dist/include/mozilla-config.h -DMOZILLA_CLIENT'
         CFLAGS="$CFLAGS -W3 -Gy"
         CXXFLAGS="$CXXFLAGS -W3 -Gy"
+        if test "$_CC_SUITE" -ge "11"; then
+            dnl VS2012+ defaults to -arch:SSE2.
+            CFLAGS="$CFLAGS -arch:IA32"
+            CXXFLAGS="$CXXFLAGS -arch:IA32"
+        fi
         if test "$_CC_SUITE" -ge "12"; then
             dnl VS2013+ requires -FS when parallel building by make -jN.
             dnl If nothing, compiler sometimes causes C1041 error.
@@ -2279,8 +2292,8 @@ ia64*-hpux*)
     if test "$LIBRUNPATH"; then
         DSO_LDOPTS="-Wl,-R$LIBRUNPATH $DSO_LDOPTS"
     fi
-    MKSHLIB='$(CXX) $(CXXFLAGS) $(DSO_PIC_CFLAGS) $(DSO_LDOPTS) -Wl,-soname,$(notdir $@) -o $@'
-    MKCSHLIB='$(CC) $(CFLAGS) $(DSO_PIC_CFLAGS) $(DSO_LDOPTS) -Wl,-soname,$(notdir $@)) -o $@'
+    MKSHLIB='$(CXX) $(CXXFLAGS) $(DSO_PIC_CFLAGS) $(DSO_LDOPTS) -Wl,-soname,$(DSO_SONAME) -o $@'
+    MKCSHLIB='$(CC) $(CFLAGS) $(DSO_PIC_CFLAGS) $(DSO_LDOPTS) -Wl,-soname,$(DSO_SONAME) -o $@'
     ;;
 
 *-openbsd*)
@@ -2323,8 +2336,8 @@ ia64*-hpux*)
                        [LDFLAGS=$_SAVE_LDFLAGS])
        fi
        MOZ_OPTIMIZE_FLAGS="-xO4"
-       MKSHLIB='$(CXX) $(CXXFLAGS) $(DSO_PIC_FLAGS) $(DSO_LDOPTS) -h $(notdir $@) -o $@'
-       MKCSHLIB='$(CC) $(CFLAGS) $(DSO_PIC_FLAGS) $(DSO_LDOPTS) -h $(notdir $@) -o $@'
+       MKSHLIB='$(CXX) $(CXXFLAGS) $(DSO_PIC_FLAGS) $(DSO_LDOPTS) -h $(DSO_SONAME) -o $@'
+       MKCSHLIB='$(CC) $(CFLAGS) $(DSO_PIC_FLAGS) $(DSO_LDOPTS) -h $(DSO_SONAME) -o $@'
        MKSHLIB_FORCE_ALL='-z allextract'
        MKSHLIB_UNFORCE_ALL='-z defaultextract'
        DSO_LDOPTS='-G'
@@ -3414,32 +3427,10 @@ MOZ_ARG_HEADER(External Packages)
 
 MOZ_ARG_WITH_STRING(libxul-sdk,
 [  --with-libxul-sdk=PFX   Use the libXUL SDK at <PFX>],
-  LIBXUL_SDK_DIR=$withval)
+  AC_MSG_ERROR([--with-libxul-sdk is not supported anymore.]))
 
-if test "$LIBXUL_SDK_DIR" = "yes"; then
-    AC_MSG_ERROR([--with-libxul-sdk must specify a path])
-elif test -n "$LIBXUL_SDK_DIR" -a "$LIBXUL_SDK_DIR" != "no"; then
-    LIBXUL_SDK=`cd "$LIBXUL_SDK_DIR" && pwd`
-
-    if test ! -f "$LIBXUL_SDK/include/xpcom-config.h"; then
-        AC_MSG_ERROR([$LIBXUL_SDK/include/xpcom-config.h doesn't exist])
-    fi
-
-fi
-AC_SUBST(LIBXUL_SDK)
-
-if test -n "$LIBXUL_SDK"; then
-    LIBXUL_DIST="$LIBXUL_SDK"
-else
-    LIBXUL_DIST="$MOZ_BUILD_ROOT/dist"
-fi
+LIBXUL_DIST="$MOZ_BUILD_ROOT/dist"
 AC_SUBST(LIBXUL_DIST)
-
-SYSTEM_LIBXUL=
-
-MOZ_ARG_WITH_BOOL(system-libxul,
-[  --with-system-libxul    Use system installed libxul SDK],
-    SYSTEM_LIBXUL=1)
 
 dnl ========================================================
 dnl = If NSPR was not detected in the system,
@@ -3859,6 +3850,7 @@ MOZ_GSTREAMER=
 MOZ_DIRECTSHOW=
 MOZ_WMF=
 MOZ_FMP4=
+MOZ_EME=1
 MOZ_FFMPEG=
 MOZ_WEBRTC=1
 MOZ_PEERCONNECTION=
@@ -3866,7 +3858,7 @@ MOZ_SRTP=
 MOZ_WEBRTC_SIGNALING=
 MOZ_WEBRTC_ASSERT_ALWAYS=1
 MOZ_SCTP=
-MOZ_MEDIA_PLUGINS=
+MOZ_ANDROID_OMX=
 MOZ_MEDIA_NAVIGATOR=
 MOZ_OMX_PLUGIN=
 MOZ_VPX=
@@ -3884,7 +3876,6 @@ LIBJPEG_TURBO_ASFLAGS=
 LIBJPEG_TURBO_X86_ASM=
 LIBJPEG_TURBO_X64_ASM=
 LIBJPEG_TURBO_ARM_ASM=
-MOZ_LOOP=$NIGHTLY_BUILD
 MOZ_PERMISSIONS=1
 MOZ_PLACES=1
 MOZ_SOCIAL=1
@@ -3918,6 +3909,7 @@ MOZ_WEBSMS_BACKEND=
 MOZ_ANDROID_BEAM=
 MOZ_LOCALE_SWITCHER=
 MOZ_ANDROID_SEARCH_ACTIVITY=
+MOZ_ANDROID_MLS_STUMBLER=
 ACCESSIBILITY=1
 MOZ_TIME_MANAGER=
 MOZ_PAY=
@@ -4949,6 +4941,13 @@ if test -n "$MOZ_ANDROID_SEARCH_ACTIVITY"; then
 fi
 
 dnl ========================================================
+dnl = Include Mozilla Location Service Stumbler on Android
+dnl ========================================================
+if test -n "$MOZ_ANDROID_MLS_STUMBLER"; then
+    AC_DEFINE(MOZ_ANDROID_MLS_STUMBLER)
+fi
+
+dnl ========================================================
 dnl = Enable IPDL's "expensive" unit tests
 dnl ========================================================
 MOZ_IPDL_TESTS=
@@ -5231,22 +5230,34 @@ if test -n "$MOZ_FMP4"; then
     AC_DEFINE(MOZ_FMP4)
 fi;
 
+dnl ========================================================
+dnl = EME support
+dnl ========================================================
+
+MOZ_ARG_DISABLE_BOOL(eme,
+[  --disable-eme  Disable support for Encrypted Media Extensions],
+    MOZ_EME=,
+    MOZ_EME=1)
+
+if test -n "$MOZ_EME"; then
+    AC_DEFINE(MOZ_EME)
+fi;
 
 dnl ========================================================
 dnl = Enable media plugin support
 dnl ========================================================
 if test "$OS_TARGET" = Android -a x"$MOZ_WIDGET_TOOLKIT" != x"gonk"; then
   dnl Enable support on android by default
-  MOZ_MEDIA_PLUGINS=1
+  MOZ_ANDROID_OMX=1
 fi
 
-MOZ_ARG_ENABLE_BOOL(media-plugins,
-[  --enable-media-plugins  Enable support for media plugins],
-    MOZ_MEDIA_PLUGINS=1,
-    MOZ_MEDIA_PLUGINS=)
+MOZ_ARG_ENABLE_BOOL(android-omx,
+[  --enable-android-omx  Enable support for Android OMX media backend],
+    MOZ_ANDROID_OMX=1,
+    MOZ_ANDROID_OMX=)
 
-if test -n "$MOZ_MEDIA_PLUGINS"; then
-  AC_DEFINE(MOZ_MEDIA_PLUGINS)
+if test -n "$MOZ_ANDROID_OMX"; then
+  AC_DEFINE(MOZ_ANDROID_OMX)
 fi
 
 dnl ========================================================
@@ -6813,6 +6824,11 @@ elif test "$GNU_CC"; then
     MOZ_CXX_SUPPORTS_WARNING(-W, no-error=maybe-uninitialized, ac_cxx_has_noerror_maybe_uninitialized)
     MOZ_C_SUPPORTS_WARNING(-W, no-error=deprecated-declarations, ac_c_has_noerror_deprecated_declarations)
     MOZ_CXX_SUPPORTS_WARNING(-W, no-error=deprecated-declarations, ac_cxx_has_noerror_deprecated_declarations)
+
+    if test -n "$MOZ_PGO"; then
+        MOZ_C_SUPPORTS_WARNING(-W, no-error=coverage-mismatch, ac_c_has_noerror_coverage_mismatch)
+        MOZ_CXX_SUPPORTS_WARNING(-W, no-error=coverage-mismatch, ac_cxx_has_noerror_coverage_mismatch)
+    fi
 fi
 
 dnl ========================================================
@@ -7217,6 +7233,17 @@ if test -n "$JSGC_GENERATIONAL"; then
 fi
 
 dnl ========================================================
+dnl = Use a smaller chunk size for GC chunks
+dnl ========================================================
+MOZ_ARG_ENABLE_BOOL(small-chunk-size,
+[  --enable-small-chunk-size  Allocate memory for JS GC things in smaller chunks],
+    JS_GC_SMALL_CHUNK_SIZE=1,
+    JS_GC_SMALL_CHUNK_SIZE= )
+if test -n "$JS_GC_SMALL_CHUNK_SIZE"; then
+    AC_DEFINE(JS_GC_SMALL_CHUNK_SIZE)
+fi
+
+dnl ========================================================
 dnl Zealous JavaScript GC
 dnl ========================================================
 MOZ_ARG_ENABLE_BOOL(gczeal,
@@ -7552,14 +7579,6 @@ fi
 AC_SUBST(MOZ_AUDIO_CHANNEL_MANAGER)
 
 dnl ========================================================
-dnl = Enable Support for Firefox Accounts (services/fxaccounts)
-dnl ========================================================
-if test -n "$MOZ_SERVICES_FXACCOUNTS"; then
-    AC_DEFINE(MOZ_SERVICES_FXACCOUNTS)
-fi
-AC_SUBST(MOZ_SERVICES_FXACCOUNTS)
-
-dnl ========================================================
 dnl = Support for demangling undefined symbols
 dnl ========================================================
 if test -z "$SKIP_LIBRARY_CHECKS"; then
@@ -7792,6 +7811,25 @@ AC_SUBST(PROFILE_GEN_CFLAGS)
 AC_SUBST(PROFILE_GEN_LDFLAGS)
 AC_SUBST(PROFILE_USE_CFLAGS)
 AC_SUBST(PROFILE_USE_LDFLAGS)
+
+dnl =============================================
+dnl Support for -fno-integrated-as (recent clang)
+dnl =============================================
+dnl Under clang 3.4+, use -fno-integrated-as to
+dnl build libvpx's vp8_asm_enc_offsets.c
+
+_SAVE_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -fno-integrated-as"
+
+AC_MSG_CHECKING([whether C compiler supports -fno-integrated-as])
+AC_TRY_COMPILE([], [return 0;],
+               [ NO_INTEGRATED_AS_CFLAGS="-fno-integrated-as"
+                 result="yes" ], result="no")
+AC_MSG_RESULT([$result])
+
+CFLAGS="$_SAVE_CFLAGS"
+
+AC_SUBST(NO_INTEGRATED_AS_CFLAGS)
 
 fi # ! SKIP_COMPILER_CHECKS
 
@@ -8134,7 +8172,7 @@ if test "$MOZ_TREE_CAIRO"; then
     MOZ_CAIRO_OSLIBS='${CAIRO_FT_OSLIBS}'
 
     if test "$MOZ_X11"; then
-        MOZ_CAIRO_OSLIBS="$MOZ_CAIRO_OSLIBS $XLDFLAGS -lXrender"
+        MOZ_CAIRO_OSLIBS="$MOZ_CAIRO_OSLIBS $XLDFLAGS -lXext -lXdamage -lXfixes -lXcomposite -lXrender"
     fi
 
     CAIRO_FEATURES_H=gfx/cairo/cairo/src/cairo-features.h
@@ -8307,12 +8345,6 @@ if test "$BUILD_CTYPES"; then
     AC_DEFINE(BUILD_CTYPES)
 fi
 
-dnl Build Loop if required
-AC_SUBST(MOZ_LOOP)
-if test "$MOZ_LOOP"; then
-  AC_DEFINE(MOZ_LOOP)
-fi
-
 dnl Build Places if required
 if test "$MOZ_PLACES"; then
   AC_DEFINE(MOZ_PLACES)
@@ -8477,6 +8509,7 @@ AC_SUBST(MOZ_ANDROID_BEAM)
 AC_SUBST(MOZ_LOCALE_SWITCHER)
 AC_SUBST(MOZ_DISABLE_GECKOVIEW)
 AC_SUBST(MOZ_ANDROID_SEARCH_ACTIVITY)
+AC_SUBST(MOZ_ANDROID_MLS_STUMBLER)
 AC_SUBST(ENABLE_STRIP)
 AC_SUBST(PKG_SKIP_STRIP)
 AC_SUBST(STRIP_FLAGS)
@@ -8680,7 +8713,6 @@ HOST_CXXFLAGS=`echo \
     $HOST_CXXFLAGS \
     $_DEPEND_CFLAGS`
 
-AC_SUBST(SYSTEM_LIBXUL)
 AC_SUBST(MOZ_NATIVE_JPEG)
 AC_SUBST(MOZ_NATIVE_PNG)
 AC_SUBST(MOZ_NATIVE_BZ2)
@@ -8778,7 +8810,6 @@ AC_SUBST(CC_VERSION)
 AC_SUBST(CXX_VERSION)
 AC_SUBST(MSMANIFEST_TOOL)
 AC_SUBST(NS_ENABLE_TSF)
-AC_SUBST(MOZ_APP_COMPONENT_LIBS)
 AC_SUBST(MOZ_APP_EXTRA_LIBS)
 
 AC_SUBST(MOZ_WAVE)
@@ -8789,8 +8820,9 @@ AC_SUBST(MOZ_WEBM)
 AC_SUBST(MOZ_WMF)
 AC_SUBST(MOZ_FFMPEG)
 AC_SUBST(MOZ_FMP4)
+AC_SUBST(MOZ_EME)
 AC_SUBST(MOZ_DIRECTSHOW)
-AC_SUBST(MOZ_MEDIA_PLUGINS)
+AC_SUBST(MOZ_ANDROID_OMX)
 AC_SUBST(MOZ_APPLEMEDIA)
 AC_SUBST(MOZ_OMX_PLUGIN)
 AC_SUBST(MOZ_VPX_ERROR_CONCEALMENT)
@@ -9045,8 +9077,6 @@ if test -z "$MOZ_NATIVE_JEMALLOC" -a "$MOZ_MEMORY" && test -n "$MOZ_JEMALLOC3" -
   if test "$CROSS_COMPILE"; then
     ac_configure_args="$ac_configure_args je_cv_static_page_shift=12"
   fi
-  _save_cache_file="$cache_file"
-  cache_file=$_objdir/memory/jemalloc/src/config.cache
 
   if ! test -e memory/jemalloc; then
     mkdir -p memory/jemalloc
@@ -9059,7 +9089,6 @@ if test -z "$MOZ_NATIVE_JEMALLOC" -a "$MOZ_MEMORY" && test -n "$MOZ_JEMALLOC3" -
   srcdir=`cd $srcdir; pwd`
   AC_OUTPUT_SUBDIRS(memory/jemalloc/src)
   srcdir="$_save_srcdir"
-  cache_file="$_save_cache_file"
   ac_configure_args="$_SUBDIR_CONFIG_ARGS"
 fi
 
@@ -9083,7 +9112,7 @@ if test "$MOZ_TREE_FREETYPE"; then
      mkdir modules
    fi
 
-   AC_OUTPUT_SUBDIRS(modules/freetype2)
+   AC_OUTPUT_SUBDIRS(modules/freetype2,$cache_file)
 fi
 
 if test -z "$direct_nspr_config"; then
@@ -9175,14 +9204,9 @@ if test -z "$MOZ_NATIVE_NSPR"; then
     export LDFLAGS="$LDFLAGS $NSPR_LDFLAGS"
     export CFLAGS="$CFLAGS $MOZ_FRAMEPTR_FLAGS"
 
-    # Use a separate cache file for NSPR since it uses autoconf 2.68.
-    _save_cache_file="$cache_file"
-    cache_file=$_objdir/nsprpub/config.cache
-
     AC_OUTPUT_SUBDIRS(nsprpub)
 
     # .. and restore them
-    cache_file="$_save_cache_file"
     CFLAGS="$_SAVE_CFLAGS"
     CPPFLAGS="$_SAVE_CPPFLAGS"
     LDFLAGS="$_SAVE_LDFLAGS"
@@ -9237,6 +9261,9 @@ fi
 if test -z "$JSGC_GENERATIONAL" ; then
     ac_configure_args="$ac_configure_args --disable-gcgenerational"
 fi
+if test -n "$JS_GC_SMALL_CHUNK_SIZE" ; then
+    ac_configure_args="$ac_configure_args --enable-small-chunk-size"
+fi
 if test -z "$MOZ_NATIVE_NSPR"; then
     ac_configure_args="$ac_configure_args --with-nspr-cflags='$NSPR_CFLAGS'"
     ac_configure_args="$ac_configure_args --with-nspr-libs='$NSPR_LIBS'"
@@ -9272,7 +9299,7 @@ if ! test -e js; then
     mkdir js
 fi
 
-AC_OUTPUT_SUBDIRS(js/src)
+AC_OUTPUT_SUBDIRS(js/src,$cache_file)
 ac_configure_args="$_SUBDIR_CONFIG_ARGS"
 
 fi # COMPILE_ENVIRONMENT && !LIBXUL_SDK_DIR

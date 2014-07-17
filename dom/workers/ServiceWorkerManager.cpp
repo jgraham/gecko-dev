@@ -4,6 +4,7 @@
 
 #include "ServiceWorkerManager.h"
 
+#include "nsIDOMEventTarget.h"
 #include "nsIDocument.h"
 #include "nsIScriptSecurityManager.h"
 #include "nsPIDOMWindow.h"
@@ -367,11 +368,10 @@ public:
     }
 
     nsRefPtr<ServiceWorkerManager> swm = ServiceWorkerManager::GetInstance();
-    ServiceWorkerManager::ServiceWorkerDomainInfo* domainInfo =
-      swm->mDomainMap.Get(domain);
+    nsRefPtr<ServiceWorkerManager::ServiceWorkerDomainInfo> domainInfo;
     // XXXnsm: This pattern can be refactored if we end up using it
     // often enough.
-    if (!swm->mDomainMap.Get(domain, &domainInfo)) {
+    if (!swm->mDomainMap.Get(domain, getter_AddRefs(domainInfo))) {
       domainInfo = new ServiceWorkerManager::ServiceWorkerDomainInfo;
       swm->mDomainMap.Put(domain, domainInfo);
     }
@@ -682,8 +682,8 @@ ServiceWorkerManager::HandleError(JSContext* aCx,
     return;
   }
 
-  ServiceWorkerDomainInfo* domainInfo;
-  if (!mDomainMap.Get(domain, &domainInfo)) {
+  nsRefPtr<ServiceWorkerDomainInfo> domainInfo;
+  if (!mDomainMap.Get(domain, getter_AddRefs(domainInfo))) {
     return;
   }
 
@@ -916,7 +916,8 @@ ServiceWorkerManager::Install(ServiceWorkerRegistration* aRegistration,
   // a wait is likely to be required only when performing networking or storage
   // transactions in the first place.
 
-  // FIXME(nsm): Bug 983497. Fire "updatefound" on ServiceWorkerContainers.
+  FireEventOnServiceWorkerContainers(aRegistration,
+                                     NS_LITERAL_STRING("updatefound"));
 }
 
 class ActivationRunnable : public nsRunnable
@@ -985,6 +986,262 @@ ServiceWorkerManager::CreateServiceWorkerForWindow(nsPIDOMWindow* aWindow,
 
   serviceWorker.forget(aServiceWorker);
   return rv;
+}
+
+already_AddRefed<ServiceWorkerRegistration>
+ServiceWorkerManager::GetServiceWorkerRegistration(nsPIDOMWindow* aWindow)
+{
+  nsCOMPtr<nsIURI> documentURI = aWindow->GetDocumentURI();
+  return GetServiceWorkerRegistration(documentURI);
+}
+
+already_AddRefed<ServiceWorkerRegistration>
+ServiceWorkerManager::GetServiceWorkerRegistration(nsIDocument* aDoc)
+{
+  nsCOMPtr<nsIURI> documentURI = aDoc->GetDocumentURI();
+  return GetServiceWorkerRegistration(documentURI);
+}
+
+already_AddRefed<ServiceWorkerRegistration>
+ServiceWorkerManager::GetServiceWorkerRegistration(nsIURI* aURI)
+{
+  nsRefPtr<ServiceWorkerDomainInfo> domainInfo = GetDomainInfo(aURI);
+  if (!domainInfo) {
+    return nullptr;
+  }
+
+  nsCString spec;
+  nsresult rv = aURI->GetSpec(spec);
+  if (NS_WARN_IF(NS_FAILED(rv))) {
+    return nullptr;
+  }
+
+  nsCString scope = FindScopeForPath(domainInfo->mOrderedScopes, spec);
+  if (scope.IsEmpty()) {
+    return nullptr;
+  }
+
+  ServiceWorkerRegistration* registration;
+  domainInfo->mServiceWorkerRegistrations.Get(scope, &registration);
+  // ordered scopes and registrations better be in sync.
+  MOZ_ASSERT(registration);
+
+  return registration;
+}
+
+namespace {
+/*
+ * Returns string without trailing '*'.
+ */
+void ScopeWithoutStar(const nsACString& aScope, nsACString& out)
+{
+  if (aScope.Last() == '*') {
+    out.Assign(StringHead(aScope, aScope.Length() - 1));
+    return;
+  }
+
+  out.Assign(aScope);
+}
+}; // anonymous namespace
+
+/* static */ void
+ServiceWorkerManager::AddScope(nsTArray<nsCString>& aList, const nsACString& aScope)
+{
+  for (uint32_t i = 0; i < aList.Length(); ++i) {
+    const nsCString& current = aList[i];
+
+    // Perfect match!
+    if (aScope.Equals(current)) {
+      return;
+    }
+
+    nsCString withoutStar;
+    ScopeWithoutStar(current, withoutStar);
+    // Edge case of match without '*'.
+    // /foo should be sorted before /foo*.
+    if (aScope.Equals(withoutStar)) {
+      aList.InsertElementAt(i, aScope);
+      return;
+    }
+
+    // /foo/bar* should be before /foo/*
+    // Similarly /foo/b* is between the two.
+    // But is /foo* categorically different?
+    if (StringBeginsWith(aScope, withoutStar)) {
+      // If the new scope is a pattern and the old one is a path, the new one
+      // goes after.  This way Add(/foo) followed by Add(/foo*) ends up with
+      // [/foo, /foo*].
+      if (aScope.Last() == '*' &&
+          withoutStar.Equals(current)) {
+        aList.InsertElementAt(i+1, aScope);
+      } else {
+        aList.InsertElementAt(i, aScope);
+      }
+      return;
+    }
+  }
+
+  aList.AppendElement(aScope);
+}
+
+// aPath can have a '*' at the end, but it is treated literally.
+/* static */ nsCString
+ServiceWorkerManager::FindScopeForPath(nsTArray<nsCString>& aList, const nsACString& aPath)
+{
+  MOZ_ASSERT(aPath.FindChar('*') == -1);
+
+  nsCString match;
+
+  for (uint32_t i = 0; i < aList.Length(); ++i) {
+    const nsCString& current = aList[i];
+    nsCString withoutStar;
+    ScopeWithoutStar(current, withoutStar);
+    if (StringBeginsWith(aPath, withoutStar)) {
+      // If non-pattern match, then check equality.
+      if (current.Last() == '*' ||
+          aPath.Equals(current)) {
+        match = current;
+        break;
+      }
+    }
+  }
+
+  return match;
+}
+
+/* static */ void
+ServiceWorkerManager::RemoveScope(nsTArray<nsCString>& aList, const nsACString& aScope)
+{
+  aList.RemoveElement(aScope);
+}
+
+already_AddRefed<ServiceWorkerManager::ServiceWorkerDomainInfo>
+ServiceWorkerManager::GetDomainInfo(nsIDocument* aDoc)
+{
+  AssertIsOnMainThread();
+  MOZ_ASSERT(aDoc);
+  nsCOMPtr<nsIURI> documentURI = aDoc->GetDocumentURI();
+  return GetDomainInfo(documentURI);
+}
+
+already_AddRefed<ServiceWorkerManager::ServiceWorkerDomainInfo>
+ServiceWorkerManager::GetDomainInfo(nsIURI* aURI)
+{
+  AssertIsOnMainThread();
+  MOZ_ASSERT(aURI);
+
+  nsCString domain;
+  nsresult rv = aURI->GetHost(domain);
+  if (NS_WARN_IF(NS_FAILED(rv))) {
+    return nullptr;
+  }
+
+  nsRefPtr<ServiceWorkerDomainInfo> domainInfo;
+  mDomainMap.Get(domain, getter_AddRefs(domainInfo));
+  return domainInfo.forget();
+}
+
+already_AddRefed<ServiceWorkerManager::ServiceWorkerDomainInfo>
+ServiceWorkerManager::GetDomainInfo(const nsCString& aURL)
+{
+  AssertIsOnMainThread();
+  nsCOMPtr<nsIURI> uri;
+  nsresult rv = NS_NewURI(getter_AddRefs(uri), aURL, nullptr, nullptr);
+  if (NS_WARN_IF(NS_FAILED(rv))) {
+    return nullptr;
+  }
+
+  return GetDomainInfo(uri);
+}
+
+NS_IMETHODIMP
+ServiceWorkerManager::GetScopeForUrl(const nsAString& aUrl, nsAString& aScope)
+{
+  nsCOMPtr<nsIURI> uri;
+  nsresult rv = NS_NewURI(getter_AddRefs(uri), aUrl, nullptr, nullptr);
+  if (NS_WARN_IF(NS_FAILED(rv))) {
+    return NS_ERROR_FAILURE;
+  }
+
+  nsRefPtr<ServiceWorkerRegistration> r = GetServiceWorkerRegistration(uri);
+  if (!r) {
+      return NS_ERROR_FAILURE;
+  }
+
+  aScope = NS_ConvertUTF8toUTF16(r->mScope);
+  return NS_OK;
+}
+NS_IMETHODIMP
+ServiceWorkerManager::AddContainerEventListener(nsIURI* aDocumentURI, nsIDOMEventTarget* aListener)
+{
+  MOZ_ASSERT(aDocumentURI);
+  nsRefPtr<ServiceWorkerDomainInfo> domainInfo = GetDomainInfo(aDocumentURI);
+  if (!domainInfo) {
+    nsCString domain;
+    nsresult rv = aDocumentURI->GetHost(domain);
+    if (NS_WARN_IF(NS_FAILED(rv))) {
+      return rv;
+    }
+
+    domainInfo = new ServiceWorkerDomainInfo;
+    mDomainMap.Put(domain, domainInfo);
+  }
+
+  MOZ_ASSERT(domainInfo);
+
+  ServiceWorkerContainer* container = static_cast<ServiceWorkerContainer*>(aListener);
+  domainInfo->mServiceWorkerContainers.AppendElement(container);
+  return NS_OK;
+}
+
+NS_IMETHODIMP
+ServiceWorkerManager::RemoveContainerEventListener(nsIURI* aDocumentURI, nsIDOMEventTarget* aListener)
+{
+  MOZ_ASSERT(aDocumentURI);
+  nsRefPtr<ServiceWorkerDomainInfo> domainInfo = GetDomainInfo(aDocumentURI);
+  if (!domainInfo) {
+    return NS_OK;
+  }
+
+  ServiceWorkerContainer* container = static_cast<ServiceWorkerContainer*>(aListener);
+  domainInfo->mServiceWorkerContainers.RemoveElement(container);
+  return NS_OK;
+}
+
+void
+ServiceWorkerManager::FireEventOnServiceWorkerContainers(
+  ServiceWorkerRegistration* aRegistration,
+  const nsAString& aName)
+{
+  AssertIsOnMainThread();
+  nsRefPtr<ServiceWorkerDomainInfo> domainInfo =
+    GetDomainInfo(aRegistration->mScriptSpec);
+
+  if (domainInfo) {
+    nsTObserverArray<ServiceWorkerContainer*>::ForwardIterator it(domainInfo->mServiceWorkerContainers);
+    while (it.HasMore()) {
+      nsRefPtr<ServiceWorkerContainer> target = it.GetNext();
+      nsIURI* targetURI = target->GetDocumentURI();
+      if (!targetURI) {
+        NS_WARNING("Controlled domain cannot have page with null URI!");
+        continue;
+      }
+
+      nsCString path;
+      nsresult rv = targetURI->GetSpec(path);
+      if (NS_WARN_IF(NS_FAILED(rv))) {
+        continue;
+      }
+
+      nsCString scope = FindScopeForPath(domainInfo->mOrderedScopes, path);
+      if (scope.IsEmpty() ||
+          !scope.Equals(aRegistration->mScope)) {
+        continue;
+      }
+
+      target->DispatchTrustedEvent(aName);
+    }
+  }
 }
 
 NS_IMETHODIMP

@@ -952,11 +952,6 @@ TypeAnalyzer::graphContainsFloat32()
 bool
 TypeAnalyzer::tryEmitFloatOperations()
 {
-    // Backends that currently don't know how to generate Float32 specialized instructions
-    // shouldn't run this pass and just let all instructions as specialized for Double.
-    if (!LIRGenerator::allowFloat32Optimizations())
-        return true;
-
     // Asm.js uses the ahead of time type checks to specialize operations, no need to check
     // them again at this point.
     if (mir->compilingAsmJS())
@@ -2419,9 +2414,14 @@ ArgumentsUseCanBeLazy(JSContext *cx, JSScript *script, MInstruction *ins, size_t
     if (ins->isGetArgumentsObjectArg() && index == 0)
         return true;
 
-    // arguments.length length can read fp->numActualArgs() directly.
-    if (ins->isCallGetProperty() && index == 0 && ins->toCallGetProperty()->name() == cx->names().length)
+    // arguments.length length can read fp->numActualArgs() directly and
+    // arguments.callee can read fp->callee() directly.
+    if (ins->isCallGetProperty() && index == 0 &&
+        (ins->toCallGetProperty()->name() == cx->names().length ||
+         ins->toCallGetProperty()->name() == cx->names().callee))
+    {
         return true;
+    }
 
     return false;
 }

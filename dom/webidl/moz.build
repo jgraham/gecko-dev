@@ -10,6 +10,7 @@ GENERATED_WEBIDL_FILES = [
 
 PREPROCESSED_WEBIDL_FILES = [
     'Crypto.webidl',
+    'HTMLMediaElement.webidl',
     'Navigator.webidl',
     'Window.webidl',
 ]
@@ -19,7 +20,9 @@ WEBIDL_FILES = [
     'ActivityRequestHandler.webidl',
     'AlarmsManager.webidl',
     'AnalyserNode.webidl',
+    'Animatable.webidl',
     'AnimationEvent.webidl',
+    'AnimationPlayer.webidl',
     'AnimationTimeline.webidl',
     'AppInfo.webidl',
     'AppNotificationServiceOptions.webidl',
@@ -39,6 +42,7 @@ WEBIDL_FILES = [
     'AudioStreamTrack.webidl',
     'AudioTrack.webidl',
     'AudioTrackList.webidl',
+    'AutocompleteInfo.webidl',
     'BarProp.webidl',
     'BatteryManager.webidl',
     'BeforeUnloadEvent.webidl',
@@ -166,7 +170,6 @@ WEBIDL_FILES = [
     'HTMLLIElement.webidl',
     'HTMLLinkElement.webidl',
     'HTMLMapElement.webidl',
-    'HTMLMediaElement.webidl',
     'HTMLMenuElement.webidl',
     'HTMLMenuItemElement.webidl',
     'HTMLMetaElement.webidl',
@@ -234,11 +237,6 @@ WEBIDL_FILES = [
     'Location.webidl',
     'MediaElementAudioSourceNode.webidl',
     'MediaError.webidl',
-    'MediaKeyError.webidl',
-    'MediaKeyMessageEvent.webidl',
-    'MediaKeyNeededEvent.webidl',
-    'MediaKeys.webidl',
-    'MediaKeySession.webidl',
     'MediaList.webidl',
     'MediaQueryList.webidl',
     'MediaRecorder.webidl',
@@ -301,6 +299,7 @@ WEBIDL_FILES = [
     'Promise.webidl',
     'PromiseDebugging.webidl',
     'PushManager.webidl',
+    'RadioNodeList.webidl',
     'Range.webidl',
     'Rect.webidl',
     'ResourceStats.webidl',
@@ -567,6 +566,7 @@ if CONFIG['MOZ_B2G_BT']:
     if CONFIG['MOZ_B2G_BT_API_V2']:
         WEBIDL_FILES += [
             'BluetoothAdapter2.webidl',
+            'BluetoothClassOfDevice.webidl',
             'BluetoothDevice2.webidl',
             'BluetoothDiscoveryHandle.webidl',
             'BluetoothManager2.webidl',
@@ -651,6 +651,7 @@ GENERATED_EVENTS_WEBIDL_FILES = [
     'MozContactChangeEvent.webidl',
     'MozEmergencyCbModeEvent.webidl',
     'MozInterAppMessageEvent.webidl',
+    'MozMessageDeletedEvent.webidl',
     'MozMmsEvent.webidl',
     'MozOtaStatusEvent.webidl',
     'MozSettingsEvent.webidl',
@@ -725,4 +726,13 @@ if CONFIG['MOZ_BUILD_APP'] in ['browser', 'xulrunner']:
 if CONFIG['MOZ_BUILD_APP'] in ['browser', 'mobile/android', 'xulrunner']:
     WEBIDL_FILES += [
         'External.webidl',
+    ]
+
+if CONFIG['MOZ_EME']:
+    WEBIDL_FILES += [
+        'MediaKeyError.webidl',
+        'MediaKeyMessageEvent.webidl',
+        'MediaKeyNeededEvent.webidl',
+        'MediaKeys.webidl',
+        'MediaKeySession.webidl',
     ]

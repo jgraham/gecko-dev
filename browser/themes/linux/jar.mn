@@ -65,6 +65,7 @@ browser.jar:
   skin/classic/browser/Toolbar.png
   skin/classic/browser/Toolbar-inverted.png
   skin/classic/browser/Toolbar-small.png
+  skin/classic/browser/undoCloseTab.png                        (../shared/undoCloseTab.png)
   skin/classic/browser/urlbar-arrow.png
   skin/classic/browser/webRTC-shareDevice-16.png
   skin/classic/browser/webRTC-shareDevice-64.png
@@ -319,6 +320,8 @@ browser.jar:
   skin/classic/browser/devtools/vview-lock@2x.png           (../shared/devtools/images/vview-lock@2x.png)
   skin/classic/browser/devtools/vview-open-inspector.png    (../shared/devtools/images/vview-open-inspector.png)
   skin/classic/browser/devtools/vview-open-inspector@2x.png (../shared/devtools/images/vview-open-inspector@2x.png)
+  skin/classic/browser/devtools/cubic-bezier-swatch.png     (../shared/devtools/images/cubic-bezier-swatch.png)
+  skin/classic/browser/devtools/cubic-bezier-swatch@2x.png  (../shared/devtools/images/cubic-bezier-swatch@2x.png)
   skin/classic/browser/devtools/undock@2x.png               (../shared/devtools/images/undock@2x.png)
   skin/classic/browser/devtools/font-inspector.css          (../shared/devtools/font-inspector.css)
   skin/classic/browser/devtools/computedview.css            (../shared/devtools/computedview.css)

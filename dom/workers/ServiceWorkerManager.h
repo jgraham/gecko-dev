@@ -12,10 +12,10 @@
 #include "mozilla/LinkedList.h"
 #include "mozilla/dom/BindingUtils.h"
 #include "mozilla/dom/Promise.h"
-#include "nsClassHashtable.h"
-#include "nsDataHashtable.h"
+#include "mozilla/dom/ServiceWorkerContainer.h"
 #include "nsRefPtrHashtable.h"
 #include "nsTArrayForwardDeclare.h"
+#include "nsTObserverArray.h"
 #include "nsTWeakRef.h"
 
 class nsIScriptError;
@@ -198,8 +198,23 @@ public:
    */
   struct ServiceWorkerDomainInfo
   {
+    // Ordered list of scopes for glob matching.
+    // Each entry is an absolute URL representing the scope.
+    //
+    // An array is used for now since the number of controlled scopes per
+    // domain is expected to be relatively low. If that assumption was proved
+    // wrong this should be replaced with a better structure to avoid the
+    // memmoves associated with inserting stuff in the middle of the array.
+    nsTArray<nsCString> mOrderedScopes;
+
     // Scope to registration.
     nsRefPtrHashtable<nsCStringHashKey, ServiceWorkerRegistration> mServiceWorkerRegistrations;
+
+    // This array can't be stored in ServiceWorkerRegistration because one may
+    // not exist when a certain window is opened, but we still want that
+    // window's container to be notified if it's in scope.
+    // The containers inform the SWM on creation and destruction.
+    nsTObserverArray<ServiceWorkerContainer*> mServiceWorkerContainers;
 
     ServiceWorkerDomainInfo()
     { }
@@ -220,11 +235,18 @@ public:
       // From now on ownership of registration is with
       // mServiceWorkerRegistrations.
       mServiceWorkerRegistrations.Put(aScope, registration);
+      ServiceWorkerManager::AddScope(mOrderedScopes, aScope);
       return registration;
     }
+
+    NS_INLINE_DECL_REFCOUNTING(ServiceWorkerDomainInfo)
+
+  private:
+    ~ServiceWorkerDomainInfo()
+    { }
   };
 
-  nsClassHashtable<nsCStringHashKey, ServiceWorkerDomainInfo> mDomainMap;
+  nsRefPtrHashtable<nsCStringHashKey, ServiceWorkerDomainInfo> mDomainMap;
 
   void
   ResolveRegisterPromises(ServiceWorkerRegistration* aRegistration,
@@ -285,6 +307,38 @@ private:
   CleanupServiceWorkerInformation(const nsACString& aDomain,
                                   ServiceWorkerDomainInfo* aDomainInfo,
                                   void *aUnused);
+
+  already_AddRefed<ServiceWorkerDomainInfo>
+  GetDomainInfo(nsIDocument* aDoc);
+
+  already_AddRefed<ServiceWorkerDomainInfo>
+  GetDomainInfo(nsIURI* aURI);
+
+  already_AddRefed<ServiceWorkerDomainInfo>
+  GetDomainInfo(const nsCString& aURL);
+
+  already_AddRefed<ServiceWorkerRegistration>
+  GetServiceWorkerRegistration(nsPIDOMWindow* aWindow);
+
+  already_AddRefed<ServiceWorkerRegistration>
+  GetServiceWorkerRegistration(nsIDocument* aDoc);
+
+  already_AddRefed<ServiceWorkerRegistration>
+  GetServiceWorkerRegistration(nsIURI* aURI);
+
+  static void
+  AddScope(nsTArray<nsCString>& aList, const nsACString& aScope);
+
+  static nsCString
+  FindScopeForPath(nsTArray<nsCString>& aList, const nsACString& aPath);
+
+  static void
+  RemoveScope(nsTArray<nsCString>& aList, const nsACString& aScope);
+
+  void
+  FireEventOnServiceWorkerContainers(ServiceWorkerRegistration* aRegistration,
+                                     const nsAString& aName);
+
 };
 
 NS_DEFINE_STATIC_IID_ACCESSOR(ServiceWorkerManager,

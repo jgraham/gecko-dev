@@ -1417,7 +1417,7 @@ nsScriptLoader::OnStreamComplete(nsIStreamLoader* aLoader,
     }
     rv = NS_OK;
   } else {
-    NS_Free(const_cast<uint8_t *>(aString));
+    moz_free(const_cast<uint8_t *>(aString));
     rv = NS_SUCCESS_ADOPTED_DATA;
   }
 
@@ -1471,9 +1471,11 @@ nsScriptLoader::PrepareLoadedRequest(nsScriptLoadRequest* aRequest,
     }
 
     nsAutoCString sourceMapURL;
-    httpChannel->GetResponseHeader(NS_LITERAL_CSTRING("X-SourceMap"), sourceMapURL);
-    aRequest->mHasSourceMapURL = true;
-    aRequest->mSourceMapURL = NS_ConvertUTF8toUTF16(sourceMapURL);
+    rv = httpChannel->GetResponseHeader(NS_LITERAL_CSTRING("X-SourceMap"), sourceMapURL);
+    if (NS_SUCCEEDED(rv)) {
+      aRequest->mHasSourceMapURL = true;
+      aRequest->mSourceMapURL = NS_ConvertUTF8toUTF16(sourceMapURL);
+    }
   }
 
   nsCOMPtr<nsIChannel> channel = do_QueryInterface(req);

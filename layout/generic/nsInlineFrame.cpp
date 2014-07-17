@@ -177,6 +177,20 @@ nsInlineFrame::PeekOffsetCharacter(bool aForward, int32_t* aOffset,
 }
 
 void
+nsInlineFrame::DestroyFrom(nsIFrame* aDestructRoot)
+{
+  nsFrameList* overflowFrames = GetOverflowFrames();
+  if (overflowFrames) {
+    // Fixup the parent pointers for any child frames on the OverflowList.
+    // nsIFrame::DestroyFrom depends on that to find the sticky scroll
+    // container (an ancestor).
+    nsIFrame* lineContainer = nsLayoutUtils::FindNearestBlockAncestor(this);
+    DrainSelfOverflowListInternal(eForDestroy, lineContainer);
+  }
+  nsContainerFrame::DestroyFrom(aDestructRoot);
+}
+
+void
 nsInlineFrame::BuildDisplayList(nsDisplayListBuilder*   aBuilder,
                                 const nsRect&           aDirtyRect,
                                 const nsDisplayListSet& aLists)
@@ -422,11 +436,12 @@ nsInlineFrame::DrainSelfOverflowListInternal(DrainFlags aFlags,
       if (aLineContainer && aLineContainer->GetPrevContinuation()) {
         ReparentFloatsForInlineChild(aLineContainer, firstChild, true);
       }
-      const bool inFirstLine = (aFlags & eInFirstLine);
+      const bool doReparentSC =
+        (aFlags & eInFirstLine) && !(aFlags & eForDestroy);
       RestyleManager* restyleManager = PresContext()->RestyleManager();
       for (nsIFrame* f = firstChild; f; f = f->GetNextSibling()) {
         f->SetParent(this);
-        if (inFirstLine) {
+        if (doReparentSC) {
           restyleManager->ReparentStyleContext(f);
           nsLayoutUtils::MarkDescendantsDirty(f);
         }
@@ -707,15 +722,15 @@ nsInlineFrame::ReflowFrames(nsPresContext* aPresContext,
     // and bottom border and padding. The height of children do not
     // affect our height.
     aMetrics.SetBlockStartAscent(fm->MaxAscent());
-    aMetrics.Height() = fm->MaxHeight();
+    aMetrics.BSize(lineWM) = fm->MaxHeight();
   } else {
     NS_WARNING("Cannot get font metrics - defaulting sizes to 0");
     aMetrics.SetBlockStartAscent(aMetrics.Height() = 0);
   }
   aMetrics.SetBlockStartAscent(aMetrics.BlockStartAscent() +
                                framePadding.BStart(frameWM));
-  aMetrics.Height() += aReflowState.ComputedPhysicalBorderPadding().top +
-    aReflowState.ComputedPhysicalBorderPadding().bottom;
+  aMetrics.BSize(lineWM) +=
+    aReflowState.ComputedLogicalBorderPadding().BStartEnd(frameWM);
 
   // For now our overflow area is zero. The real value will be
   // computed in |nsLineLayout::RelativePositionFrames|.

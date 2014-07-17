@@ -511,9 +511,6 @@ LIRGenerator::visitAssertFloat32(MAssertFloat32 *assertion)
     MIRType type = assertion->input()->type();
     DebugOnly<bool> checkIsFloat32 = assertion->mustBeFloat32();
 
-    if (!allowFloat32Optimizations())
-        return true;
-
     if (type != MIRType_Value && !js_JitOptions.eagerCompilation) {
         JS_ASSERT_IF(checkIsFloat32, type == MIRType_Float32);
         JS_ASSERT_IF(!checkIsFloat32, type != MIRType_Float32);
@@ -2216,15 +2213,11 @@ LIRGenerator::visitGuardThreadExclusive(MGuardThreadExclusive *ins)
 bool
 LIRGenerator::visitInterruptCheck(MInterruptCheck *ins)
 {
-    // Implicit interrupt checks require asm.js signal handlers to be
-    // installed. ARM does not yet use implicit interrupt checks, see
-    // bug 864220.
-#ifndef JS_CODEGEN_ARM
+    // Implicit interrupt checks require asm.js signal handlers to be installed.
     if (GetIonContext()->runtime->signalHandlersInstalled()) {
         LInterruptCheckImplicit *lir = new(alloc()) LInterruptCheckImplicit();
         return add(lir, ins) && assignSafepoint(lir, ins);
     }
-#endif
 
     LInterruptCheck *lir = new(alloc()) LInterruptCheck();
     return add(lir, ins) && assignSafepoint(lir, ins);
@@ -2780,7 +2773,7 @@ LIRGenerator::visitLoadTypedArrayElement(MLoadTypedArrayElement *ins)
 
     // We need a temp register for Uint32Array with known double result.
     LDefinition tempDef = LDefinition::BogusTemp();
-    if (ins->arrayType() == ScalarTypeDescr::TYPE_UINT32 && IsFloatingPointType(ins->type()))
+    if (ins->arrayType() == Scalar::Uint32 && IsFloatingPointType(ins->type()))
         tempDef = temp();
 
     LLoadTypedArrayElement *lir = new(alloc()) LLoadTypedArrayElement(elements, index, tempDef);
@@ -2855,11 +2848,8 @@ LIRGenerator::visitStoreTypedArrayElement(MStoreTypedArrayElement *ins)
     JS_ASSERT(ins->index()->type() == MIRType_Int32);
 
     if (ins->isFloatArray()) {
-        DebugOnly<bool> optimizeFloat32 = allowFloat32Optimizations();
-        JS_ASSERT_IF(optimizeFloat32 && ins->arrayType() == ScalarTypeDescr::TYPE_FLOAT32,
-                     ins->value()->type() == MIRType_Float32);
-        JS_ASSERT_IF(!optimizeFloat32 || ins->arrayType() == ScalarTypeDescr::TYPE_FLOAT64,
-                     ins->value()->type() == MIRType_Double);
+        JS_ASSERT_IF(ins->arrayType() == Scalar::Float32, ins->value()->type() == MIRType_Float32);
+        JS_ASSERT_IF(ins->arrayType() == Scalar::Float64, ins->value()->type() == MIRType_Double);
     } else {
         JS_ASSERT(ins->value()->type() == MIRType_Int32);
     }
@@ -2884,11 +2874,8 @@ LIRGenerator::visitStoreTypedArrayElementHole(MStoreTypedArrayElementHole *ins)
     JS_ASSERT(ins->length()->type() == MIRType_Int32);
 
     if (ins->isFloatArray()) {
-        DebugOnly<bool> optimizeFloat32 = allowFloat32Optimizations();
-        JS_ASSERT_IF(optimizeFloat32 && ins->arrayType() == ScalarTypeDescr::TYPE_FLOAT32,
-                     ins->value()->type() == MIRType_Float32);
-        JS_ASSERT_IF(!optimizeFloat32 || ins->arrayType() == ScalarTypeDescr::TYPE_FLOAT64,
-                     ins->value()->type() == MIRType_Double);
+        JS_ASSERT_IF(ins->arrayType() == Scalar::Float32, ins->value()->type() == MIRType_Float32);
+        JS_ASSERT_IF(ins->arrayType() == Scalar::Float64, ins->value()->type() == MIRType_Double);
     } else {
         JS_ASSERT(ins->value()->type() == MIRType_Int32);
     }
@@ -3117,8 +3104,8 @@ LIRGenerator::visitAssertRange(MAssertRange *ins)
         break;
 
       case MIRType_Float32: {
-        LDefinition armtemp = hasMultiAlias() ? tempFloat32() : LDefinition::BogusTemp();
-        lir = new(alloc()) LAssertRangeF(useRegister(input), tempFloat32(), armtemp);
+        LDefinition armtemp = hasMultiAlias() ? tempDouble() : LDefinition::BogusTemp();
+        lir = new(alloc()) LAssertRangeF(useRegister(input), tempDouble(), armtemp);
         break;
       }
       case MIRType_Value:

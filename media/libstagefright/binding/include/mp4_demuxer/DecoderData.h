@@ -74,17 +74,20 @@ public:
   bool IsValid();
 };
 
+typedef int64_t Microseconds;
+
 class MP4Sample
 {
 public:
   MP4Sample();
   ~MP4Sample();
   void Update();
+  void Pad(size_t aPaddingBytes);
 
   stagefright::MediaBuffer* mMediaBuffer;
 
-  int64_t composition_timestamp;
-  int64_t duration;
+  Microseconds composition_timestamp;
+  Microseconds duration;
   int64_t byte_offset;
   bool is_sync_point;
 

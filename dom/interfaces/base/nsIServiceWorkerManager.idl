@@ -5,7 +5,9 @@
 
 #include "domstubs.idl"
 
-[uuid(d9539ecb-6665-452c-bae7-4e42f25d23aa)]
+interface nsIURI;
+
+[uuid(6117cdf1-cb10-42a3-9901-4f1bab7ffa4d)]
 interface nsIServiceWorkerManager : nsISupports
 {
   // Returns a Promise
@@ -14,6 +16,12 @@ interface nsIServiceWorkerManager : nsISupports
   // Returns a Promise
   nsISupports unregister(in nsIDOMWindow aWindow, in DOMString aScope);
 
+  // aTarget MUST be a ServiceWorkerContainer.
+  [noscript] void AddContainerEventListener(in nsIURI aPageURI, in nsIDOMEventTarget aTarget);
+  [noscript] void RemoveContainerEventListener(in nsIURI aPageURI, in nsIDOMEventTarget aTarget);
+
+  // Testing
+  DOMString getScopeForUrl(in DOMString path);
 };
 
 %{ C++

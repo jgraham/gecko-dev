@@ -20,7 +20,7 @@ using mozilla::layers::ImageContainer;
 namespace mozilla {
 namespace image {
 
-NS_IMPL_ISUPPORTS(OrientedImage, imgIContainer)
+NS_IMPL_ISUPPORTS_INHERITED0(OrientedImage, ImageWrapper)
 
 nsIntRect
 OrientedImage::FrameRect(uint32_t aWhichFrame)
@@ -268,7 +268,10 @@ OrientedImage::GetImageSpaceInvalidationRect(const nsIntRect& aRect)
   }
 
   // Transform the invalidation rect into the correct orientation.
-  gfxMatrix matrix(OrientationMatrix(nsIntSize(width, height)).Invert());
+  gfxMatrix matrix(OrientationMatrix(nsIntSize(width, height)));
+  if (!matrix.Invert()) {
+    return nsIntRect();
+  }
   gfxRect invalidRect(matrix.TransformBounds(gfxRect(rect.x, rect.y,
                                                      rect.width, rect.height)));
   invalidRect.RoundOut();

@@ -16,6 +16,7 @@
 #include "nsIZipReader.h"
 #include "nsIDownloader.h"
 #include "nsILoadGroup.h"
+#include "nsILoadInfo.h"
 #include "nsIThreadRetargetableRequest.h"
 #include "nsIThreadRetargetableStreamListener.h"
 #include "nsHashPropertyBag.h"
@@ -38,7 +39,7 @@ class nsJARChannel : public nsIJARChannel
                    , public nsHashPropertyBag
 {
 public:
-    NS_DECL_THREADSAFE_ISUPPORTS
+    NS_DECL_ISUPPORTS_INHERITED
     NS_DECL_NSIREQUEST
     NS_DECL_NSICHANNEL
     NS_DECL_NSIJARCHANNEL
@@ -73,6 +74,7 @@ private:
     nsCOMPtr<nsIURI>                mOriginalURI;
     nsCOMPtr<nsIURI>                mAppURI;
     nsCOMPtr<nsISupports>           mOwner;
+    nsCOMPtr<nsILoadInfo>           mLoadInfo;
     nsCOMPtr<nsIInterfaceRequestor> mCallbacks;
     nsCOMPtr<nsISupports>           mSecurityInfo;
     nsCOMPtr<nsIProgressEventSink>  mProgressSink;

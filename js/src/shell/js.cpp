@@ -83,9 +83,11 @@ using namespace js;
 using namespace js::cli;
 
 using mozilla::ArrayLength;
-using mozilla::NumberEqualsInt32;
+using mozilla::MakeUnique;
 using mozilla::Maybe;
+using mozilla::NumberEqualsInt32;
 using mozilla::PodCopy;
+using mozilla::UniquePtr;
 
 enum JSShellExitCode {
     EXITCODE_RUNTIME_ERROR      = 3,
@@ -196,7 +198,7 @@ NewGlobalObject(JSContext *cx, JS::CompartmentOptions &options,
                 JSPrincipals *principals);
 
 static const JSErrorFormatString *
-my_GetErrorMessage(void *userRef, const char *locale, const unsigned errorNumber);
+my_GetErrorMessage(void *userRef, const unsigned errorNumber);
 
 
 /*
@@ -772,6 +774,7 @@ Options(JSContext *cx, unsigned argc, jsval *vp)
     CallArgs args = CallArgsFromVp(argc, vp);
 
     JS::ContextOptions oldContextOptions = JS::ContextOptionsRef(cx);
+    JS::RuntimeOptions oldRuntimeOptions = JS::RuntimeOptionsRef(cx);
     for (unsigned i = 0; i < args.length(); i++) {
         JSString *str = JS::ToString(cx, args[i]);
         if (!str)
@@ -785,9 +788,9 @@ Options(JSContext *cx, unsigned argc, jsval *vp)
         if (strcmp(opt.ptr(), "strict") == 0)
             JS::ContextOptionsRef(cx).toggleExtraWarnings();
         else if (strcmp(opt.ptr(), "werror") == 0)
-            JS::ContextOptionsRef(cx).toggleWerror();
+            JS::RuntimeOptionsRef(cx).toggleWerror();
         else if (strcmp(opt.ptr(), "strict_mode") == 0)
-            JS::ContextOptionsRef(cx).toggleStrictMode();
+            JS::RuntimeOptionsRef(cx).toggleStrictMode();
         else {
             JS_ReportError(cx,
                            "unknown option name '%s'."
@@ -804,11 +807,11 @@ Options(JSContext *cx, unsigned argc, jsval *vp)
         names = JS_sprintf_append(names, "%s%s", found ? "," : "", "strict");
         found = true;
     }
-    if (names && oldContextOptions.werror()) {
+    if (names && oldRuntimeOptions.werror()) {
         names = JS_sprintf_append(names, "%s%s", found ? "," : "", "werror");
         found = true;
     }
-    if (names && oldContextOptions.strictMode()) {
+    if (names && oldRuntimeOptions.strictMode()) {
         names = JS_sprintf_append(names, "%s%s", found ? "," : "", "strict_mode");
         found = true;
     }
@@ -1258,7 +1261,7 @@ Evaluate(JSContext *cx, unsigned argc, jsval *vp)
                                          JSSMSG_CACHE_SINGLETON_FAILED);
                     return false;
                 }
-                JS::CompartmentOptionsRef(cx).cloneSingletonsOverride().set(true);
+                JS::CompartmentOptionsRef(cx).setCloneSingletons(true);
             }
 
             if (loadBytecode) {
@@ -2891,7 +2894,7 @@ WorkerMain(void *arg)
 {
     WorkerInput *input = (WorkerInput *) arg;
 
-    JSRuntime *rt = JS_NewRuntime(8L * 1024L * 1024L, input->runtime);
+    JSRuntime *rt = JS_NewRuntime(8L * 1024L * 1024L, 2L * 1024L * 1024L, input->runtime);
     if (!rt) {
         js_delete(input);
         return;
@@ -4458,15 +4461,17 @@ WithSourceHook(JSContext *cx, unsigned argc, jsval *vp)
         return false;
     }
 
-    ShellSourceHook *hook = new ShellSourceHook(cx, args[0].toObject().as<JSFunction>());
+    UniquePtr<ShellSourceHook> hook =
+        MakeUnique<ShellSourceHook>(cx, args[0].toObject().as<JSFunction>());
     if (!hook)
         return false;
 
-    SourceHook *savedHook = js::ForgetSourceHook(cx->runtime());
-    js::SetSourceHook(cx->runtime(), hook);
+    UniquePtr<SourceHook> savedHook = js::ForgetSourceHook(cx->runtime());
+    js::SetSourceHook(cx->runtime(), Move(hook));
+
     RootedObject fun(cx, &args[1].toObject());
     bool result = Call(cx, UndefinedHandleValue, fun, JS::HandleValueArray::empty(), args.rval());
-    js::SetSourceHook(cx->runtime(), savedHook);
+    js::SetSourceHook(cx->runtime(), Move(savedHook));
     return result;
 }
 
@@ -5110,7 +5115,7 @@ static const JSErrorFormatString jsShell_ErrorFormatString[JSShellErr_Limit] = {
 };
 
 static const JSErrorFormatString *
-my_GetErrorMessage(void *userRef, const char *locale, const unsigned errorNumber)
+my_GetErrorMessage(void *userRef, const unsigned errorNumber)
 {
     if (errorNumber == 0 || errorNumber >= JSShellErr_Limit)
         return nullptr;
@@ -6102,6 +6107,10 @@ SetRuntimeOptions(JSRuntime *rt, const OptionParser &op)
     int32_t fill = op.getIntOption("arm-asm-nop-fill");
     if (fill >= 0)
         jit::Assembler::NopFill = fill;
+
+    int32_t poolMaxOffset = op.getIntOption("asm-pool-max-offset");
+    if (poolMaxOffset >= 5 && poolMaxOffset <= 1024)
+        jit::Assembler::AsmPoolMaxOffset = poolMaxOffset;
 #endif
 
 #if defined(JS_ARM_SIMULATOR)
@@ -6313,7 +6322,7 @@ main(int argc, char **argv, char **envp)
                              "to test JIT codegen (no-op on platforms other than x86 and x64).")
         || !op.addBoolOption('\0', "fuzzing-safe", "Don't expose functions that aren't safe for "
                              "fuzzers to call")
-        || !op.addBoolOption('\0', "latin1-strings", "Enable Latin1 strings (default: off)")
+        || !op.addBoolOption('\0', "latin1-strings", "Enable Latin1 strings (default: on)")
 #ifdef DEBUG
         || !op.addBoolOption('\0', "dump-entrained-variables", "Print variables which are "
                              "unnecessarily entrained by inner functions")
@@ -6328,6 +6337,8 @@ main(int argc, char **argv, char **envp)
                                "Specify ARM code generation features, or 'help' to list all features.")
         || !op.addIntOption('\0', "arm-asm-nop-fill", "SIZE",
                             "Insert the given number of NOP instructions at all possible pool locations.", 0)
+        || !op.addIntOption('\0', "asm-pool-max-offset", "OFFSET",
+                            "The maximum pc relative OFFSET permitted in pool reference instructions.", 1024)
 #endif
 #if defined(JS_ARM_SIMULATOR)
         || !op.addBoolOption('\0', "arm-sim-icache-checks", "Enable icache flush checks in the ARM "
@@ -6339,6 +6350,9 @@ main(int argc, char **argv, char **envp)
                              "simulator.")
         || !op.addIntOption('\0', "mips-sim-stop-at", "NUMBER", "Stop the MIPS simulator after the given "
                             "NUMBER of instructions.", -1)
+#endif
+#ifdef JSGC_GENERATIONAL
+        || !op.addIntOption('\0', "nursery-size", "SIZE-MB", "Set the maximum nursery size in MB", 16)
 #endif
     )
     {
@@ -6405,8 +6419,13 @@ main(int argc, char **argv, char **envp)
     if (!JS_Init())
         return 1;
 
+    size_t nurseryBytes = JS::DefaultNurseryBytes;
+#ifdef JSGC_GENERATIONAL
+    nurseryBytes = op.getIntOption("nursery-size") * 1024L * 1024L;
+#endif
+
     /* Use the same parameters as the browser in xpcjsruntime.cpp. */
-    rt = JS_NewRuntime(32L * 1024L * 1024L);
+    rt = JS_NewRuntime(JS::DefaultHeapMaxBytes, nurseryBytes);
     if (!rt)
         return 1;
 

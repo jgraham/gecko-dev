@@ -127,12 +127,48 @@ ServiceWorkerContainer::Ready()
   return promise.forget();
 }
 
+// XXXnsm, maybe this can be optimized to only add when a event handler is
+// registered.
+void
+ServiceWorkerContainer::StartListeningForEvents()
+{
+  nsCOMPtr<nsIServiceWorkerManager> swm = do_GetService(SERVICEWORKERMANAGER_CONTRACTID);
+  if (swm) {
+    swm->AddContainerEventListener(mWindow->GetDocumentURI(), this);
+  }
+}
+
+void
+ServiceWorkerContainer::StopListeningForEvents()
+{
+  nsCOMPtr<nsIServiceWorkerManager> swm = do_GetService(SERVICEWORKERMANAGER_CONTRACTID);
+  if (swm) {
+    swm->RemoveContainerEventListener(mWindow->GetDocumentURI(), this);
+  }
+}
+
 // Testing only.
 already_AddRefed<Promise>
 ServiceWorkerContainer::ClearAllServiceWorkerData(ErrorResult& aRv)
 {
   aRv.Throw(NS_ERROR_DOM_NOT_SUPPORTED_ERR);
   return nullptr;
+}
+
+// Testing only.
+void
+ServiceWorkerContainer::GetScopeForUrl(const nsAString& aUrl,
+                                       nsString& aScope,
+                                       ErrorResult& aRv)
+{
+  nsresult rv;
+  nsCOMPtr<nsIServiceWorkerManager> swm = do_GetService(SERVICEWORKERMANAGER_CONTRACTID, &rv);
+  if (NS_WARN_IF(NS_FAILED(rv))) {
+    aRv.Throw(rv);
+    return;
+  }
+
+  aRv = swm->GetScopeForUrl(aUrl, aScope);
 }
 
 // Testing only.

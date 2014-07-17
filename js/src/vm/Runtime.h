@@ -14,6 +14,7 @@
 #include "mozilla/PodOperations.h"
 #include "mozilla/Scoped.h"
 #include "mozilla/ThreadLocal.h"
+#include "mozilla/UniquePtr.h"
 
 #include <setjmp.h>
 
@@ -346,6 +347,30 @@ class NewObjectCache
         Shape::writeBarrierPost(dst->shape_, &dst->shape_);
         types::TypeObject::writeBarrierPost(dst->type_, &dst->type_);
 #endif
+    }
+};
+
+class RegExpObject;
+
+// One slot cache for speeding up RegExp.test() executions, by stripping
+// unnecessary leading or trailing .* from the RegExp.
+struct RegExpTestCache
+{
+    RegExpObject *key;
+    RegExpObject *value;
+
+    RegExpTestCache()
+      : key(nullptr), value(nullptr)
+    {}
+
+    void purge() {
+        key = nullptr;
+        value = nullptr;
+    }
+
+    void fill(RegExpObject *key, RegExpObject *value) {
+        this->key = key;
+        this->value = value;
     }
 };
 
@@ -1009,7 +1034,7 @@ struct JSRuntime : public JS::shadow::Runtime,
         return !contextList.isEmpty();
     }
 
-    mozilla::ScopedDeletePtr<js::SourceHook> sourceHook;
+    mozilla::UniquePtr<js::SourceHook> sourceHook;
 
     /* Per runtime debug hooks -- see js/OldDebugAPI.h. */
     JSDebugHooks        debugHooks;
@@ -1109,6 +1134,7 @@ struct JSRuntime : public JS::shadow::Runtime,
     js::UncompressedSourceCache uncompressedSourceCache;
     js::EvalCache       evalCache;
     js::LazyScriptCache lazyScriptCache;
+    js::RegExpTestCache regExpTestCache;
 
     js::CompressedSourceSet compressedSourceSet;
     js::DateTimeInfo    dateTimeInfo;
@@ -1282,7 +1308,7 @@ struct JSRuntime : public JS::shadow::Runtime,
     JSRuntime(JSRuntime *parentRuntime);
     ~JSRuntime();
 
-    bool init(uint32_t maxbytes);
+    bool init(uint32_t maxbytes, uint32_t maxNurseryBytes);
 
     JSRuntime *thisFromCtor() { return this; }
 

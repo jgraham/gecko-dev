@@ -115,6 +115,8 @@ NS_IMPL_ISUPPORTS(GfxD2DSurfaceReporter, nsIMemoryReporter)
 
 class GfxD2DVramReporter MOZ_FINAL : public nsIMemoryReporter
 {
+    ~GfxD2DVramReporter() {}
+
 public:
     NS_DECL_ISUPPORTS
 
@@ -169,6 +171,8 @@ class GPUAdapterReporter : public nsIMemoryReporter
 
         return result;
     }
+
+    ~GPUAdapterReporter() {}
 
 public:
     NS_DECL_ISUPPORTS
@@ -645,37 +649,6 @@ gfxWindowsPlatform::GetScaledFontForFont(DrawTarget* aTarget, gfxFont *aFont)
     }
 
     return Factory::CreateScaledFontForNativeFont(nativeFont, aFont->GetAdjustedSize());
-}
-
-already_AddRefed<gfxASurface>
-gfxWindowsPlatform::GetThebesSurfaceForDrawTarget(DrawTarget *aTarget)
-{
-#ifdef XP_WIN
-  if (aTarget->GetBackendType() == BackendType::DIRECT2D) {
-    if (!GetD2DDevice()) {
-      // We no longer have a D2D device, can't do this.
-      return nullptr;
-    }
-
-    RefPtr<ID3D10Texture2D> texture =
-      static_cast<ID3D10Texture2D*>(aTarget->GetNativeSurface(NativeSurfaceType::D3D10_TEXTURE));
-
-    if (!texture) {
-      return gfxPlatform::GetThebesSurfaceForDrawTarget(aTarget);
-    }
-
-    aTarget->Flush();
-
-    nsRefPtr<gfxASurface> surf =
-      new gfxD2DSurface(texture, ContentForFormat(aTarget->GetFormat()));
-
-    // shouldn't this hold a reference?
-    surf->SetData(&kDrawTarget, aTarget, nullptr);
-    return surf.forget();
-  }
-#endif
-
-  return gfxPlatform::GetThebesSurfaceForDrawTarget(aTarget);
 }
 
 nsresult
