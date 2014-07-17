@@ -10612,6 +10612,18 @@
         "path": "performance-timeline/idlharness.html"
       }, 
       {
+        "url": "/pointerevents/pointerevent_constructor.html", 
+        "path": "pointerevents/pointerevent_constructor.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerout_after_pointercancel_touch.html", 
+        "path": "pointerevents/pointerevent_pointerout_after_pointercancel_touch.html"
+      }, 
+      {
+        "url": "/pointerevents/pointerevent_pointerout_pen.html", 
+        "path": "pointerevents/pointerevent_pointerout_pen.html"
+      }, 
+      {
         "url": "/pointerevents/pointerevent_touch-action-illegal.html", 
         "path": "pointerevents/pointerevent_touch-action-illegal.html"
       }, 
@@ -21947,5 +21959,5 @@
     ]
   }, 
   "local_changes": [], 
-  "rev": "95d351e59ad62441769022e198bc692b9ee5ae9d"
+  "rev": "e77587c14e83818f79f4b4127c8c446433c40cf3"
 }
