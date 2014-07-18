@@ -2,14 +2,22 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import glob
+import os
+import sys
+import textwrap
+
 from setuptools import setup, find_packages
 
 PACKAGE_NAME = 'wptrunner'
-PACKAGE_VERSION = '0.3.13'
+PACKAGE_VERSION = '0.4.1'
 
-# dependencies
+# Dependencies
 with open('requirements.txt') as f:
     deps = f.read().splitlines()
+
+# Browser-specific requirements
+requirements_files = glob.glob("requirements_*.txt")
 
 profile_dest = None
 dest_exists = False
@@ -45,6 +53,18 @@ setup(name=PACKAGE_NAME,
                                   "browsers/b2g_setup/*",
                                   "prefs/*"]},
       include_package_data=True,
-      data_files=[("config", ["config.ini"])],
+      data_files=[("requirements", requirements_files)],
       install_requires=deps
      )
+
+if "install" in sys.argv:
+    path = os.path.relpath(os.path.join(sys.prefix, "requirements"), os.curdir)
+    print textwrap.fill("""In order to use with one of the built-in browser
+products, you will need to install the extra dependencies. These are provided
+as requirements_[name].txt in the %s directory and can be installed using
+e.g.""" % path, 80)
+
+print """
+
+pip install -r %s/requirements_firefox.txt
+""" % path
