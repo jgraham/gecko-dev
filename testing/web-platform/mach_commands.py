@@ -6,12 +6,8 @@
 
 from __future__ import unicode_literals, print_function
 
-import mozpack.path
 import os
-import shutil
 import sys
-
-from StringIO import StringIO
 
 from mozbuild.base import (
     MachCommandBase,
@@ -20,7 +16,6 @@ from mozbuild.base import (
 )
 
 from mach.decorators import (
-    CommandArgument,
     CommandProvider,
     Command,
 )
@@ -67,7 +62,7 @@ class WebPlatformTestsRunner(MozbuildObject):
         self.setup_kwargs(kwargs)
 
         logger = wptrunner.setup_logging(kwargs, {})
-        self.log_manager.register_structured_logger(wptrunner.logger)
+        self.log_manager.register_structured_logger(logger)
         self.log_manager.add_terminal_logging()
 
         result = wptrunner.run_tests(**kwargs)
@@ -79,7 +74,7 @@ class WebPlatformTestsRunner(MozbuildObject):
 
         self.setup_kwargs(kwargs)
 
-        result = wptrunner.list_test_groups(**kwargs)
+        wptrunner.list_test_groups(**kwargs)
 
 class WebPlatformTestsUpdater(MozbuildObject):
     """Update web platform tests."""
@@ -104,7 +99,6 @@ class WebPlatformTestsUpdater(MozbuildObject):
 class WebPlatformTestsReduce(WebPlatformTestsRunner):
 
     def run_reduce(self, **kwargs):
-        from wptrunner import wptrunner
         from wptrunner import reduce
 
         self.setup_kwargs(kwargs)
