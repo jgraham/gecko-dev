@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 import ConfigParser
 import os
 import sys
@@ -32,17 +36,19 @@ def read(config_path):
 
     return rv
 
-def path(check_argv=True):
+def path(argv=None):
+    if argv is None:
+        argv = []
     path = None
-    if check_argv:
-        for i, arg in enumerate(sys.argv):
-            if arg == "--config":
-                if i + 1 < len(sys.argv):
-                    path = sys.argv[i+1]
-            elif arg.startswith("--config="):
-                path = arg.split("=", 1)[1]
-            if path is not None:
-                break
+
+    for i, arg in enumerate(argv):
+        if arg == "--config":
+            if i + 1 < len(argv):
+                path = argv[i + 1]
+        elif arg.startswith("--config="):
+            path = arg.split("=", 1)[1]
+        if path is not None:
+            break
 
     if path is None:
         if os.path.exists("wptrunner.ini"):
@@ -53,4 +59,4 @@ def path(check_argv=True):
     return os.path.abspath(path)
 
 def load():
-    return read(path())
+    return read(path(sys.argv))
