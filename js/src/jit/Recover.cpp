@@ -905,6 +905,10 @@ RNewObject::recover(JSContext *cx, SnapshotIterator &iter) const
     RootedValue result(cx);
     JSObject *resultObject = nullptr;
 
+    // Use AutoEnterAnalysis to avoid invoking the object metadata callback
+    // while bailing out, which could try to walk the stack.
+    types::AutoEnterAnalysis enter(cx);
+
     // See CodeGenerator::visitNewObjectVMCall
     if (templateObjectIsClassPrototype_)
         resultObject = NewInitObjectWithClassPrototype(cx, templateObject);
@@ -937,11 +941,46 @@ RNewDerivedTypedObject::recover(JSContext *cx, SnapshotIterator &iter) const
     Rooted<TypedObject *> owner(cx, &iter.read().toObject().as<TypedObject>());
     int32_t offset = iter.read().toInt32();
 
+    // Use AutoEnterAnalysis to avoid invoking the object metadata callback
+    // while bailing out, which could try to walk the stack.
+    types::AutoEnterAnalysis enter(cx);
+
     JSObject *obj = TypedObject::createDerived(cx, descr, owner, offset);
     if (!obj)
         return false;
 
     RootedValue result(cx, ObjectValue(*obj));
     iter.storeInstructionResult(result);
+    return true;
+}
+
+bool
+MObjectState::writeRecoverData(CompactBufferWriter &writer) const
+{
+    MOZ_ASSERT(canRecoverOnBailout());
+    writer.writeUnsigned(uint32_t(RInstruction::Recover_ObjectState));
+    writer.writeUnsigned(numSlots());
+    return true;
+}
+
+RObjectState::RObjectState(CompactBufferReader &reader)
+{
+    numSlots_ = reader.readUnsigned();
+}
+
+bool
+RObjectState::recover(JSContext *cx, SnapshotIterator &iter) const
+{
+    RootedObject object(cx, &iter.read().toObject());
+    MOZ_ASSERT(object->slotSpan() == numSlots());
+
+    RootedValue val(cx);
+    for (size_t i = 0; i < numSlots(); i++) {
+        val = iter.read();
+        object->nativeSetSlot(i, val);
+    }
+
+    val.setObject(*object);
+    iter.storeInstructionResult(val);
     return true;
 }

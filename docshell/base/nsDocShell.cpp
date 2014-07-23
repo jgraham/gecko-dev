@@ -22,6 +22,7 @@
 #include "mozilla/Telemetry.h"
 #include "mozilla/unused.h"
 #include "mozilla/VisualEventTracer.h"
+#include "URIUtils.h"
 
 #ifdef MOZ_LOGGING
 // so we can get logging even in release builds (but only for some things)
@@ -4362,14 +4363,28 @@ nsDocShell::LoadURIWithBase(const char16_t * aURI,
           fixupFlags |= nsIURIFixup::FIXUP_FLAG_FIX_SCHEME_TYPOS;
         }
         nsCOMPtr<nsIInputStream> fixupStream;
-        rv = sURIFixup->CreateFixupURI(uriString, fixupFlags,
-                                       getter_AddRefs(fixupStream),
-                                       getter_AddRefs(uri));
+        nsCOMPtr<nsIURIFixupInfo> fixupInfo;
+        rv = sURIFixup->GetFixupURIInfo(uriString, fixupFlags,
+                                        getter_AddRefs(fixupStream),
+                                        getter_AddRefs(fixupInfo));
+
+        if (NS_SUCCEEDED(rv)) {
+            fixupInfo->GetPreferredURI(getter_AddRefs(uri));
+            fixupInfo->SetConsumer(GetAsSupports(this));
+        }
+
         if (fixupStream) {
             // CreateFixupURI only returns a post data stream if it succeeded
             // and changed the URI, in which case we should override the
             // passed-in post data.
             postStream = fixupStream;
+        }
+
+        if (aLoadFlags & LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP) {
+            nsCOMPtr<nsIObserverService> serv = services::GetObserverService();
+            if (serv) {
+                serv->NotifyObservers(fixupInfo, "keyword-uri-fixup", aURI);
+            }
         }
     }
     // else no fixup service so just use the URI we created and see
@@ -4545,16 +4560,24 @@ nsDocShell::DisplayLoadError(nsresult aError, nsIURI *aURI,
 
                 // if this is a Strict-Transport-Security host and the cert
                 // is bad, don't allow overrides (STS Spec section 7.3).
-                nsCOMPtr<nsISiteSecurityService> sss =
-                          do_GetService(NS_SSSERVICE_CONTRACTID, &rv);
-                NS_ENSURE_SUCCESS(rv, rv);
-                uint32_t flags =
-                  mInPrivateBrowsing ? nsISocketProvider::NO_PERMANENT_STORAGE : 0;
-                
+                uint32_t type = nsISiteSecurityService::HEADER_HSTS;
+                uint32_t flags = mInPrivateBrowsing
+                                 ? nsISocketProvider::NO_PERMANENT_STORAGE
+                                 : 0;
                 bool isStsHost = false;
-                rv = sss->IsSecureURI(nsISiteSecurityService::HEADER_HSTS,
-                                      aURI, flags, &isStsHost);
-                NS_ENSURE_SUCCESS(rv, rv);
+                if (XRE_GetProcessType() == GeckoProcessType_Default) {
+                  nsCOMPtr<nsISiteSecurityService> sss =
+                            do_GetService(NS_SSSERVICE_CONTRACTID, &rv);
+                  NS_ENSURE_SUCCESS(rv, rv);
+                  rv = sss->IsSecureURI(type, aURI, flags, &isStsHost);
+                  NS_ENSURE_SUCCESS(rv, rv);
+                } else {
+                  mozilla::dom::ContentChild* cc =
+                    mozilla::dom::ContentChild::GetSingleton();
+                  mozilla::ipc::URIParams uri;
+                  SerializeURI(aURI, uri);
+                  cc->SendIsSecureURI(type, uri, flags, &isStsHost);
+                }
 
                 uint32_t bucketId;
                 if (isStsHost) {
@@ -7050,6 +7073,43 @@ nsDocShell::EndPageLoad(nsIWebProgress * aProgress,
             aStatus == NS_ERROR_CORRUPTED_CONTENT ||
             aStatus == NS_ERROR_INVALID_CONTENT_ENCODING) {
             DisplayLoadError(aStatus, url, nullptr, aChannel);
+            return NS_OK;
+        }
+
+        // Handle iframe document not loading error because source was
+        // a tracking URL. (Safebrowsing) We make a note of this iframe
+        // node by including it in a dedicated array of blocked tracking
+        // nodes under its parent document. (document of parent window of
+        // blocked document)
+        if (isTopFrame == false && aStatus == NS_ERROR_TRACKING_URI) {
+            // frameElement is our nsIContent to be annotated
+            nsCOMPtr<nsIDOMElement> frameElement;
+            nsPIDOMWindow* thisWindow = GetWindow();
+            if (!thisWindow) {
+                return NS_OK;
+            }
+
+            thisWindow->GetFrameElement(getter_AddRefs(frameElement));
+            if (!frameElement) {
+                return NS_OK;
+            }
+
+            // Parent window
+            nsCOMPtr<nsIDocShellTreeItem> parentItem;
+            GetSameTypeParent(getter_AddRefs(parentItem));
+            if (!parentItem) {
+                return NS_OK;
+            }
+
+            nsCOMPtr<nsIDocument> parentDoc;
+            parentDoc = parentItem->GetDocument();
+            if (!parentDoc) {
+                return NS_OK;
+            }
+
+            nsCOMPtr<nsIContent> cont = do_QueryInterface(frameElement);
+            parentDoc->AddBlockedTrackingNode(cont);
+
             return NS_OK;
         }
 

@@ -444,13 +444,6 @@ nsSubDocumentFrame::BuildDisplayList(nsDisplayListBuilder*   aBuilder,
     haveDisplayPort ||
     presContext->IsRootContentDocument() || (sf && sf->IsScrollingActive());
 
-  // Don't let in fixed pos propagate down to child documents. This makes
-  // it a little less effective but doesn't regress an important case of a
-  // child document being in a fixed pos element where we would do no occlusion
-  // at all if we let it propagate down.
-  nsDisplayListBuilder::AutoInFixedPosSetter
-    buildingInFixedPos(aBuilder, false);
-
   nsDisplayList childItems;
 
   {
@@ -464,10 +457,11 @@ nsSubDocumentFrame::BuildDisplayList(nsDisplayListBuilder*   aBuilder,
     }
 
     if (subdocRootFrame) {
+      nsIFrame* rootScrollFrame = presShell->GetRootScrollFrame();
       nsDisplayListBuilder::AutoCurrentScrollParentIdSetter idSetter(
           aBuilder,
-          ignoreViewportScrolling && subdocRootFrame->GetContent()
-              ? nsLayoutUtils::FindOrCreateIDFor(subdocRootFrame->GetContent())
+          ignoreViewportScrolling && rootScrollFrame && rootScrollFrame->GetContent()
+              ? nsLayoutUtils::FindOrCreateIDFor(rootScrollFrame->GetContent())
               : aBuilder->GetCurrentScrollParentId());
 
       aBuilder->SetAncestorHasTouchEventHandler(false);
@@ -502,6 +496,14 @@ nsSubDocumentFrame::BuildDisplayList(nsDisplayListBuilder*   aBuilder,
           *aBuilder, childItems, subdocRootFrame ? subdocRootFrame : this,
           bounds, NS_RGBA(0,0,0,0), flags);
       }
+    }
+  }
+
+  if (subdocRootFrame) {
+    aBuilder->LeavePresShell(subdocRootFrame, dirty);
+
+    if (ignoreViewportScrolling) {
+      aBuilder->SetIgnoreScrollFrame(savedIgnoreScrollFrame);
     }
   }
 
@@ -542,14 +544,6 @@ nsSubDocumentFrame::BuildDisplayList(nsDisplayListBuilder*   aBuilder,
       aBuilder, subdocRootFrame ? subdocRootFrame : this,
       &childItems, flags);
     childItems.AppendToTop(layerItem);
-  }
-
-  if (subdocRootFrame) {
-    aBuilder->LeavePresShell(subdocRootFrame, dirty);
-
-    if (ignoreViewportScrolling) {
-      aBuilder->SetIgnoreScrollFrame(savedIgnoreScrollFrame);
-    }
   }
 
   if (aBuilder->IsForImageVisibility()) {

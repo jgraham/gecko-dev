@@ -50,6 +50,11 @@ ValueNumberer::VisibleValues::ValueHasher::hash(Lookup ins)
 bool
 ValueNumberer::VisibleValues::ValueHasher::match(Key k, Lookup l)
 {
+    // If one of the instructions depends on a store, and the other instruction
+    // does not depend on the same store, the instructions are not congruent.
+    if (k->dependency() != l->dependency())
+        return false;
+
     return k->congruentTo(l); // Ask the values themselves what they think.
 }
 
@@ -406,19 +411,15 @@ ValueNumberer::leader(MDefinition *def)
         // Look for a match.
         VisibleValues::AddPtr p = values_.findLeaderForAdd(def);
         if (p) {
-            // We found a congruent value.
             MDefinition *rep = *p;
-            if (rep->block()->dominates(def->block()) &&
-                rep->dependency() == def->dependency())
-            {
-                // It dominates and has the same dependency. Use it!
+            if (rep->block()->dominates(def->block())) {
+                // We found a dominating congruent value.
                 MOZ_ASSERT(!rep->isInWorklist(), "Dead value in set");
                 return rep;
             }
 
-            // The congruent value doesn't dominate or it has a different
-            // dependency. It won't be suitable for replacing anything else
-            // we'll see in this dominator tree walk, so overwrite it.
+            // The congruent value doesn't dominate. It never will again in this
+            // dominator tree, so overwrite it.
             values_.overwrite(p, def);
         } else {
             // No match. Add a new entry.
@@ -478,6 +479,12 @@ ValueNumberer::visitDefinition(MDefinition *def)
         IonSpew(IonSpew_GVN, "    Folded %s%u to %s%u",
                 def->opName(), def->id(), sim->opName(), sim->id());
         ReplaceAllUsesWith(def, sim);
+
+        // The node's foldsTo said |def| can be replaced by |rep|. If |def| is a
+        // guard, then either |rep| is also a guard, or a guard isn't actually
+        // needed, so we can clear |def|'s guard flag and let it be deleted.
+        def->setNotGuardUnchecked();
+
         if (IsDead(def) && !deleteDefsRecursively(def))
             return false;
         def = sim;
@@ -494,10 +501,9 @@ ValueNumberer::visitDefinition(MDefinition *def)
                     def->opName(), def->id(), rep->opName(), rep->id());
             ReplaceAllUsesWith(def, rep);
 
-            // This is effectively what the old GVN did. It allows isGuard()
-            // instructions to be deleted if they are redundant, and the
-            // replacement is not even guaranteed to have isGuard() set.
-            // TODO: Clean this up (bug 1031410).
+            // The node's congruentTo said |def| is congruent to |rep|, and it's
+            // dominated by |rep|. If |def| is a guard, it's covered by |rep|,
+            // so we can clear |def|'s guard flag and let it be deleted.
             def->setNotGuardUnchecked();
 
             if (IsDead(def) && !deleteDefsRecursively(def))

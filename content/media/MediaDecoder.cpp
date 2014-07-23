@@ -1211,7 +1211,10 @@ void MediaDecoder::PlaybackPositionChanged()
   {
     ReentrantMonitorAutoEnter mon(GetReentrantMonitor());
     if (mDecoderStateMachine) {
-      if (!IsSeeking()) {
+      // Don't update the official playback position when paused which is
+      // expected by the script. (The current playback position might be still
+      // advancing for a while after paused.)
+      if (!IsSeeking() && mPlayState != PLAY_STATE_PAUSED) {
         // Only update the current playback position if we're not seeking.
         // If we are seeking, the update could have been scheduled on the
         // state machine thread while we were playing but after the seek
@@ -1716,6 +1719,16 @@ bool
 MediaDecoder::IsOmxEnabled()
 {
   return Preferences::GetBool("media.omx.enabled", false);
+}
+
+bool
+MediaDecoder::IsOmxAsyncEnabled()
+{
+#if ANDROID_VERSION >= 16
+  return Preferences::GetBool("media.omx.async.enabled", false);
+#else
+  return false;
+#endif
 }
 #endif
 

@@ -654,6 +654,10 @@ pref("devtools.dump.emit", false);
 pref("devtools.discovery.log", false);
 // Disable scanning for DevTools devices via WiFi
 pref("devtools.remote.wifi.scan", false);
+// Hide UI options for controlling device visibility over WiFi
+// N.B.: This does not set whether the device can be discovered via WiFi, only
+// whether the UI control to make such a choice is shown to the user
+pref("devtools.remote.wifi.visible", false);
 
 // view source
 pref("view_source.syntax_highlight", true);
@@ -1109,6 +1113,9 @@ pref("network.http.connection-timeout", 90);
 // when starting a new speculative connection.
 pref("network.http.speculative-parallel-limit", 6);
 
+// Allow/Forbid speculative connections on loopback.
+pref("network.http.speculative.allowLoopback", false);
+
 // Whether or not to block requests for non head js/css items (e.g. media)
 // while those elements load.
 pref("network.http.rendering-critical-requests-prioritization", true);
@@ -1527,6 +1534,10 @@ pref("network.proxy.autoconfig_retry_interval_max", 300);  // 5 minutes
 
 // Use the HSTS preload list by default
 pref("network.stricttransportsecurity.preloadlist", true);
+
+// Prohibit resource loads from private networks (e.g. RFC1918 like IP
+// addresses) by documents which were loaded from public networks.
+pref("network.zonepolicy.enabled", true);
 
 pref("converter.html2txt.structs",          true); // Output structured phrases (strong, em, code, sub, sup, b, i, u)
 pref("converter.html2txt.header_strategy",  1); // 0 = no indention; 1 = indention, increased with header level; 2 = numbering and slight indention
@@ -4062,10 +4073,9 @@ pref("memory.dump_reports_on_oom", false);
 // Number of stack frames to capture in createObjectURL for about:memory.
 pref("memory.blob_report.stack_frames", 0);
 
-// comma separated list of domain origins (e.g. https://domain.com) for
-// providers that can install from their own website without user warnings.
-// entries are
-pref("social.whitelist", "https://mozsocial.cliqz.com,https://now.msn.com,https://mixi.jp");
+// comma separated list of domain origins (e.g. https://domain.com) that still
+// need localStorage in the frameworker
+pref("social.whitelist", "https://mozsocial.cliqz.com");
 // comma separated list of domain origins (e.g. https://domain.com) for
 // directory websites (e.g. AMO) that can install providers for other sites
 pref("social.directories", "https://activations.cdn.mozilla.net");
@@ -4230,6 +4240,9 @@ pref("dom.voicemail.defaultServiceId", 0);
 
 // DOM Inter-App Communication API.
 pref("dom.inter-app-communication-api.enabled", false);
+
+// Disable mapped array buffer by default.
+pref("dom.mapped_arraybuffer.enabled", false);
 
 // The tables used for Safebrowsing phishing and malware checks.
 pref("urlclassifier.malwareTable", "goog-malware-shavar,test-malware-simple");

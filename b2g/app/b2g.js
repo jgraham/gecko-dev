@@ -152,6 +152,7 @@ pref("dom.disable_open_during_load", true);
 pref("privacy.popups.showBrowserMessage", true);
 
 pref("keyword.enabled", true);
+pref("browser.fixup.domainwhitelist.localhost", true);
 
 pref("accessibility.typeaheadfind", false);
 pref("accessibility.typeaheadfind.timeout", 5000);
@@ -1004,5 +1005,7 @@ pref("identity.fxaccounts.enabled", true);
 // Mobile Identity API.
 pref("services.mobileid.server.uri", "https://msisdn.services.mozilla.com");
 
-// Enable mapped array buffer
+// Enable mapped array buffer.
+#ifndef XP_WIN
 pref("dom.mapped_arraybuffer.enabled", true);
+#endif

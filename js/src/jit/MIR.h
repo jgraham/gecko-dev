@@ -953,6 +953,43 @@ class MQuaternaryInstruction : public MAryInstruction<4>
     }
 };
 
+class MVariadicInstruction : public MInstruction
+{
+    FixedList<MUse> operands_;
+
+  protected:
+    bool init(TempAllocator &alloc, size_t length) {
+        return operands_.init(alloc, length);
+    }
+    void initOperand(size_t index, MDefinition *operand) {
+        // FixedList doesn't initialize its elements, so do an unchecked init.
+        operands_[index].initUnchecked(operand, this);
+    }
+    MUse *getUseFor(size_t index) MOZ_FINAL MOZ_OVERRIDE {
+        return &operands_[index];
+    }
+    const MUse *getUseFor(size_t index) const MOZ_FINAL MOZ_OVERRIDE {
+        return &operands_[index];
+    }
+
+  public:
+    // Will assert if called before initialization.
+    MDefinition *getOperand(size_t index) const MOZ_FINAL MOZ_OVERRIDE {
+        return operands_[index].producer();
+    }
+    size_t numOperands() const MOZ_FINAL MOZ_OVERRIDE {
+        return operands_.length();
+    }
+    size_t indexOf(const MUse *u) const MOZ_FINAL MOZ_OVERRIDE {
+        MOZ_ASSERT(u >= &operands_[0]);
+        MOZ_ASSERT(u <= &operands_[numOperands() - 1]);
+        return u - &operands_[0];
+    }
+    void replaceOperand(size_t index, MDefinition *operand) MOZ_FINAL MOZ_OVERRIDE {
+        operands_[index].replaceProducer(operand);
+    }
+};
+
 // Generates an LSnapshot without further effect.
 class MStart : public MNullaryInstruction
 {
@@ -1811,6 +1848,68 @@ class MNewDerivedTypedObject
     }
 };
 
+// Represent the content of all slots of an object.  This instruction is not
+// lowered and is not used to generate code.
+class MObjectState : public MVariadicInstruction
+{
+  private:
+    uint32_t numSlots_;
+    uint32_t numFixedSlots_;
+
+    MObjectState(MDefinition *obj);
+
+    bool init(TempAllocator &alloc, MDefinition *obj);
+
+    void initSlot(uint32_t slot, MDefinition *def) {
+        initOperand(slot + 1, def);
+    }
+
+  public:
+    INSTRUCTION_HEADER(ObjectState)
+
+    static MObjectState *New(TempAllocator &alloc, MDefinition *obj, MDefinition *undefinedVal);
+    static MObjectState *Copy(TempAllocator &alloc, MObjectState *state);
+
+    MDefinition *object() const {
+        return getOperand(0);
+    }
+
+    size_t numFixedSlots() const {
+        return numFixedSlots_;
+    }
+    size_t numSlots() const {
+        return numSlots_;
+    }
+
+    MDefinition *getSlot(uint32_t slot) const {
+        return getOperand(slot + 1);
+    }
+    void setSlot(uint32_t slot, MDefinition *def) {
+        replaceOperand(slot + 1, def);
+    }
+
+    MDefinition *getFixedSlot(uint32_t slot) const {
+        MOZ_ASSERT(slot < numFixedSlots());
+        return getSlot(slot);
+    }
+    void setFixedSlot(uint32_t slot, MDefinition *def) {
+        MOZ_ASSERT(slot < numFixedSlots());
+        setSlot(slot, def);
+    }
+
+    MDefinition *getDynamicSlot(uint32_t slot) const {
+        return getSlot(slot + numFixedSlots());
+    }
+    void setDynamicSlot(uint32_t slot, MDefinition *def) {
+        setSlot(slot + numFixedSlots(), def);
+    }
+
+    bool writeRecoverData(CompactBufferWriter &writer) const;
+    bool canRecoverOnBailout() const {
+        return true;
+    }
+};
+
 // Setting __proto__ in an object literal.
 class MMutateProto
   : public MAryInstruction<2>,
@@ -1991,43 +2090,6 @@ class MInitElemGetterSetter
     }
     TypePolicy *typePolicy() {
         return this;
-    }
-};
-
-class MVariadicInstruction : public MInstruction
-{
-    FixedList<MUse> operands_;
-
-  protected:
-    bool init(TempAllocator &alloc, size_t length) {
-        return operands_.init(alloc, length);
-    }
-    void initOperand(size_t index, MDefinition *operand) {
-        // FixedList doesn't initialize its elements, so do an unchecked init.
-        operands_[index].initUnchecked(operand, this);
-    }
-    MUse *getUseFor(size_t index) MOZ_FINAL MOZ_OVERRIDE {
-        return &operands_[index];
-    }
-    const MUse *getUseFor(size_t index) const MOZ_FINAL MOZ_OVERRIDE {
-        return &operands_[index];
-    }
-
-  public:
-    // Will assert if called before initialization.
-    MDefinition *getOperand(size_t index) const MOZ_FINAL MOZ_OVERRIDE {
-        return operands_[index].producer();
-    }
-    size_t numOperands() const MOZ_FINAL MOZ_OVERRIDE {
-        return operands_.length();
-    }
-    size_t indexOf(const MUse *u) const MOZ_FINAL MOZ_OVERRIDE {
-        MOZ_ASSERT(u >= &operands_[0]);
-        MOZ_ASSERT(u <= &operands_[numOperands() - 1]);
-        return u - &operands_[0];
-    }
-    void replaceOperand(size_t index, MDefinition *operand) MOZ_FINAL MOZ_OVERRIDE {
-        operands_[index].replaceProducer(operand);
     }
 };
 
@@ -5339,6 +5401,34 @@ class MInterruptCheck : public MNullaryInstruction
     }
 };
 
+// Check whether we need to fire the interrupt handler at loop headers and
+// function prologues in asm.js. Generated only if we can't use implicit
+// interrupt checks with signal handlers.
+class MAsmJSInterruptCheck : public MNullaryInstruction
+{
+    Label *interruptExit_;
+    CallSiteDesc funcDesc_;
+
+    MAsmJSInterruptCheck(Label *interruptExit, const CallSiteDesc &funcDesc)
+      : interruptExit_(interruptExit), funcDesc_(funcDesc)
+    {}
+
+  public:
+    INSTRUCTION_HEADER(AsmJSInterruptCheck)
+
+    static MAsmJSInterruptCheck *New(TempAllocator &alloc, Label *interruptExit,
+                                     const CallSiteDesc &funcDesc)
+    {
+        return new(alloc) MAsmJSInterruptCheck(interruptExit, funcDesc);
+    }
+    Label *interruptExit() const {
+        return interruptExit_;
+    }
+    const CallSiteDesc &funcDesc() const {
+        return funcDesc_;
+    }
+};
+
 // If not defined, set a global variable to |undefined|.
 class MDefVar : public MUnaryInstruction
 {
@@ -7489,6 +7579,7 @@ class MGetPropertyPolymorphic
         shapes_(alloc),
         name_(name)
     {
+        setGuard();
         setMovable();
         setResultType(MIRType_Value);
     }
@@ -10326,8 +10417,8 @@ class MAsmJSHeapAccess
     bool skipBoundsCheck_;
 
   public:
-    MAsmJSHeapAccess(Scalar::Type vt, bool s)
-      : viewType_(vt), skipBoundsCheck_(s)
+    MAsmJSHeapAccess(Scalar::Type vt)
+      : viewType_(vt), skipBoundsCheck_(false)
     {}
 
     Scalar::Type viewType() const { return viewType_; }
@@ -10338,7 +10429,7 @@ class MAsmJSHeapAccess
 class MAsmJSLoadHeap : public MUnaryInstruction, public MAsmJSHeapAccess
 {
     MAsmJSLoadHeap(Scalar::Type vt, MDefinition *ptr)
-      : MUnaryInstruction(ptr), MAsmJSHeapAccess(vt, false)
+      : MUnaryInstruction(ptr), MAsmJSHeapAccess(vt)
     {
         setMovable();
         if (vt == Scalar::Float32)
@@ -10368,7 +10459,7 @@ class MAsmJSLoadHeap : public MUnaryInstruction, public MAsmJSHeapAccess
 class MAsmJSStoreHeap : public MBinaryInstruction, public MAsmJSHeapAccess
 {
     MAsmJSStoreHeap(Scalar::Type vt, MDefinition *ptr, MDefinition *v)
-      : MBinaryInstruction(ptr, v) , MAsmJSHeapAccess(vt, false)
+      : MBinaryInstruction(ptr, v) , MAsmJSHeapAccess(vt)
     {}
 
   public:

@@ -109,6 +109,8 @@ function TelephonyService() {
   this._listeners = [];
   this._currentCalls = {};
 
+  this._cdmaCallWaitingNumber = null;
+
   // _isActiveCall[clientId][callIndex] shows the active status of the call.
   this._isActiveCall = {};
   this._numActiveCall = 0;
@@ -728,8 +730,15 @@ TelephonyService.prototype = {
       serviceId: aClientId,
       emergency: aCall.isEmergency,
       duration: duration,
-      direction: aCall.isOutgoing ? "outgoing" : "incoming"
+      direction: aCall.isOutgoing ? "outgoing" : "incoming",
+      hangUpLocal: aCall.hangUpLocal
     };
+
+    if (this._cdmaCallWaitingNumber != null) {
+      data.secondNumber = this._cdmaCallWaitingNumber;
+      this._cdmaCallWaitingNumber = null;
+    }
+
     gSystemMessenger.broadcastMessage("telephony-call-ended", data);
 
     let manualConfStateChange = false;
@@ -867,6 +876,9 @@ TelephonyService.prototype = {
       // call comes after a 3way call.
       this.notifyCallDisconnected(aClientId, call);
     }
+
+    this._cdmaCallWaitingNumber = aCall.number;
+
     this._notifyAllListeners("notifyCdmaCallWaiting", [aClientId,
                                                        aCall.number,
                                                        aCall.numberPresentation,

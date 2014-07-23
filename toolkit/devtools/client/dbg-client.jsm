@@ -447,7 +447,7 @@ DebuggerClient.prototype = {
     if (this._clients.has(aTabActor)) {
       let cachedTab = this._clients.get(aTabActor);
       let cachedResponse = {
-        cacheEnabled: cachedTab.cacheEnabled,
+        cacheDisabled: cachedTab.cacheDisabled,
         javascriptEnabled: cachedTab.javascriptEnabled,
         traits: cachedTab.traits,
       };
@@ -1256,7 +1256,7 @@ function TabClient(aClient, aForm) {
   this._actor = aForm.from;
   this._threadActor = aForm.threadActor;
   this.javascriptEnabled = aForm.javascriptEnabled;
-  this.cacheEnabled = aForm.cacheEnabled;
+  this.cacheDisabled = aForm.cacheDisabled;
   this.thread = null;
   this.request = this.client.request;
   this.traits = aForm.traits || {};
@@ -1757,14 +1757,17 @@ ThreadClient.prototype = {
       this.client.request(packet, (aResponse) => {
         // Ignoring errors, since the user may be setting a breakpoint in a
         // dead script that will reappear on a page reload.
-        if (aOnResponse) {
+        let bpClient;
+        if (aResponse.actor) {
           let root = this.client.mainRoot;
-          let bpClient = new BreakpointClient(
+          bpClient = new BreakpointClient(
             this.client,
             aResponse.actor,
             location,
             root.traits.conditionalBreakpoints ? condition : undefined
           );
+        }
+        if (aOnResponse) {
           aOnResponse(aResponse, bpClient);
         }
         if (aCallback) {

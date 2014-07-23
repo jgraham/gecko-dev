@@ -187,9 +187,12 @@ jit::EliminateDeadCode(MIRGenerator *mir, MIRGraph &graph)
         for (MInstructionReverseIterator inst = block->rbegin(); inst != block->rend(); ) {
             if (!inst->isEffectful() && !inst->resumePoint() &&
                 !inst->hasUses() && !inst->isGuard() &&
-                !inst->isControlInstruction()) {
+                !inst->isControlInstruction())
+            {
                 inst = block->discardAt(inst);
-            } else if (!inst->hasLiveDefUses() && inst->canRecoverOnBailout()) {
+            } else if (!inst->isRecoveredOnBailout() && !inst->hasLiveDefUses() &&
+                       inst->canRecoverOnBailout())
+            {
                 inst->setRecoveredOnBailout();
                 inst++;
             } else {
@@ -2414,11 +2417,11 @@ ArgumentsUseCanBeLazy(JSContext *cx, JSScript *script, MInstruction *ins, size_t
     if (ins->isGetArgumentsObjectArg() && index == 0)
         return true;
 
-    // arguments.length length can read fp->numActualArgs() directly and
-    // arguments.callee can read fp->callee() directly.
+    // arguments.length length can read fp->numActualArgs() directly.
+    // arguments.callee can read fp->callee() directly in non-strict code.
     if (ins->isCallGetProperty() && index == 0 &&
         (ins->toCallGetProperty()->name() == cx->names().length ||
-         ins->toCallGetProperty()->name() == cx->names().callee))
+         (!script->strict() && ins->toCallGetProperty()->name() == cx->names().callee)))
     {
         return true;
     }

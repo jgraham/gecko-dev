@@ -1481,7 +1481,7 @@ nsLayoutUtils::GetScrollableFrameFor(const nsIFrame *aScrolledFrame)
 {
   nsIFrame *frame = aScrolledFrame->GetParent();
   nsIScrollableFrame *sf = do_QueryFrame(frame);
-  return sf;
+  return (sf && sf->GetScrolledFrame() == aScrolledFrame) ? sf : nullptr;
 }
 
 /* static */ void
@@ -1603,9 +1603,9 @@ IsScrollbarThumbLayerized(nsIFrame* aThumbFrame)
   return reinterpret_cast<intptr_t>(aThumbFrame->Properties().Get(ScrollbarThumbLayerized()));
 }
 
-static nsIFrame*
-GetAnimatedGeometryRootForFrame(nsIFrame* aFrame,
-                                const nsIFrame* aStopAtAncestor)
+nsIFrame*
+nsLayoutUtils::GetAnimatedGeometryRootForFrame(nsIFrame* aFrame,
+                                               const nsIFrame* aStopAtAncestor)
 {
   nsIFrame* f = aFrame;
   nsIFrame* stickyFrame = nullptr;
@@ -2323,7 +2323,7 @@ nsLayoutUtils::GetLayerTransformForFrame(nsIFrame* aFrame,
                                false/*don't build caret*/);
   nsDisplayList list;  
   nsDisplayTransform* item =
-    new (&builder) nsDisplayTransform(&builder, aFrame, &list);
+    new (&builder) nsDisplayTransform(&builder, aFrame, &list, nsRect());
 
   *aTransform =
     item->GetTransform();
@@ -2937,9 +2937,6 @@ nsLayoutUtils::PaintFrame(nsRenderingContext* aRenderingContext, nsIFrame* aFram
   }
 #endif
 
-  list.ComputeVisibilityForRoot(&builder, &visibleRegion,
-                                usingDisplayPort ? rootScrollFrame : nullptr);
-
   uint32_t flags = nsDisplayList::PAINT_DEFAULT;
   if (aFlags & PAINT_WIDGET_LAYERS) {
     flags |= nsDisplayList::PAINT_USE_WIDGET_LAYERS;
@@ -2955,7 +2952,6 @@ nsLayoutUtils::PaintFrame(nsRenderingContext* aRenderingContext, nsIFrame* aFram
     } else if (!(aFlags & PAINT_DOCUMENT_RELATIVE)) {
       nsIWidget *widget = aFrame->GetNearestWidget();
       if (widget) {
-        builder.SetFinalTransparentRegion(visibleRegion);
         // If we're finished building display list items for painting of the outermost
         // pres shell, notify the widget about any toolbars we've encountered.
         widget->UpdateThemeGeometries(builder.GetThemeGeometries());
@@ -3023,8 +3019,7 @@ nsLayoutUtils::PaintFrame(nsRenderingContext* aRenderingContext, nsIFrame* aFram
       !(aFlags & PAINT_DOCUMENT_RELATIVE)) {
     nsIWidget *widget = aFrame->GetNearestWidget();
     if (widget) {
-      nsRegion excludedRegion = builder.GetExcludedGlassRegion();
-      excludedRegion.Sub(excludedRegion, visibleRegion);
+      nsRegion excludedRegion = builder.GetWindowOpaqueRegion();
       nsIntRegion windowRegion(excludedRegion.ToNearestPixels(presContext->AppUnitsPerDevPixel()));
       widget->UpdateOpaqueRegion(windowRegion);
     }
@@ -3596,7 +3591,8 @@ GetPercentHeight(const nsStyleCoord& aStyle,
     if (minh > h)
       h = minh;
   } else {
-    NS_ASSERTION(pos->mMinHeight.HasPercent(),
+    NS_ASSERTION(pos->mMinHeight.HasPercent() ||
+                 pos->mMinHeight.GetUnit() == eStyleUnit_Auto,
                  "unknown min-height unit");
   }
 
@@ -3665,6 +3661,8 @@ GetIntrinsicCoord(const nsStyleCoord& aStyle,
 static int32_t gNoiseIndent = 0;
 #endif
 
+#define MULDIV(a,b,c) (nscoord(int64_t(a) * int64_t(b) / int64_t(c)))
+
 /* static */ nscoord
 nsLayoutUtils::IntrinsicForContainer(nsRenderingContext *aRenderingContext,
                                      nsIFrame *aFrame,
@@ -3709,7 +3707,19 @@ nsLayoutUtils::IntrinsicForContainer(nsRenderingContext *aRenderingContext,
   nscoord maxw;
   bool haveFixedMaxWidth = GetAbsoluteCoord(styleMaxWidth, maxw);
   nscoord minw;
-  bool haveFixedMinWidth = GetAbsoluteCoord(styleMinWidth, minw);
+
+  // Treat "min-width: auto" as 0.
+  bool haveFixedMinWidth;
+  if (eStyleUnit_Auto == styleMinWidth.GetUnit()) {
+    // NOTE: Technically, "auto" is supposed to behave like "min-content" on
+    // flex items. However, we don't need to worry about that here, because
+    // flex items' min-sizes are intentionally ignored until the flex
+    // container explicitly considers them during space distribution.
+    minw = 0;
+    haveFixedMinWidth = true;
+  } else {
+    haveFixedMinWidth = GetAbsoluteCoord(styleMinWidth, minw);
+  }
 
   // If we have a specified width (or a specified 'min-width' greater
   // than the specified 'max-width', which works out to the same thing),
@@ -3743,12 +3753,18 @@ nsLayoutUtils::IntrinsicForContainer(nsRenderingContext *aRenderingContext,
 
     // Handle elements with an intrinsic ratio (or size) and a specified
     // height, min-height, or max-height.
+    // NOTE: We treat "min-height:auto" as "0" for the purpose of this code,
+    // since that's what it means in all cases except for on flex items -- and
+    // even there, we're supposed to ignore it (i.e. treat it as 0) until the
+    // flex container explicitly considers it.
     const nsStyleCoord &styleHeight = stylePos->mHeight;
     const nsStyleCoord &styleMinHeight = stylePos->mMinHeight;
     const nsStyleCoord &styleMaxHeight = stylePos->mMaxHeight;
+
     if (styleHeight.GetUnit() != eStyleUnit_Auto ||
-        !(styleMinHeight.GetUnit() == eStyleUnit_Coord &&
-          styleMinHeight.GetCoordValue() == 0) ||
+        !(styleMinHeight.GetUnit() == eStyleUnit_Auto || 
+          (styleMinHeight.GetUnit() == eStyleUnit_Coord &&
+           styleMinHeight.GetCoordValue() == 0)) ||
         styleMaxHeight.GetUnit() != eStyleUnit_None) {
 
       nsSize ratio = aFrame->GetIntrinsicRatio();
@@ -3786,15 +3802,13 @@ nsLayoutUtils::IntrinsicForContainer(nsRenderingContext *aRenderingContext,
         if (GetAbsoluteCoord(styleHeight, h) ||
             GetPercentHeight(styleHeight, aFrame, h)) {
           h = std::max(0, h - heightTakenByBoxSizing);
-          result =
-            NSToCoordRound(h * (float(ratio.width) / float(ratio.height)));
+          result = MULDIV(h, ratio.width, ratio.height);
         }
 
         if (GetAbsoluteCoord(styleMaxHeight, h) ||
             GetPercentHeight(styleMaxHeight, aFrame, h)) {
           h = std::max(0, h - heightTakenByBoxSizing);
-          nscoord maxWidth =
-            NSToCoordRound(h * (float(ratio.width) / float(ratio.height)));
+          nscoord maxWidth = MULDIV(h, ratio.width, ratio.height);
           if (maxWidth < result)
             result = maxWidth;
         }
@@ -3802,8 +3816,7 @@ nsLayoutUtils::IntrinsicForContainer(nsRenderingContext *aRenderingContext,
         if (GetAbsoluteCoord(styleMinHeight, h) ||
             GetPercentHeight(styleMinHeight, aFrame, h)) {
           h = std::max(0, h - heightTakenByBoxSizing);
-          nscoord minWidth =
-            NSToCoordRound(h * (float(ratio.width) / float(ratio.height)));
+          nscoord minWidth = MULDIV(h, ratio.width, ratio.height);
           if (minWidth > result)
             result = minWidth;
         }
@@ -4083,8 +4096,6 @@ nsLayoutUtils::MarkDescendantsDirty(nsIFrame *aSubtreeRoot)
   } while (subtrees.Length() != 0);
 }
 
-#define MULDIV(a,b,c) (nscoord(int64_t(a) * int64_t(b) / int64_t(c)))
-
 /* static */ nsSize
 nsLayoutUtils::ComputeSizeWithIntrinsicDimensions(
                    nsRenderingContext* aRenderingContext, nsIFrame* aFrame,
@@ -4169,20 +4180,23 @@ nsLayoutUtils::ComputeSizeWithIntrinsicDimensions(
                  aFrame, aCBSize.width, boxSizingAdjust.width,
                  boxSizingToMarginEdgeWidth, stylePos->mMaxWidth);
   } else {
-    // NOTE: Flex items ignore their min & max sizing properties in their
-    // flex container's main-axis.  (Those properties get applied later in
-    // the flexbox algorithm.)
     maxWidth = nscoord_MAX;
   }
 
-  if (!(isFlexItem && isHorizontalFlexItem)) {
+  // NOTE: Flex items ignore their min & max sizing properties in their
+  // flex container's main-axis.  (Those properties get applied later in
+  // the flexbox algorithm.)
+  if (stylePos->mMinWidth.GetUnit() != eStyleUnit_Auto &&
+      !(isFlexItem && isHorizontalFlexItem)) {
     minWidth = nsLayoutUtils::ComputeWidthValue(aRenderingContext,
                  aFrame, aCBSize.width, boxSizingAdjust.width,
                  boxSizingToMarginEdgeWidth, stylePos->mMinWidth);
   } else {
-    // NOTE: Flex items ignore their min & max sizing properties in their
-    // flex container's main-axis.  (Those properties get applied later in
-    // the flexbox algorithm.)
+    // Treat "min-width: auto" as 0.
+    // NOTE: Technically, "auto" is supposed to behave like "min-content" on
+    // flex items. However, we don't need to worry about that here, because
+    // flex items' min-sizes are intentionally ignored until the flex
+    // container explicitly considers them during space distribution.
     minWidth = 0;
   }
 
@@ -4912,6 +4926,14 @@ struct SnappedImageDrawingParameters {
   {}
 };
 
+static nsRect
+TileNearRect(const nsRect& aAnyTile, const nsRect& aTargetRect)
+{
+  nsPoint distance = aTargetRect.TopLeft() - aAnyTile.TopLeft();
+  return aAnyTile + nsPoint(distance.x / aAnyTile.width * aAnyTile.width,
+                            distance.y / aAnyTile.height * aAnyTile.height);
+}
+
 /**
  * Given a set of input parameters, compute certain output parameters
  * for drawing an image with the image snapping algorithm.
@@ -4932,8 +4954,13 @@ ComputeSnappedImageDrawingParameters(gfxContext*     aCtx,
   if (aDest.IsEmpty() || aFill.IsEmpty() || !aImageSize.width || !aImageSize.height)
     return SnappedImageDrawingParameters();
 
+  // Avoid unnecessarily large offsets.
+  bool doTile = !aDest.Contains(aFill);
+  nsRect dest = doTile ? TileNearRect(aDest, aFill.Intersect(aDirty)) : aDest;
+  nsPoint anchor = aAnchor + (dest.TopLeft() - aDest.TopLeft());
+
   gfxRect devPixelDest =
-    nsLayoutUtils::RectToGfxRect(aDest, aAppUnitsPerDevPixel);
+    nsLayoutUtils::RectToGfxRect(dest, aAppUnitsPerDevPixel);
   gfxRect devPixelFill =
     nsLayoutUtils::RectToGfxRect(aFill, aAppUnitsPerDevPixel);
   gfxRect devPixelDirty =
@@ -4973,8 +5000,8 @@ ComputeSnappedImageDrawingParameters(gfxContext*     aCtx,
   // Compute the anchor point and compute final fill rect.
   // This code assumes that pixel-based devices have one pixel per
   // device unit!
-  gfxPoint anchorPoint(gfxFloat(aAnchor.x)/aAppUnitsPerDevPixel,
-                       gfxFloat(aAnchor.y)/aAppUnitsPerDevPixel);
+  gfxPoint anchorPoint(gfxFloat(anchor.x)/aAppUnitsPerDevPixel,
+                       gfxFloat(anchor.y)/aAppUnitsPerDevPixel);
   gfxPoint imageSpaceAnchorPoint =
     MapToFloatImagePixels(imageSize, devPixelDest, anchorPoint);
 
@@ -5063,49 +5090,6 @@ DrawImageInternal(nsRenderingContext*    aRenderingContext,
                drawingParams.mFillRect, drawingParams.mSubimage, aImageSize,
                aSVGContext, imgIContainer::FRAME_CURRENT, aImageFlags);
   return NS_OK;
-}
-
-/* static */ void
-nsLayoutUtils::DrawPixelSnapped(nsRenderingContext* aRenderingContext,
-                                nsPresContext*       aPresContext,
-                                gfxDrawable*         aDrawable,
-                                GraphicsFilter       aFilter,
-                                const nsRect&        aDest,
-                                const nsRect&        aFill,
-                                const nsPoint&       aAnchor,
-                                const nsRect&        aDirty)
-{
-  int32_t appUnitsPerDevPixel =
-    aPresContext->AppUnitsPerDevPixel();
-  gfxContext* ctx = aRenderingContext->ThebesContext();
-  gfxIntSize drawableSize = aDrawable->Size();
-  nsIntSize imageSize(drawableSize.width, drawableSize.height);
-
-  SnappedImageDrawingParameters drawingParams =
-    ComputeSnappedImageDrawingParameters(ctx, appUnitsPerDevPixel, aDest, aFill,
-                                         aAnchor, aDirty, imageSize);
-
-  if (!drawingParams.mShouldDraw)
-    return;
-
-  gfxContextMatrixAutoSaveRestore saveMatrix(ctx);
-  if (drawingParams.mResetCTM) {
-    ctx->IdentityMatrix();
-  }
-
-  gfxRect sourceRect =
-    drawingParams.mUserSpaceToImageSpace.Transform(drawingParams.mFillRect);
-  gfxRect imageRect(0, 0, imageSize.width, imageSize.height);
-  gfxRect subimage(drawingParams.mSubimage.x, drawingParams.mSubimage.y,
-                   drawingParams.mSubimage.width, drawingParams.mSubimage.height);
-
-  NS_ASSERTION(!sourceRect.Intersect(subimage).IsEmpty(),
-               "We must be allowed to sample *some* source pixels!");
-
-  gfxUtils::DrawPixelSnapped(ctx, aDrawable,
-                             drawingParams.mUserSpaceToImageSpace, subimage,
-                             sourceRect, imageRect, drawingParams.mFillRect,
-                             gfx::SurfaceFormat::B8G8R8A8, aFilter);
 }
 
 /* static */ nsresult

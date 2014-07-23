@@ -5155,7 +5155,6 @@ PresShell::PaintRangePaintInfo(nsTArray<nsAutoPtr<RangePaintInfo> >* aItems,
 
     aArea.MoveBy(-rangeInfo->mRootOffset.x, -rangeInfo->mRootOffset.y);
     nsRegion visible(aArea);
-    rangeInfo->mList.ComputeVisibilityForRoot(&rangeInfo->mBuilder, &visible);
     rangeInfo->mList.PaintRoot(&rangeInfo->mBuilder, rc, nsDisplayList::PAINT_DEFAULT);
     aArea.MoveBy(rangeInfo->mRootOffset.x, rangeInfo->mRootOffset.y);
   }
@@ -7831,9 +7830,11 @@ PresShell::DispatchTouchEvent(WidgetEvent* aEvent,
                               bool aTouchIsNew)
 {
   // calling preventDefault on touchstart or the first touchmove for a
-  // point prevents mouse events
-  bool canPrevent = aEvent->message == NS_TOUCH_START ||
-              (aEvent->message == NS_TOUCH_MOVE && aTouchIsNew);
+  // point prevents mouse events. calling it on the touchend should
+  // prevent click dispatching.
+  bool canPrevent = (aEvent->message == NS_TOUCH_START) ||
+              (aEvent->message == NS_TOUCH_MOVE && aTouchIsNew) ||
+              (aEvent->message == NS_TOUCH_END);
   bool preventDefault = false;
   nsEventStatus tmpStatus = nsEventStatus_eIgnore;
   WidgetTouchEvent* touchEvent = aEvent->AsTouchEvent();

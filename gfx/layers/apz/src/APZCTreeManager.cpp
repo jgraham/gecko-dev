@@ -244,8 +244,7 @@ APZCTreeManager::UpdatePanZoomControllerTree(CompositorParent* aCompositor,
                                       * metrics.mDevPixelsPerCSSPixel
                                       * metrics.GetParentResolution());
         }
-        gfx3DMatrix transform;
-        gfx::To3DMatrix(aLayer->GetTransform(), transform);
+        gfx3DMatrix transform = gfx::To3DMatrix(aLayer->GetTransform());
 
         apzc->SetLayerHitTestData(visible, aTransform, transform);
         APZCTM_LOG("Setting rect(%f %f %f %f) as visible region for APZC %p\n", visible.x, visible.y,
@@ -312,9 +311,7 @@ APZCTreeManager::UpdatePanZoomControllerTree(CompositorParent* aCompositor,
     aTransform = gfx3DMatrix();
   } else {
     // Multiply child layer transforms on the left so they get applied first
-    gfx3DMatrix matrix;
-    gfx::To3DMatrix(aLayer->GetTransform(), matrix);
-    aTransform = matrix * aTransform;
+    aTransform = gfx::To3DMatrix(aLayer->GetTransform()) * aTransform;
   }
 
   uint64_t childLayersId = (aLayer->AsRefLayer() ? aLayer->AsRefLayer()->GetReferentId() : aLayersId);
@@ -888,16 +885,26 @@ bool
 APZCTreeManager::FlushRepaintsForOverscrollHandoffChain()
 {
   MonitorAutoLock lock(mTreeLock);  // to access mOverscrollHandoffChain
-  if (mOverscrollHandoffChain.length() == 0) {
-    return false;
-  }
   for (uint32_t i = 0; i < mOverscrollHandoffChain.length(); i++) {
     nsRefPtr<AsyncPanZoomController> item = mOverscrollHandoffChain[i];
     if (item) {
       item->FlushRepaintForOverscrollHandoff();
     }
   }
-  return true;
+  return mOverscrollHandoffChain.length() > 0;
+}
+
+bool
+APZCTreeManager::CancelAnimationsForOverscrollHandoffChain()
+{
+  MonitorAutoLock lock(mTreeLock);  // to access mOverscrollHandoffChain
+  for (uint32_t i = 0; i < mOverscrollHandoffChain.length(); i++) {
+    nsRefPtr<AsyncPanZoomController> item = mOverscrollHandoffChain[i];
+    if (item) {
+      item->CancelAnimation();
+    }
+  }
+  return mOverscrollHandoffChain.length() > 0;
 }
 
 bool
