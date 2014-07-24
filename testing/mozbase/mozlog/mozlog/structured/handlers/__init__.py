@@ -61,9 +61,9 @@ class StreamHandler(BaseHandler):
         if not formatted:
             return
         with self._lock:
-            #XXX Should encoding be the formatter's responsibility?
-            try:
-                self.stream.write(formatted.encode("utf8", "replace"))
-            except:
-                raise
+            if isinstance(formatted, unicode):
+                self.stream.write(formatted.encode("utf-8", "replace"))
+            else:
+                self.stream.write(formatted)
+
             self.stream.flush()
