@@ -241,7 +241,7 @@ class TestStructuredLog(BaseStructuredTest):
     def test_process(self):
         self.logger.process_output(1234, "test output")
         self.assert_log_equals({"action": "process_output",
-                                "process": 1234,
+                                "process": "1234",
                                 "data": "test output"})
 
     def test_log(self):
