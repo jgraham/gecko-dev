@@ -10,7 +10,7 @@ from threading import current_thread, Lock
 import json
 import time
 
-from types import Unicode, TestId, Status, Dict, List, log_action
+from types import Unicode, TestId, Status, SubStatus, Dict, List, log_action, convertor_registry
 
 """Structured Logging for recording test results.
 
@@ -131,10 +131,18 @@ class StructuredLogger(object):
         message is logged from this logger"""
         return self._state.handlers
 
-    def log_raw(self, data):
-        if "action" not in data:
+    def log_raw(self, raw_data):
+        if "action" not in raw_data:
             raise ValueError
-        data = self._make_log_data(data['action'], data)
+
+        action = raw_data["action"]
+
+        converted_data = convertor_registry[action].convert_known(**raw_data)
+        for k, v in raw_data.iteritems():
+            if k not in converted_data:
+                converted_data[k] = v
+
+        data = self._make_log_data(action, converted_data)
         self._handle_log(data)
 
     def _log_data(self, action, data=None):
