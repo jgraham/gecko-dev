@@ -206,8 +206,8 @@ class StructuredLogger(object):
 
     @log_action(TestId("test"),
                 Unicode("subtest"),
-                Status("status"),
-                Status("expected", default="PASS"),
+                SubStatus("status"),
+                SubStatus("expected", default="PASS"),
                 Unicode("message", default=None, optional=True),
                 Unicode("stack", default=None, optional=True),
                 Dict("extra", default=None, optional=True))
@@ -227,7 +227,6 @@ class StructuredLogger(object):
 
         if (data["expected"] == data["status"] or
             data["status"] == "SKIP"):
-            print "removing expected"
             del data["expected"]
 
         if data["test"] not in self._state.running_tests:
