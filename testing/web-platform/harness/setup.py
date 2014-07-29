@@ -10,7 +10,7 @@ import textwrap
 from setuptools import setup, find_packages
 
 PACKAGE_NAME = 'wptrunner'
-PACKAGE_VERSION = '0.4.1'
+PACKAGE_VERSION = '1.0'
 
 # Dependencies
 with open('requirements.txt') as f:
@@ -49,6 +49,7 @@ setup(name=PACKAGE_NAME,
                                   "testharnessreport.js",
                                   "testharness_runner.html",
                                   "config.json",
+                                  "wptrunner.default.ini",
                                   "browsers/server-locations.txt",
                                   "browsers/b2g_setup/*",
                                   "prefs/*"]},
