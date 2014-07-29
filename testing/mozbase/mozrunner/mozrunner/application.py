@@ -129,13 +129,6 @@ class B2GContext(object):
         return find_executable(binary)
 
     def stop_application(self):
-        if self.bindir is None:
-            # Assume this is a real device
-            print("Restarting device")
-            self.dm.reboot(wait=True)
-            import subprocess
-            print(subprocess.call(["adb", "wait-for-device"]))
-
         self.dm.shellCheckOutput(['stop', 'b2g'])
 
     def setup_profile(self, profile):

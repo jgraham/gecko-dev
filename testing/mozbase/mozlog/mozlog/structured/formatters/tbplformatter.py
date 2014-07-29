@@ -20,7 +20,7 @@ class TbplFormatter(BaseMachFormatter):
         if data.get('component'):
             return "%s %s\n" % (data["component"], data["message"])
 
-        return "%s | %s\n" % (data["level"] | data["message"])
+        return "%s\n" % (data["message"])
 
     def process_output(self, data):
         return "PROCESS | %(process)s | %(data)s\n" % data
@@ -81,24 +81,6 @@ class TbplFormatter(BaseMachFormatter):
 
         return "TEST-%s | %s | took %ims\n" % (
             data["status"], self.id_str(data["test"]), time)
-
-    def suite_end(self, data):
-        start_time = self.suite_start_time
-        time = int((data["time"] - start_time) / 1000)
-
-        return "SUITE-END | took %is\n" % time
-
-    def test_id(self, test_id):
-        if isinstance(test_id, (str, unicode)):
-            return test_id
-        else:
-            return tuple(test_id)
-
-    def id_str(self, test_id):
-        if isinstance(test_id, (str, unicode)):
-            return test_id
-        else:
-            return " ".join(test_id)
 
     def suite_end(self, data):
         start_time = self.suite_start_time

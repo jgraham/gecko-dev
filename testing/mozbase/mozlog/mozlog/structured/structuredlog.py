@@ -84,18 +84,6 @@ def set_default_logger(default_logger):
 log_levels = dict((k.upper(), v) for v, k in
                   enumerate(["critical", "error", "warning", "info", "debug"]))
 
-_default_logger_name = None
-
-def get_default_logger(component=None):
-    if _default_logger_name is not None:
-        return StructuredLogger(_default_logger_name, component)
-
-def set_default_loggger(logger):
-    global _default_logger_name
-    _default_logger_name = logger.name
-
-def get_default_logger(component=None):
-    return None
 
 class LoggerState(object):
     def __init__(self):
