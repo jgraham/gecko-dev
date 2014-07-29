@@ -143,3 +143,51 @@ on Mozilla infrastructure. This situation is expected to be temporary.
 
 Full documentation on test authoring and submission can be found on
 [testthewebforward.org](http://testthewebforward.org/docs).
+
+Running Tests In Other Browsers
+-------------------------------
+
+web-platform-tests is cross browser, and the runner is compatible with
+multiple browsers. Therefore it's possible to check the behaviour of
+tests in other browsers. This is somewhat more involved than running
+them in Firefox since extra dependencies may be required. For example
+to test in Chrome:
+
+1) Download the chromedriver binary and place it somewhere sensible
+e.g. ~/bin
+
+2) In your gecko source tree activate the virtualenv created by mach,
+since this has most dependencies already installed. This is typically
+in objdir/_virtualenv and is activated via e.g.
+
+    source objdir/_virtualenv/bin/activate
+
+3) Install the extra requirements:
+
+    cd testing/web-platform/harness
+    pip install -r requirements_chrome.txt
+
+4) Edit the config file `testing/web-platform/wptrunner.ini` so that
+chrome support is enabled by changing the section that reads:
+
+    [products]
+    firefox =
+
+to read
+
+    [products]
+    firefox =
+    chrome =
+
+(alternatively create a new config file elsewhere and use the
+`--config` option to `runtests.py` to point wptrunner at this config
+file).
+
+5) Run `runtests.py` using the location of chromedriver as
+the binary:
+
+    cd testing/web-platform
+    python runtests.py --product=chrome --binary=~/bin/chromedriver --log-mach=-
+
+By default this will use the same test checkout and metadata as are in
+the Gecko tree, so it's easy to compare behaviour relative to Firefox.
