@@ -6,7 +6,7 @@
 #include "ClientLayerManager.h"
 #include "CompositorChild.h"            // for CompositorChild
 #include "GeckoProfiler.h"              // for PROFILER_LABEL
-#include "gfxPrefs.h"                   // for gfxPrefs::LayersTileWidth/Height
+#include "gfxPrefs.h"                   // for gfxPrefs::LayersTile...
 #include "mozilla/Assertions.h"         // for MOZ_ASSERT, etc
 #include "mozilla/Hal.h"
 #include "mozilla/dom/ScreenOrientation.h"  // for ScreenOrientation
@@ -28,6 +28,7 @@
 #include "nsXULAppAPI.h"                // for XRE_GetProcessType, etc
 #include "TiledLayerBuffer.h"
 #include "mozilla/dom/WindowBinding.h"  // for Overfill Callback
+#include "gfxPrefs.h"
 #ifdef MOZ_WIDGET_ANDROID
 #include "AndroidBridge.h"
 #endif
@@ -165,7 +166,7 @@ ClientLayerManager::BeginTransactionWithTarget(gfxContext* aTarget)
   }
 
   // If this is a new paint, increment the paint sequence number.
-  if (!mIsRepeatTransaction) {
+  if (!mIsRepeatTransaction && gfxPrefs::APZTestLoggingEnabled()) {
     ++mPaintSequenceNumber;
     mApzTestData.StartNewPaint(mPaintSequenceNumber);
   }
@@ -321,6 +322,14 @@ ClientLayerManager::GetCompositorSideAPZTestData(APZTestData* aData) const
     if (!mForwarder->GetShadowManager()->SendGetAPZTestData(aData)) {
       NS_WARNING("Call to PLayerTransactionChild::SendGetAPZTestData() failed");
     }
+  }
+}
+
+void
+ClientLayerManager::StartNewRepaintRequest(SequenceNumber aSequenceNumber)
+{
+  if (gfxPrefs::APZTestLoggingEnabled()) {
+    mApzTestData.StartNewRepaintRequest(aSequenceNumber);
   }
 }
 
@@ -563,6 +572,8 @@ ClientLayerManager::GetTexturePool(SurfaceFormat aFormat)
   mTexturePools.AppendElement(
       new TextureClientPool(aFormat, IntSize(gfxPrefs::LayersTileWidth(),
                                              gfxPrefs::LayersTileHeight()),
+                            gfxPrefs::LayersTileMaxPoolSize(),
+                            gfxPrefs::LayersTileShrinkPoolTimeout(),
                             mForwarder));
 
   return mTexturePools.LastElement();
@@ -577,6 +588,8 @@ ClientLayerManager::GetSimpleTileTexturePool(SurfaceFormat aFormat)
   if (mSimpleTilePools[index].get() == nullptr) {
     mSimpleTilePools[index] = new SimpleTextureClientPool(aFormat, IntSize(gfxPrefs::LayersTileWidth(),
                                                                            gfxPrefs::LayersTileHeight()),
+                                                          gfxPrefs::LayersTileMaxPoolSize(),
+                                                          gfxPrefs::LayersTileShrinkPoolTimeout(),
                                                           mForwarder);
   }
 

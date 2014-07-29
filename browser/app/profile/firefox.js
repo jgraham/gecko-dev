@@ -313,8 +313,14 @@ pref("browser.urlbar.doubleClickSelectsAll", true);
 #else
 pref("browser.urlbar.doubleClickSelectsAll", false);
 #endif
+
+// Control autoFill behavior
 pref("browser.urlbar.autoFill", true);
 pref("browser.urlbar.autoFill.typed", true);
+
+// Use the new unifiedComplete component
+pref("browser.urlbar.unifiedcomplete", true);
+
 // 0: Match anywhere (e.g., middle of words)
 // 1: Match on word boundaries and then try matching anywhere
 // 2: Match only on word boundaries (e.g., after / or .)
@@ -1285,6 +1291,7 @@ pref("devtools.toolbox.selectedTool", "webconsole");
 pref("devtools.toolbox.toolbarSpec", '["splitconsole", "paintflashing toggle","tilt toggle","scratchpad","resize toggle","eyedropper","screenshot --fullpage"]');
 pref("devtools.toolbox.sideEnabled", true);
 pref("devtools.toolbox.zoomValue", "1");
+pref("devtools.toolbox.splitconsoleEnabled", false);
 
 // Toolbox Button preferences
 pref("devtools.command-button-pick.enabled", true);

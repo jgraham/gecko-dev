@@ -123,14 +123,6 @@ GetBuildConfiguration(JSContext *cx, unsigned argc, jsval *vp)
     if (!JS_SetProperty(cx, info, "has-gczeal", value))
         return false;
 
-#ifdef JS_THREADSAFE
-    value = BooleanValue(true);
-#else
-    value = BooleanValue(false);
-#endif
-    if (!JS_SetProperty(cx, info, "threadsafe", value))
-        return false;
-
 #ifdef JS_MORE_DETERMINISTIC
     value = BooleanValue(true);
 #else
@@ -1605,11 +1597,10 @@ static bool
 HelperThreadCount(JSContext *cx, unsigned argc, jsval *vp)
 {
     CallArgs args = CallArgsFromVp(argc, vp);
-#ifdef JS_THREADSAFE
-    args.rval().setInt32(HelperThreadState().threadCount);
-#else
-    args.rval().setInt32(0);
-#endif
+    if (CanUseExtraThreads())
+        args.rval().setInt32(HelperThreadState().threadCount);
+    else
+        args.rval().setInt32(0);
     return true;
 }
 
@@ -1733,7 +1724,7 @@ struct FindPathHandler {
 
         // Record how we reached this node. This is the last edge on a
         // shortest path to this node.
-        EdgeName edgeName(js_strdup(traversal.cx, edge.name));
+        EdgeName edgeName = DuplicateString(traversal.cx, edge.name);
         if (!edgeName)
             return false;
         *backEdge = mozilla::Move(BackEdge(origin, Move(edgeName)));

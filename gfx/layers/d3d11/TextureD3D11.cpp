@@ -185,6 +185,19 @@ TextureClientD3D11::~TextureClientD3D11()
 #endif
 }
 
+TemporaryRef<TextureClient>
+TextureClientD3D11::CreateSimilar(TextureFlags aFlags,
+                                  TextureAllocationFlags aAllocFlags) const
+{
+  RefPtr<TextureClient> tex = new TextureClientD3D11(mFormat, mFlags | aFlags);
+
+  if (!tex->AllocateForSurface(mSize, ALLOC_DEFAULT)) {
+    return nullptr;
+  }
+
+  return tex;
+}
+
 bool
 TextureClientD3D11::Lock(OpenMode aMode)
 {
@@ -381,6 +394,9 @@ DXGITextureHostD3D11::Unlock()
 NewTextureSource*
 DXGITextureHostD3D11::GetTextureSources()
 {
+  MOZ_ASSERT(mIsLocked);
+  // If Lock was successful we must have a valid TextureSource.
+  MOZ_ASSERT(mTextureSource);
   return mTextureSource.get();
 }
 

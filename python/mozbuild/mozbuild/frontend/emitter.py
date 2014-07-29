@@ -226,7 +226,18 @@ class TreeMetadataEmitter(LoggingMixin):
     def _link_libraries(self, sandbox, obj, variable):
         """Add linkage declarations to a given object."""
         assert isinstance(obj, Linkable)
-        for path in sandbox.get(variable, []):
+
+        extra = []
+        # Add stdc++compat library when wanted and needed
+        compat_varname = 'MOZ_LIBSTDCXX_%s_VERSION' % obj.KIND.upper()
+        if sandbox.config.substs.get(compat_varname) \
+                and not isinstance(obj, (StaticLibrary, HostLibrary)):
+            extra.append({
+                'target': 'stdc++compat',
+                'host': 'host_stdc++compat',
+            }[obj.KIND])
+
+        for path in sandbox.get(variable, []) + extra:
             force_static = path.startswith('static:') and obj.KIND == 'target'
             if force_static:
                 path = path[7:]
@@ -374,6 +385,7 @@ class TreeMetadataEmitter(LoggingMixin):
             'MSVC_ENABLE_PGO',
             'NO_DIST_INSTALL',
             'OS_LIBS',
+            'PYTHON_UNIT_TESTS',
             'RCFILE',
             'RESFILE',
             'RCINCLUDE',
@@ -922,11 +934,7 @@ class TreeMetadataEmitter(LoggingMixin):
     def _emit_directory_traversal_from_sandbox(self, sandbox):
         o = DirectoryTraversal(sandbox)
         o.dirs = sandbox.get('DIRS', [])
-        o.parallel_dirs = sandbox.get('PARALLEL_DIRS', [])
-        o.tool_dirs = sandbox.get('TOOL_DIRS', [])
         o.test_dirs = sandbox.get('TEST_DIRS', [])
-        o.test_tool_dirs = sandbox.get('TEST_TOOL_DIRS', [])
-        o.is_tool_dir = sandbox.get('IS_TOOL_DIR', False)
         o.affected_tiers = sandbox.get_affected_tiers()
 
         if 'TIERS' in sandbox:
