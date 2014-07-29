@@ -6,7 +6,7 @@ import os
 import requests
 import urlparse
 
-treeherder_base = "http://treeherder-dev.allizom.org/"
+treeherder_base = "http://treeherder.mozilla.org/"
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -66,9 +66,11 @@ def get_structured_logs(branch, commit, dest=None):
 
     for result in job_data["results"]:
         for platform in result["platforms"]:
+            if platform["option"] == "debug":
+                continue
             for group in platform["groups"]:
                 for job in group["jobs"]:
-                    if job["job_type_name"] == "W3C Web Platform Tests":
+                    if job["job_type_name"].startswith("W3C Web Platform") or job["job_type_name"] == "unknown":
                         url = get_blobber_url(branch, job)
                         if url:
                             prefix = job["platform"]
