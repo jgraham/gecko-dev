@@ -106,12 +106,12 @@ def save_dump_file(dump_save_path, dump_path, extra):
             pass
 
     shutil.move(dump_path, dump_save_path)
-    log.info("Saved minidump as %s",
+    log.info("Saved minidump as %s" %
              os.path.join(dump_save_path, os.path.basename(dump_path)))
 
     if os.path.isfile(extra):
         shutil.move(extra, dump_save_path)
-        log.info("Saved app info as %s",
+        log.info("Saved app info as %s" %
                  os.path.join(dump_save_path, os.path.basename(extra)))
 
 
@@ -154,7 +154,7 @@ class CrashInfo(object):
         # This updates self.symbols_path so we only download once
         if self.symbols_path and mozfile.is_url(self.symbols_path):
             self.remove_symbols = True
-            self.logger.info("Downloading symbols from: %s", self.symbols_path)
+            self.logger.info("Downloading symbols from: %s" % self.symbols_path)
             # Get the symbols and write them to a temporary zipfile
             data = urllib2.urlopen(self.symbols_path)
             with tempfile.TemporaryFile() as symbols_file:
