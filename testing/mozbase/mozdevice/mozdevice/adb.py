@@ -229,6 +229,45 @@ class ADBCommand(object):
 
         return adb_process
 
+    def command_bool(self, cmds, device_serial=None, timeout=None):
+        """Executes an adb command on the host returning True on success and
+        False on failure.
+
+        :param cmds: list containing the command and its arguments to be
+            executed.
+        :param device_serial: optional string specifying the device's
+            serial number if the adb command is to be executed against
+            a specific device.
+        :param timeout: optional integer specifying the maximum time in seconds
+            for any spawned adb process to complete before throwing
+            an ADBTimeoutError.
+            This timeout is per adb call. The total time spent
+            may exceed this value. If it is not specified, the value
+            set in the ADBCommand constructor is used.
+        :returns: string - content of stdout.
+
+        :raises: * ADBTimeoutError
+                 * ADBError
+
+        """
+        with ADBCommand.command(self, cmds,
+                                device_serial=device_serial,
+                                timeout=timeout) as adb_process:
+            if adb_process.timedout:
+                raise ADBTimeoutError("%s" % adb_process)
+            elif adb_process.exitcode:
+                raise ADBError("%s" % adb_process)
+
+            self._logger.debug('command_output: %s, '
+                               'timeout: %s, '
+                               'timedout: %s, '
+                               'exitcode: %s' %
+                               (' '.join(adb_process.args),
+                                timeout,
+                                adb_process.timedout,
+                                adb_process.exitcode))
+            return adb_process.exitcode == 0
+
     def command_output(self, cmds, device_serial=None, timeout=None):
         """Executes an adb command on the host returning stdout.
 
