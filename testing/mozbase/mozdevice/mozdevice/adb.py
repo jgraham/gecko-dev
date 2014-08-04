@@ -42,6 +42,15 @@ class ADBProcess(object):
                                      stdout=self.stdout_file,
                                      stderr=self.stderr_file)
 
+    def __enter__(self, *args, **kwargs):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        if hasattr(self.stdout_file, "close"):
+            self.stdout_file.close()
+        if hasattr(self.stdout_file, "close"):
+            self.stderr_file.close()
+
     @property
     def stdout(self):
         """Return the contents of stdout."""
@@ -240,14 +249,12 @@ class ADBCommand(object):
                  * ADBError
 
         """
-        adb_process = None
-        try:
-            # Need to force the use of the ADBCommand class's command
-            # since ADBDevice will redefine command and call its
-            # own version otherwise.
-            adb_process = ADBCommand.command(self, cmds,
-                                             device_serial=device_serial,
-                                             timeout=timeout)
+        # Need to force the use of the ADBCommand class's command
+        # since ADBDevice will redefine command and call its
+        # own version otherwise.
+        with ADBCommand.command(self, cmds,
+                                device_serial=device_serial,
+                                timeout=timeout) as adb_process:
             if adb_process.timedout:
                 raise ADBTimeoutError("%s" % adb_process)
             elif adb_process.exitcode:
@@ -263,10 +270,6 @@ class ADBCommand(object):
                                 adb_process.exitcode,
                                 output))
             return output
-        finally:
-            if adb_process and isinstance(adb_process.stdout_file, file):
-                adb_process.stdout_file.close()
-                adb_process.stderr_file.close()
 
 
 class ADBHost(ADBCommand):
@@ -828,17 +831,12 @@ class ADBDevice(ADBCommand):
                  * ADBRootError
 
         """
-        adb_process = None
-        try:
-            adb_process = self.shell(cmd, env=env, cwd=cwd,
-                                     timeout=timeout, root=root)
+        with self.shell(cmd, env=env, cwd=cwd,
+                        timeout=timeout, root=root) as adb_process:
             if adb_process.timedout:
                 raise ADBTimeoutError("%s" % adb_process)
             return adb_process.exitcode == 0
-        finally:
-            if adb_process:
-                adb_process.stdout_file.close()
-                adb_process.stderr_file.close()
+
 
     def shell_output(self, cmd, env=None, cwd=None, timeout=None, root=False):
         """Executes an adb shell on the device returning stdout.
@@ -862,10 +860,8 @@ class ADBDevice(ADBCommand):
                  * ADBError
 
         """
-        adb_process = None
-        try:
-            adb_process = self.shell(cmd, env=env, cwd=cwd,
-                                     timeout=timeout, root=root)
+        with self.shell(cmd, env=env, cwd=cwd,
+                        timeout=timeout, root=root) as adb_process:
             if adb_process.timedout:
                 raise ADBTimeoutError("%s" % adb_process)
             elif adb_process.exitcode:
@@ -884,10 +880,6 @@ class ADBDevice(ADBCommand):
                                 adb_process.exitcode,
                                 output))
             return output
-        finally:
-            if adb_process and isinstance(adb_process.stdout_file, file):
-                adb_process.stdout_file.close()
-                adb_process.stderr_file.close()
 
     # Informational methods
 
@@ -1264,9 +1256,7 @@ class ADBDevice(ADBCommand):
                  * ADBError
 
         """
-        adb_process = None
-        try:
-            adb_process = self.shell("ps", timeout=timeout)
+        with self.shell("ps", timeout=timeout) as adb_process:
             if adb_process.timedout:
                 raise ADBTimeoutError("%s" % adb_process)
             elif adb_process.exitcode:
@@ -1300,10 +1290,6 @@ class ADBDevice(ADBCommand):
                 line = adb_process.stdout_file.readline()
             self._logger.debug('get_process_list: %s' % ret)
             return ret
-        finally:
-            if adb_process and isinstance(adb_process.stdout_file, file):
-                adb_process.stdout_file.close()
-                adb_process.stderr_file.close()
 
     def kill(self, pids, sig=None,  attempts=3, wait=5,
              timeout=None, root=False):
