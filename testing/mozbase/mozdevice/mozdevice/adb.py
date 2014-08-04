@@ -489,14 +489,16 @@ class ADBDevice(ADBCommand):
 
     """
 
-    def __init__(self, device_serial,
+    def __init__(self,
+                 device_serial=None,
                  adb='adb',
                  test_root='',
                  logger_name='adb',
                  log_level=logging.INFO,
                  timeout=300,
                  device_ready_retry_wait=20,
-                 device_ready_retry_attempts=3):
+                 device_ready_retry_attempts=3,
+                 setup_test_root=False):
         """Initializes the ADBDevice object.
 
         :param device_serial: adb serial number of the device.
@@ -566,7 +568,8 @@ class ADBDevice(ADBCommand):
 
         self._logger.debug("ADBDevice: %s" % self.__dict__)
 
-        self._setup_test_root()
+        if setup_test_root:
+            self.setup_test_root()
 
     @staticmethod
     def _escape_command_line(cmd):
@@ -624,7 +627,7 @@ class ADBDevice(ADBCommand):
 
         return exitcode
 
-    def _setup_test_root(self, timeout=None, root=False):
+    def setup_test_root(self, timeout=None, root=False):
         """setup the device root and cache its value
 
         :param timeout: optional integer specifying the maximum time in
