@@ -9,6 +9,18 @@ import re
 import subprocess
 import tempfile
 import time
+import traceback
+
+from mozlog.structured import get_default_logger
+
+
+def get_logger(logger_name="adb"):
+    logger = get_default_logger(logger_name)
+    if logger is None:
+        import logging
+        logger = logging.getLogger(logger_name)
+    return logger
+
 
 class ADBProcess(object):
     """ADBProcess encapsulates the data related to executing the adb process.
@@ -137,7 +149,7 @@ class ADBCommand(object):
         if self.__class__ == ADBCommand:
             raise NotImplementedError
 
-        self._logger = logging.getLogger(logger_name)
+        self._logger = get_logger(logger_name)
         self._adb_path = adb
         self._log_level = log_level
         self._timeout = timeout
@@ -479,19 +491,19 @@ class ADBDevice(ADBCommand):
             if self.shell_output("id").find(uid) != -1:
                 self._have_root_shell = True
         except ADBError:
-            self._logger.exception('ADBDevice.__init__: id')
+            self._logger.error('ADBDevice.__init__: id\n%s' % traceback.format_exc())
         # Do we have a 'Superuser' sh like su?
         try:
             if self.shell_output("su -c '%s'" % cmd_id).find(uid) != -1:
                 self._have_su = True
         except ADBError:
-            self._logger.exception('ADBDevice.__init__: id')
+            self._logger.error('ADBDevice.__init__: id\n%s' % traceback.format_exc())
         # Do we have Android's su?
         try:
             if self.shell_output("su 0 id").find(uid) != -1:
                 self._have_android_su = True
         except ADBError:
-            self._logger.exception('ADBDevice.__init__: id')
+            self._logger.error('ADBDevice.__init__: id\n%s' % traceback.format_exc())
 
         self._mkdir_p = None
         # Force the use of /system/bin/ls or /system/xbin/ls in case
@@ -598,8 +610,8 @@ class ADBDevice(ADBCommand):
                     self.mkdir(self.test_root, timeout=timeout, root=root)
                     return
                 except:
-                    self._logger.exception("Attempt %d of 3 failed to create device root %s" %
-                                           (attempt+1, self.test_root))
+                    self._logger.error("Attempt %d of 3 failed to create device root %s\n%s" %
+                                       (attempt+1, self.test_root, traceback.format_exc()))
                 time.sleep(20)
             raise ADBError('Unable to set test root to %s' % self.test_root)
 
@@ -616,9 +628,9 @@ class ADBDevice(ADBCommand):
                         self.test_root = test_root
                         return
                     except:
-                        self._logger.exception('_setup_test_root: '
-                                               'Attempt %d of 3 failed to set test_root to %s' %
-                                               (attempt+1, test_root))
+                        self._logger.error('_setup_test_root: '
+                                           'Attempt %d of 3 failed to set test_root to %s\n%s' %
+                                           (attempt+1, test_root, traceback.format_exc()))
                         time.sleep(20)
 
         raise ADBError("Unable to set up device root using paths: [%s]"
@@ -1109,7 +1121,7 @@ class ADBDevice(ADBCommand):
                                          root=root).split('\r\n')
                 self._logger.debug('list_files: data: %s' % data)
             except ADBError:
-                self._logger.exception('Ignoring exception in ADBDevice.list_files')
+                self._logger.error('Ignoring exception in ADBDevice.list_files\n%s' % traceback.format_exc())
                 pass
         data[:] = [item for item in data if item]
         self._logger.debug('list_files: %s' % data)
@@ -1281,8 +1293,8 @@ class ADBDevice(ADBCommand):
                 try:
                     ret.append([int(els[pid_i]), els[-1], els[user_i]])
                 except ValueError:
-                    self._logger.exception('get_process_list: %s %s' % (
-                        header, line))
+                    self._logger.error('get_process_list: %s %s\n%s' % (
+                        header, line, traceback.format_exc()))
                     raise ADBError('get_process_list: %s: %s: %s' % (
                         header, line, adb_process))
                 line = adb_process.stdout_file.readline()
