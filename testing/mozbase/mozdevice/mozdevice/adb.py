@@ -744,6 +744,35 @@ class ADBDevice(ADBCommand):
                                          device_serial=self._device_serial,
                                          timeout=timeout)
 
+    # Port forwarding methods
+
+    def forward(self, local, remote, allow_rebind=True, timeout=None):
+        """Forward a local port to a specific port on the device.
+
+        """
+        cmd = ["forward", local, remote]
+        if not allow_rebind:
+            cmd.insert(1, "--no-rebind")
+        return self.command_bool(cmd, timeout=timeout)
+
+    def list_forwards(self, timeout=None):
+        """Return a list of tuples specifying active forwards
+
+        """
+        forwards = self.command_output(["forward", "--list"], timeout=timeout)
+        return [line.split(" ") for line in forwards.split("\n") if line.strip()]
+
+    def remove_forwards(self, local=None, timeout=None):
+        """Return a list of tuples specifying active forwards
+
+        """
+        cmd = ["forward"]
+        if local is not None:
+            cmd.extend(["--remove", local])
+        else:
+            cmd.extend(["--remove-all"])
+        return self.command_bool(cmd, timeout=timeout)
+
     # Device Shell methods
 
     def shell(self, cmd, env=None, cwd=None, timeout=None, root=False):
