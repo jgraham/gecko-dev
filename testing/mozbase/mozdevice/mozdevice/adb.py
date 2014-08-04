@@ -1242,6 +1242,26 @@ class ADBDevice(ADBCommand):
         self.command_output(["push", os.path.realpath(local), remote],
                             timeout=timeout)
 
+    def pull(self, remote, local, timeout=None):
+        """Pulls a file or directory from the device.
+
+        :param remote: string containing the name of the remote file or
+            directory name.
+        :param local: string containing the name of the local file or
+            directory name.
+        :param timeout: optional integer specifying the maximum time in
+            seconds for any spawned adb process to complete before
+            throwing an ADBTimeoutError.
+            This timeout is per adb call. The total time spent
+            may exceed this value. If it is not specified, the value
+            set in the ADBDevice constructor is used.
+        :raises: * ADBTimeoutError
+                 * ADBError
+
+        """
+        self.command_output(["pull", remote, os.path.realpath(local)],
+                            timeout=timeout)
+
     def rm(self, path, recursive=False, force=False, timeout=None, root=False):
         """Delete files or directories on the device.
 
