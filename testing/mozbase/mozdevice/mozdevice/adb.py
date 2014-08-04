@@ -1014,6 +1014,22 @@ class ADBDevice(ADBCommand):
 
     # File management methods
 
+    def remount(self, timeout=None):
+        """Remount /system/ in read/write mode
+
+        :param timeout: optional integer specifying the maximum time in
+            seconds for any spawned adb process to complete before throwing
+            an ADBTimeoutError.
+            This timeout is per adb call. The total time spent
+            may exceed this value. If it is not specified, the value
+            set in the ADBDevice constructor is used.
+        :param root: optional boolean specifying if the command should
+            be executed as root.
+        :raises: * ADBTimeoutError
+                 * ADBRootError
+                 * ADBError"""
+        return self.command_bool(["remount"], timeout=timeout)
+
     def chmod(self, path, recursive=False, mask="777", timeout=None, root=False):
         """Recursively changes the permissions of a directory on the
         device.
