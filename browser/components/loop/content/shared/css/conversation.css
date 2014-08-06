@@ -8,7 +8,7 @@
   position: relative;
 }
 
-.conversation .controls {
+.conversation-toolbar {
   position: absolute;
   z-index: 999; /* required to have it superimposed to the video element */
   left: 0;
@@ -20,13 +20,13 @@
   padding: 0;
 }
 
-.conversation .controls li {
+.conversation-toolbar li {
   float: left;
   font-size: 0px; /* prevents vertical bottom padding added to buttons in google
                      chrome */
 }
 
-.conversation .controls .btn {
+.conversation-toolbar .btn {
   width: 40px;
   height: 30px;
   background: transparent;
@@ -38,66 +38,66 @@
   cursor: pointer;
 }
 
-.conversation .controls .btn:hover {
+.conversation-toolbar .btn:hover {
   background-color: rgba(255, 255, 255, .35);
 }
 
 /* Hangup button */
-.conversation .controls .btn-hangup {
+.conversation-toolbar .btn-hangup {
   background-color: #D74345;
   background-image: url(../img/hangup-inverse-14x14.png);
 }
-.conversation .controls .btn-hangup:hover {
+.conversation-toolbar .btn-hangup:hover {
   background-color: #C53436;
 }
 @media (min-resolution: 2dppx) {
-  .conversation .controls .btn-hangup {
+  .conversation-toolbar .btn-hangup {
     background-image: url(../img/hangup-inverse-14x14@2x.png);
   }
 }
 
 /* Common media control buttons behavior */
-.conversation .controls .media-control {
+.conversation-toolbar .media-control {
   background-color: transparent;
   opacity: 1;
 }
-.conversation .controls .media-control:hover {
+.conversation-toolbar .media-control:hover {
   background-color: rgba(255, 255, 255, .35);
   opacity: 1;
 }
-.conversation .controls .media-control.muted {
+.conversation-toolbar .media-control.muted {
   background-color: #0096DD;
   opacity: 1;
 }
 
 /* Audio mute button */
-.conversation .controls .local-media.btn-mute-audio {
+.conversation-toolbar .local-media.btn-mute-audio {
   background-image: url(../img/audio-inverse-14x14.png);
 }
-.conversation .controls .local-media.btn-mute-audio.muted {
+.conversation-toolbar .local-media.btn-mute-audio.muted {
   background-image: url(../img/mute-inverse-14x14.png);
 }
 @media (min-resolution: 2dppx) {
-  .conversation .controls .local-media.btn-mute-audio {
+  .conversation-toolbar .local-media.btn-mute-audio {
     background-image: url(../img/audio-inverse-14x14@2x.png);
   }
-  .conversation .controls .local-media.btn-mute-audio.muted {
+  .conversation-toolbar .local-media.btn-mute-audio.muted {
     background-image: url(../img/mute-inverse-14x14@2x.png);
   }
 }
 
 /* Video mute button */
-.conversation .controls .local-media.btn-mute-video {
+.conversation-toolbar .local-media.btn-mute-video {
   background-image: url(../img/video-inverse-14x14.png);
 }
-.conversation .controls .local-media.btn-mute-video.muted {
+.conversation-toolbar .local-media.btn-mute-video.muted {
   background-image: url(../img/facemute-14x14.png);
 }
 @media (min-resolution: 2dppx) {
-  .conversation .controls .local-media.btn-mute-video {
+  .conversation-toolbar .local-media.btn-mute-video {
     background-image: url(../img/video-inverse-14x14@2x.png);
   }
-  .conversation .controls .local-media.btn-mute-video.muted {
+  .conversation-toolbar .local-media.btn-mute-video.muted {
     background-image: url(../img/facemute-14x14@2x.png);
   }
 }
@@ -238,3 +238,105 @@
     color: #FFF;
     background: #111;
   }
+
+/* Expired call url page */
+
+.expired-url-info {
+  width: 400px;
+  margin: 0 auto;
+}
+
+.promote-firefox {
+  text-align: center;
+  font-size: 18px;
+  line-height: 24px;
+  margin: 2em 0;
+}
+
+.promote-firefox h3 {
+  font-weight: 300;
+}
+
+/* Feedback form */
+
+.feedback {
+  padding: 1em;
+}
+
+.feedback h3 {
+  color: #666;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 10px;
+  margin-top: 15px;
+}
+
+.feedback .faces {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.feedback .face {
+  border: 1px solid transparent;
+  box-shadow: 0px 1px 2px #CCC;
+  cursor: pointer;
+  border-radius: 4px;
+  margin: 0px 10px;
+  width: 80px;
+  height: 80px;
+  background-color: #fbfbfb;
+  background-size: 60px auto;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.feedback .face:hover {
+  border: 1px solid #DDD;
+  background-color: #FEFEFE;
+}
+
+.feedback .face.face-happy {
+  background-image: url("../img/happy.png");
+}
+
+.feedback .face.face-sad {
+  background-image: url("../img/sad.png");
+}
+
+.feedback button.back {
+  border-radius: 2px;
+  border: 1px solid #CCC;
+  color: #CCC;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 3px 10px;
+  display: inline;
+  margin-bottom: 1em;
+}
+
+.feedback label {
+  display: block;
+}
+
+.feedback form input[type="radio"] {
+  margin-right: .5em;
+}
+
+.feedback form button[type="submit"] {
+  width: 100%;
+}
+
+.feedback form input[type="text"] {
+  width: 100%;
+}
+
+.feedback .info {
+  display: block;
+  font-size: 10px;
+  color: #CCC;
+  text-align: center;
+}

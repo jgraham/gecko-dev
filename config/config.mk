@@ -49,13 +49,13 @@ _MOZBUILD_EXTERNAL_VARIABLES := \
   FINAL_LIBRARY \
   HOST_CSRCS \
   HOST_CMMSRCS \
+  HOST_EXTRA_LIBS \
   HOST_LIBRARY_NAME \
   HOST_PROGRAM \
   HOST_SIMPLE_PROGRAMS \
   IS_COMPONENT \
   JAR_MANIFEST \
   JAVA_JAR_TARGETS \
-  JS_MODULES_PATH \
   LD_VERSION_SCRIPT \
   LIBRARY_NAME \
   LIBS \
@@ -829,13 +829,6 @@ export CL_INCLUDES_PREFIX
 # in environment variables to prevent it from breking silently on
 # non-English systems.
 export NONASCII
-
-ifdef MOZ_GTK2_CFLAGS
-MOZ_GTK2_CFLAGS := -I$(topsrcdir)/widget/gtk/compat $(MOZ_GTK2_CFLAGS)
-endif
-ifdef MOZ_GTK3_CFLAGS
-MOZ_GTK3_CFLAGS := -I$(topsrcdir)/widget/gtk/compat-gtk3 $(MOZ_GTK3_CFLAGS)
-endif
 
 DEFINES += -DNO_NSPR_10_SUPPORT
 

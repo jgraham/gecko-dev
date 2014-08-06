@@ -28,6 +28,7 @@ class BluetoothDevice;
 class BluetoothDiscoveryHandle;
 class BluetoothSignal;
 class BluetoothNamedValue;
+class BluetoothPairingListener;
 class BluetoothValue;
 
 class BluetoothAdapter : public DOMEventTargetHelper
@@ -76,6 +77,11 @@ public:
     return mDiscoverable;
   }
 
+  BluetoothPairingListener* PairingReqs() const
+  {
+    return mPairingReqs;
+  }
+
   /**
    * Update this adapter's discovery handle in use (mDiscoveryHandleInUse).
    *
@@ -99,18 +105,6 @@ public:
     Unpair(const nsAString& aDeviceAddress, ErrorResult& aRv);
   already_AddRefed<DOMRequest>
     GetPairedDevices(ErrorResult& aRv);
-  already_AddRefed<DOMRequest>
-    SetPinCode(const nsAString& aDeviceAddress, const nsAString& aPinCode,
-               ErrorResult& aRv);
-  already_AddRefed<DOMRequest>
-    SetPasskey(const nsAString& aDeviceAddress, uint32_t aPasskey,
-               ErrorResult& aRv);
-  already_AddRefed<DOMRequest>
-    SetPairingConfirmation(const nsAString& aDeviceAddress, bool aConfirmation,
-                           ErrorResult& aRv);
-  already_AddRefed<DOMRequest>
-    SetAuthorization(const nsAString& aDeviceAddress, bool aAllow,
-                     ErrorResult& aRv);
 
   already_AddRefed<Promise> EnableDisable(bool aEnable, ErrorResult& aRv);
   already_AddRefed<Promise> Enable(ErrorResult& aRv);
@@ -181,6 +175,7 @@ private:
   void GetPairedDeviceProperties(const nsTArray<nsString>& aDeviceAddresses);
 
   void HandleDeviceFound(const BluetoothValue& aValue);
+  void HandlePairingRequest(const BluetoothValue& aValue);
 
   /**
    * mDevices holds references of all created device objects.
@@ -199,6 +194,7 @@ private:
    */
   nsTArray<nsRefPtr<BluetoothDevice> > mDevices;
   nsRefPtr<BluetoothDiscoveryHandle> mDiscoveryHandleInUse;
+  nsRefPtr<BluetoothPairingListener> mPairingReqs;
   BluetoothAdapterState mState;
   nsString mAddress;
   nsString mName;

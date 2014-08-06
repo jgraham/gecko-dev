@@ -25,6 +25,7 @@
 #include "nsIPermissionManager.h"
 #include "nsIPrincipal.h"
 #include "nsIXPConnect.h"
+#include "nsUTF8Utils.h"
 #include "WrapperFactory.h"
 #include "xpcprivate.h"
 #include "XPCQuickStubs.h"
@@ -1607,6 +1608,29 @@ DictionaryBase::ParseJSON(JSContext* aCx,
                       aJSON.Length(), aVal);
 }
 
+bool
+DictionaryBase::StringifyToJSON(JSContext* aCx,
+                                JS::MutableHandle<JS::Value> aValue,
+                                nsAString& aJSON)
+{
+  return JS_Stringify(aCx, aValue, JS::NullPtr(), JS::NullHandleValue,
+                      AppendJSONToString, &aJSON);
+}
+
+/* static */
+bool
+DictionaryBase::AppendJSONToString(const jschar* aJSONData,
+                                   uint32_t aDataLength,
+                                   void* aString)
+{
+  nsAString* string = static_cast<nsAString*>(aString);
+  string->Append(static_cast<const char16_t*>(aJSONData),
+                 aDataLength);
+  return true;
+}
+
+
+
 static JSString*
 ConcatJSString(JSContext* cx, const char* pre, JS::Handle<JSString*> str, const char* post)
 {
@@ -2138,6 +2162,36 @@ NonVoidByteStringToJsval(JSContext *cx, const nsACString &str,
     return true;
 }
 
+
+template<typename T> static void
+NormalizeScalarValueStringInternal(JSContext* aCx, T& aString)
+{
+  char16_t* start = aString.BeginWriting();
+  // Must use const here because we can't pass char** to UTF16CharEnumerator as
+  // it expects const char**.  Unclear why this is illegal...
+  const char16_t* nextChar = start;
+  const char16_t* end = aString.Data() + aString.Length();
+  while (nextChar < end) {
+    uint32_t enumerated = UTF16CharEnumerator::NextChar(&nextChar, end);
+    if (enumerated == UCS2_REPLACEMENT_CHAR) {
+      int32_t lastCharIndex = (nextChar - start) - 1;
+      start[lastCharIndex] = static_cast<char16_t>(enumerated);
+    }
+  }
+}
+
+void
+NormalizeScalarValueString(JSContext* aCx, nsAString& aString)
+{
+  NormalizeScalarValueStringInternal(aCx, aString);
+}
+
+void
+NormalizeScalarValueString(JSContext* aCx, binding_detail::FakeString& aString)
+{
+  NormalizeScalarValueStringInternal(aCx, aString);
+}
+
 bool
 ConvertJSValueToByteString(JSContext* cx, JS::Handle<JS::Value> v,
                            bool nullable, nsACString& result)
@@ -2504,15 +2558,7 @@ ConvertExceptionToPromise(JSContext* cx,
 void
 CreateGlobalOptions<nsGlobalWindow>::TraceGlobal(JSTracer* aTrc, JSObject* aObj)
 {
-  mozilla::dom::TraceProtoAndIfaceCache(aTrc, aObj);
-
-  // We might be called from a GC during the creation of a global, before we've
-  // been able to set up the compartment private or the XPCWrappedNativeScope,
-  // so we need to null-check those.
-  xpc::CompartmentPrivate* compartmentPrivate = xpc::CompartmentPrivate::Get(aObj);
-  if (compartmentPrivate && compartmentPrivate->scope) {
-    compartmentPrivate->scope->TraceSelf(aTrc);
-  }
+  xpc::TraceXPCGlobal(aTrc, aObj);
 }
 
 /* static */

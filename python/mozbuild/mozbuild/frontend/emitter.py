@@ -314,6 +314,10 @@ class TreeMetadataEmitter(LoggingMixin):
                 self._static_linking_shared.add(obj)
             obj.link_library(candidates[0])
 
+        # Link system libraries from OS_LIBS/HOST_OS_LIBS.
+        for lib in sandbox.get(variable.replace('USE', 'OS'), []):
+            obj.link_system_library(lib)
+
     def emit_from_sandbox(self, sandbox):
         """Convert a MozbuildSandbox to tree metadata objects.
 
@@ -373,18 +377,14 @@ class TreeMetadataEmitter(LoggingMixin):
             'EXTRA_COMPILE_FLAGS',
             'EXTRA_COMPONENTS',
             'EXTRA_DSO_LDOPTS',
-            'EXTRA_JS_MODULES',
             'EXTRA_PP_COMPONENTS',
-            'EXTRA_PP_JS_MODULES',
             'FAIL_ON_WARNINGS',
             'FILES_PER_UNIFIED_FILE',
             'USE_STATIC_LIBS',
             'GENERATED_FILES',
             'IS_GYP_DIR',
-            'JS_MODULES_PATH',
             'MSVC_ENABLE_PGO',
             'NO_DIST_INSTALL',
-            'OS_LIBS',
             'PYTHON_UNIT_TESTS',
             'RCFILE',
             'RESFILE',
@@ -506,6 +506,14 @@ class TreeMetadataEmitter(LoggingMixin):
                 self._linkage.append((sandbox, self._binaries[program],
                     'HOST_USE_LIBS' if kind == 'HOST_SIMPLE_PROGRAMS'
                     else 'USE_LIBS'))
+
+        extra_js_modules = sandbox.get('EXTRA_JS_MODULES')
+        if extra_js_modules:
+            yield JavaScriptModules(sandbox, extra_js_modules, 'extra')
+
+        extra_pp_js_modules = sandbox.get('EXTRA_PP_JS_MODULES')
+        if extra_pp_js_modules:
+            yield JavaScriptModules(sandbox, extra_pp_js_modules, 'extra_pp')
 
         test_js_modules = sandbox.get('TESTING_JS_MODULES')
         if test_js_modules:
