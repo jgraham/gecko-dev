@@ -43,10 +43,10 @@ class StructuredLoggingManager(mach_logging.LoggingManager):
                                                 write_times=write_times)
 
         if self.terminal:
-            formatter = machformatter.MachTerminalFormatter(self.start_time,
-                                                            write_interval=write_interval,
-                                                            write_times=write_times,
-                                                            terminal=self.terminal)
+            formatter = machformatter.MachFormatter(self.start_time,
+                                                    write_interval=write_interval,
+                                                    write_times=write_times,
+                                                    terminal=self.terminal)
 
         handler = StreamHandler(stream=fh, formatter=formatter)
         handler = LogLevelFilter(handler, logging.getLevelName(level))
