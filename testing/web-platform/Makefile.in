@@ -29,6 +29,7 @@ libs:: $(WPT_METADATA)
 
 stage-package:
 	$(NSINSTALL) -D $(PKG_STAGE)/web-platform
+	@cp $(DEPTH)/mozinfo.json $(PKG_STAGE)/web-platform
 	@(cd $(DEPTH)/_tests/ && tar $(TAR_CREATE_FLAGS) - web-platform) | (cd $(PKG_STAGE) && tar -xf -)
 
 #endif
