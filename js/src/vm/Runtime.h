@@ -73,8 +73,6 @@ js_ReportAllocationOverflow(js::ThreadSafeContext *cx);
 extern void
 js_ReportOverRecursed(js::ThreadSafeContext *cx);
 
-namespace JSC { class ExecutableAllocator; }
-
 namespace js {
 
 class Activation;
@@ -818,7 +816,7 @@ struct JSRuntime : public JS::shadow::Runtime,
      * Both of these allocators are used for regular expression code which is shared at the
      * thread-data level.
      */
-    JSC::ExecutableAllocator *execAlloc_;
+    js::jit::ExecutableAllocator *execAlloc_;
     js::jit::JitRuntime *jitRuntime_;
 
     /*
@@ -830,18 +828,18 @@ struct JSRuntime : public JS::shadow::Runtime,
     /* Space for interpreter frames. */
     js::InterpreterStack interpreterStack_;
 
-    JSC::ExecutableAllocator *createExecutableAllocator(JSContext *cx);
+    js::jit::ExecutableAllocator *createExecutableAllocator(JSContext *cx);
     js::jit::JitRuntime *createJitRuntime(JSContext *cx);
 
   public:
-    JSC::ExecutableAllocator *getExecAlloc(JSContext *cx) {
+    js::jit::ExecutableAllocator *getExecAlloc(JSContext *cx) {
         return execAlloc_ ? execAlloc_ : createExecutableAllocator(cx);
     }
-    JSC::ExecutableAllocator &execAlloc() {
+    js::jit::ExecutableAllocator &execAlloc() {
         JS_ASSERT(execAlloc_);
         return *execAlloc_;
     }
-    JSC::ExecutableAllocator *maybeExecAlloc() {
+    js::jit::ExecutableAllocator *maybeExecAlloc() {
         return execAlloc_;
     }
     js::jit::JitRuntime *getJitRuntime(JSContext *cx) {
@@ -992,6 +990,10 @@ struct JSRuntime : public JS::shadow::Runtime,
     }
 
     mozilla::UniquePtr<js::SourceHook> sourceHook;
+
+#ifdef NIGHTLY_BUILD
+    js::AssertOnScriptEntryHook assertOnScriptEntryHook_;
+#endif
 
     /* If true, new compartments are initially in debug mode. */
     bool                debugMode;
@@ -1368,7 +1370,7 @@ struct JSRuntime : public JS::shadow::Runtime,
     static const unsigned LARGE_ALLOCATION = 25 * 1024 * 1024;
 
     void *callocCanGC(size_t bytes) {
-        void *p = calloc_(bytes);
+        void *p = (void *)pod_calloc<uint8_t>(bytes);
         if (MOZ_LIKELY(!!p))
             return p;
         return onOutOfMemoryCanGC(reinterpret_cast<void *>(1), bytes);
@@ -1648,7 +1650,12 @@ class RuntimeAllocPolicy
   public:
     MOZ_IMPLICIT RuntimeAllocPolicy(JSRuntime *rt) : runtime(rt) {}
     void *malloc_(size_t bytes) { return runtime->malloc_(bytes); }
-    void *calloc_(size_t bytes) { return runtime->calloc_(bytes); }
+
+    template <typename T>
+    T *pod_calloc(size_t numElems) {
+        return runtime->pod_calloc<T>(numElems);
+    }
+
     void *realloc_(void *p, size_t bytes) { return runtime->realloc_(p, bytes); }
     void free_(void *p) { js_free(p); }
     void reportAllocOverflow() const {}

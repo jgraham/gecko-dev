@@ -3310,7 +3310,7 @@ Compile(JSContext *cx, unsigned argc, jsval *vp)
         return false;
     }
     if (!args[0].isString()) {
-        const char *typeName = JS_GetTypeName(cx, JS_TypeOfValue(cx, args[0]));
+        const char *typeName = InformalValueTypeName(args[0]);
         JS_ReportError(cx, "expected string to compile, got %s", typeName);
         return false;
     }
@@ -3350,7 +3350,7 @@ Parse(JSContext *cx, unsigned argc, jsval *vp)
         return false;
     }
     if (!args[0].isString()) {
-        const char *typeName = JS_GetTypeName(cx, JS_TypeOfValue(cx, args[0]));
+        const char *typeName = InformalValueTypeName(args[0]);
         JS_ReportError(cx, "expected string to parse, got %s", typeName);
         return false;
     }
@@ -3397,7 +3397,7 @@ SyntaxParse(JSContext *cx, unsigned argc, jsval *vp)
         return false;
     }
     if (!args[0].isString()) {
-        const char *typeName = JS_GetTypeName(cx, JS_TypeOfValue(cx, args[0]));
+        const char *typeName = InformalValueTypeName(args[0]);
         JS_ReportError(cx, "expected string to parse, got %s", typeName);
         return false;
     }
@@ -3534,7 +3534,7 @@ OffThreadCompileScript(JSContext *cx, unsigned argc, jsval *vp)
         return false;
     }
     if (!args[0].isString()) {
-        const char *typeName = JS_GetTypeName(cx, JS_TypeOfValue(cx, args[0]));
+        const char *typeName = InformalValueTypeName(args[0]);
         JS_ReportError(cx, "expected string to parse, got %s", typeName);
         return false;
     }
@@ -5787,14 +5787,23 @@ SetRuntimeOptions(JSRuntime *rt, const OptionParser &op)
             return OptionFailure("ion-edgecase-analysis", str);
     }
 
-     if (const char *str = op.getStringOption("ion-range-analysis")) {
-         if (strcmp(str, "on") == 0)
-             jit::js_JitOptions.disableRangeAnalysis = false;
-         else if (strcmp(str, "off") == 0)
-             jit::js_JitOptions.disableRangeAnalysis = true;
-         else
-             return OptionFailure("ion-range-analysis", str);
-     }
+    if (const char *str = op.getStringOption("ion-range-analysis")) {
+        if (strcmp(str, "on") == 0)
+            jit::js_JitOptions.disableRangeAnalysis = false;
+        else if (strcmp(str, "off") == 0)
+            jit::js_JitOptions.disableRangeAnalysis = true;
+        else
+            return OptionFailure("ion-range-analysis", str);
+    }
+
+    if (const char *str = op.getStringOption("ion-loop-unrolling")) {
+        if (strcmp(str, "on") == 0)
+            jit::js_JitOptions.disableLoopUnrolling = false;
+        else if (strcmp(str, "off") == 0)
+            jit::js_JitOptions.disableLoopUnrolling = true;
+        else
+            return OptionFailure("ion-loop-unrolling", str);
+    }
 
     if (op.getBoolOption("ion-check-range-analysis"))
         jit::js_JitOptions.checkRangeAnalysis = true;
@@ -6059,6 +6068,8 @@ main(int argc, char **argv, char **envp)
                                "Find edge cases where Ion can avoid bailouts (default: on, off to disable)")
         || !op.addStringOption('\0', "ion-range-analysis", "on/off",
                                "Range analysis (default: on, off to disable)")
+        || !op.addStringOption('\0', "ion-loop-unrolling", "on/off",
+                               "Loop unrolling (default: off, on to enable)")
         || !op.addBoolOption('\0', "ion-check-range-analysis",
                                "Range analysis checking")
         || !op.addStringOption('\0', "ion-inlining", "on/off",

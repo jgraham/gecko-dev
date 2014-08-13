@@ -856,10 +856,6 @@ var BrowserApp = {
     return this._tabs;
   },
 
-  get selectedTab() {
-    return this._selectedTab;
-  },
-
   set selectedTab(aTab) {
     if (this._selectedTab == aTab)
       return;
@@ -1762,6 +1758,11 @@ var BrowserApp = {
   },
 
   // nsIAndroidBrowserApp
+  get selectedTab() {
+    return this._selectedTab;
+  },
+
+  // nsIAndroidBrowserApp
   getBrowserTab: function(tabId) {
     return this.getTabForId(tabId);
   },
@@ -2093,8 +2094,8 @@ var NativeWindow = {
     SelectorContext: function(aSelector) {
       return {
         matches: function(aElt) {
-          if (aElt.mozMatchesSelector)
-            return aElt.mozMatchesSelector(aSelector);
+          if (aElt.matches)
+            return aElt.matches(aSelector);
           return false;
         }
       };
@@ -3172,11 +3173,14 @@ Tab.prototype = {
         this.id = aParams.tabID;
         stub = true;
       } else {
-        let jni = new JNI();
-        let cls = jni.findClass("org/mozilla/gecko/Tabs");
-        let method = jni.getStaticMethodID(cls, "getNextTabId", "()I");
-        this.id = jni.callStaticIntMethod(cls, method);
-        jni.close();
+        let jenv = JNI.GetForThread();
+        let jTabs = JNI.LoadClass(jenv, "org.mozilla.gecko.Tabs", {
+          static_methods: [
+            { name: "getNextTabId", sig: "()I" }
+          ],
+        });
+        this.id = jTabs.getNextTabId();
+        JNI.UnloadClasses(jenv);
       }
 
       this.desktopMode = ("desktopMode" in aParams) ? aParams.desktopMode : false;
@@ -5116,7 +5120,7 @@ var BrowserEventHandler = {
       if (checkElem) {
         if ((elem.scrollTopMax > 0 || elem.scrollLeftMax > 0) &&
             (this._hasScrollableOverflow(elem) ||
-             elem.mozMatchesSelector("textarea")) ||
+             elem.matches("textarea")) ||
             (elem instanceof HTMLInputElement && elem.mozIsTextField(false)) ||
             (elem instanceof HTMLSelectElement && (elem.size > 1 || elem.multiple))) {
           scrollable = true;
@@ -5251,14 +5255,14 @@ const ElementTouchHelper = {
     let threshold = Number.POSITIVE_INFINITY;
     for (let i = 0; i < nodes.length; i++) {
       let current = nodes[i];
-      if (!current.mozMatchesSelector || !this.isElementClickable(current, unclickableCache, true))
+      if (!current.matches || !this.isElementClickable(current, unclickableCache, true))
         continue;
 
       let rect = current.getBoundingClientRect();
       let distance = this._computeDistanceFromRect(aX, aY, rect);
 
       // increase a little bit the weight for already visited items
-      if (current && current.mozMatchesSelector("*:visited"))
+      if (current && current.matches("*:visited"))
         distance *= (this.weight.visited / 100);
 
       if (distance < threshold) {
@@ -5282,7 +5286,7 @@ const ElementTouchHelper = {
         continue;
       if (this._hasMouseListener(elem))
         return true;
-      if (elem.mozMatchesSelector && elem.mozMatchesSelector(selector))
+      if (elem.matches && elem.matches(selector))
         return true;
       if (elem instanceof HTMLLabelElement && elem.control != null)
         return true;

@@ -100,6 +100,7 @@ nsXBLPrototypeBinding::nsXBLPrototypeBinding()
   mCheckedBaseProto(false),
   mKeyHandlersRegistered(false),
   mChromeOnlyContent(false),
+  mBindToUntrustedContent(false),
   mResources(nullptr),
   mBaseNameSpaceID(kNameSpaceID_None)
 {
@@ -213,6 +214,10 @@ nsXBLPrototypeBinding::SetBindingElement(nsIContent* aElement)
   mChromeOnlyContent = mBinding->AttrValueIs(kNameSpaceID_None,
                                              nsGkAtoms::chromeOnlyContent,
                                              nsGkAtoms::_true, eCaseMatters);
+
+  mBindToUntrustedContent = mBinding->AttrValueIs(kNameSpaceID_None,
+                                                  nsGkAtoms::bindToUntrustedContent,
+                                                  nsGkAtoms::_true, eCaseMatters);
 }
 
 bool
@@ -598,7 +603,8 @@ void
 nsXBLPrototypeBinding::EnsureAttributeTable()
 {
   if (!mAttributeTable) {
-    mAttributeTable = new nsClassHashtable<nsUint32HashKey, InnerAttributeTable>(4);
+    mAttributeTable =
+        new nsClassHashtable<nsUint32HashKey, InnerAttributeTable>(2);
   }
 }
 
@@ -609,7 +615,7 @@ nsXBLPrototypeBinding::AddToAttributeTable(int32_t aSourceNamespaceID, nsIAtom* 
 {
     InnerAttributeTable* attributesNS = mAttributeTable->Get(aSourceNamespaceID);
     if (!attributesNS) {
-      attributesNS = new InnerAttributeTable(4);
+      attributesNS = new InnerAttributeTable(2);
       mAttributeTable->Put(aSourceNamespaceID, attributesNS);
     }
 
