@@ -16,6 +16,7 @@ from mozprofile import FirefoxProfile, Preferences
 
 from .base import get_free_port, BrowserError, Browser, ExecutorBrowser
 from ..executors.executormarionette import MarionetteTestharnessExecutor, required_files
+from ..hosts import HostsFile, HostsLine
 
 here = os.path.split(__file__)[0]
 
@@ -108,12 +109,12 @@ class B2GBrowser(Browser):
         self.logger.debug("Device runner started")
 
     def setup_hosts(self):
-        hosts = ["web-platform.test",
-                 "www.web-platform.test",
-                 "www1.web-platform.test",
-                 "www2.web-platform.test",
-                 "xn--n8j6ds53lwwkrqhv28a.web-platform.test",
-                 "xn--lve-6lad.web-platform.test"]
+        hostnames = ["web-platform.test",
+                     "www.web-platform.test",
+                     "www1.web-platform.test",
+                     "www2.web-platform.test",
+                     "xn--n8j6ds53lwwkrqhv28a.web-platform.test",
+                     "xn--lve-6lad.web-platform.test"]
 
         host_ip = moznetwork.get_ip()
 
@@ -123,24 +124,14 @@ class B2GBrowser(Browser):
         try:
             self.device.getFile("/system/etc/hosts", hosts_path)
 
-            with open(hosts_path, "a+") as f:
-                hosts_present = set()
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    ip, host = line.split()
-                    hosts_present.add(host)
+            with open(hosts_path) as f:
+                hosts_file = HostsFile.from_file(f)
 
-                    if host in hosts and ip != host_ip:
-                        raise Exception("Existing hosts file has an ip for %s" % host)
+            for canonical_hostname in hostnames:
+                hosts_file.set_host(HostsLine(host_ip, canonical_hostname))
 
-                f.seek(f.tell() - 1)
-                if f.read() != "\n":
-                    f.write("\n")
-
-                for host in hosts:
-                    f.write("%s%s%s\n" % (host_ip, " " * (28 - len(host_ip)), host))
+            with open(hosts_path, "w") as f:
+                hosts_file.to_file(f)
 
             self.logger.info("Installing hosts file")
 
@@ -213,15 +204,13 @@ class B2GExecutorBrowser(ExecutorBrowser):
         self.marionette = executor.marionette
         self.executor.logger.debug("Running browser.after_connect steps")
 
-        self.gaia_device = gaiatest.GaiaDevice(marionette=executor.marionette,
-                                               manager=self.dm)
+        self.gaia_apps = gaiatest.GaiaApps(marionette=executor.marionette)
 
         self.executor.logger.debug("Waiting for homescreen to load")
-        self.executor.logger.debug("B2G is running: %s" % self.gaia_device.is_b2g_running)
 
         # Moved out of gaia_test temporarily
         self.executor.logger.info("Waiting for B2G to be ready")
-        self.wait_for_b2g_ready(timeout=60)
+        self.wait_for_homescreen(timeout=60)
 
         self.install_cert_app()
         self.use_cert_app()
@@ -241,10 +230,27 @@ class B2GExecutorBrowser(ExecutorBrowser):
         self.executor.logger.info("Homescreen loaded")
         self.gaia_apps.launch("CertTest App")
 
-    def wait_for_b2g_ready(self, timeout):
-        # Wait for the homescreen to finish loading
-        gaiatest.Wait(self.marionette, timeout).until(gaiatest.expected.element_present(
-            gaiatest.By.CSS_SELECTOR, '#homescreen[loading-state=false]'))
+    def wait_for_homescreen(self, timeout):
+        self.executor.logger.info("Waiting for homescreen")
+        self.marionette.execute_async_script("""
+let manager = window.wrappedJSObject.AppWindowManager || window.wrappedJSObject.WindowManager;
+let app = null;
+if (manager) {
+  app = ('getActiveApp' in manager) ? manager.getActiveApp() : manager.getCurrentDisplayedApp();
+}
+if (app) {
+  log('Already loaded home screen');
+  marionetteScriptFinished();
+} else {
+  log('waiting for mozbrowserloadend');
+  window.addEventListener('mozbrowserloadend', function loaded(aEvent) {
+    log('received mozbrowserloadend for ' + aEvent.target.src);
+    if (aEvent.target.src.indexOf('ftu') != -1 || aEvent.target.src.indexOf('homescreen') != -1) {
+      window.removeEventListener('mozbrowserloadend', loaded);
+      marionetteScriptFinished();
+    }
+  });
+}""", script_timeout=1000 * timeout)
 
 class B2GMarionetteTestharnessExecutor(MarionetteTestharnessExecutor):
     def after_connect(self):
