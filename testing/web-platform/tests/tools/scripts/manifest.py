@@ -497,8 +497,6 @@ def sync_urls(manifest, updated_files):
 
 
 def sync_local_changes(manifest, local_changes):
-    #If we just refuse to write the manifest in the face of local changes
-    #this can be simplified somewhat
     if local_changes:
         logger.info("Working directory not clean, adding local changes")
     prev_local_changes = manifest.local_changes
@@ -507,12 +505,12 @@ def sync_local_changes(manifest, local_changes):
     for path, status in prev_local_changes.iteritems():
         print status, path, path in local_changes
         if path not in local_changes:
-            #If a path was previously marked as deleted but is now back
-            #we need to readd it to the manifest
+            # If a path was previously marked as deleted but is now back
+            # we need to readd it to the manifest
             if status == "D" and path in all_paths:
                 local_changes[path] = "A"
-            #If a path was previously marked as added but is now
-            #not then we need to remove it from the manifest
+            # If a path was previously marked as added but is now
+            # not then we need to remove it from the manifest
             elif status == "A" and path not in all_paths:
                 local_changes[path] = "D"
 
@@ -556,13 +554,13 @@ def update(manifest):
 
 def write(manifest, manifest_path):
     with open(manifest_path, "w") as f:
-        json.dump(manifest.to_json(), f, indent=2)
+        json.dump(manifest.to_json(), f, sort_keys=True, indent=2, separators=(',', ': '))
 
 
 def update_manifest(repo_path, **kwargs):
     setup_git(repo_path)
     if not kwargs.get("rebuild", False):
-        manifest = load(opts.path)
+        manifest = load(kwargs["path"])
     else:
         manifest = Manifest(None)
     if has_local_changes() and not kwargs.get("local_changes", False):
@@ -570,7 +568,7 @@ def update_manifest(repo_path, **kwargs):
     else:
         logger.info("Updating manifest")
         update(manifest)
-        write(manifest, opts.path)
+        write(manifest, kwargs["path"])
 
 
 def create_parser():
@@ -588,7 +586,6 @@ def create_parser():
              "changes (experimental)")
     return parser
 
-
 if __name__ == "__main__":
     try:
         get_repo_root()
@@ -597,5 +594,6 @@ if __name__ == "__main__":
         sys.exit(1)
     opts = create_parser().parse_args()
     update_manifest(get_repo_root(),
+                    path=opts.path,
                     rebuild=opts.rebuild,
                     local_changes=opts.experimental_include_local_changes)
