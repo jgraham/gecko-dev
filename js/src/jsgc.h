@@ -432,7 +432,7 @@ class ArenaList {
         return *this;
     }
 
-    ArenaList(const SortedArenaListSegment &segment) {
+    explicit ArenaList(const SortedArenaListSegment &segment) {
         head_ = segment.head;
         cursorp_ = segment.isEmpty() ? &head_ : segment.tailp;
         check();
@@ -970,9 +970,6 @@ TriggerGC(JSRuntime *rt, JS::gcreason::Reason reason);
 /* Must be called with GC lock taken. */
 extern bool
 TriggerZoneGC(Zone *zone, JS::gcreason::Reason reason);
-
-extern void
-MaybeGC(JSContext *cx);
 
 extern void
 ReleaseAllJITCode(FreeOp *op);
