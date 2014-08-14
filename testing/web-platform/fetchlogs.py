@@ -8,6 +8,9 @@ import urlparse
 
 treeherder_base = "http://treeherder.mozilla.org/"
 
+# Interpretation of the "job" list from
+# https://github.com/mozilla/treeherder-service/blob/master/treeherder/webapp/api/utils.py#L18
+
 def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("branch", action="store",
@@ -41,7 +44,7 @@ def download(url, prefix, dest, force_suffix=True):
         f.write(resp.text.encode(resp.encoding))
 
 def get_blobber_url(branch, job):
-    job_id = job["id"]
+    job_id = job[8]
     resp = requests.get(urlparse.urljoin(treeherder_base,
                                          "/api/project/%s/artifact/?job_id=%i&name=Job%%20Info" % (branch,
                                                                                                    job_id)))
@@ -66,14 +69,13 @@ def get_structured_logs(branch, commit, dest=None):
 
     for result in job_data["results"]:
         for platform in result["platforms"]:
-            if platform["option"] == "debug":
-                continue
             for group in platform["groups"]:
                 for job in group["jobs"]:
-                    if job["job_type_name"].startswith("W3C Web Platform") or job["job_type_name"] == "unknown":
+                    job_type_name = job[13]
+                    if job_type_name.startswith("W3C Web Platform") or job_type_name == "unknown":
                         url = get_blobber_url(branch, job)
                         if url:
-                            prefix = job["platform"]
+                            prefix = job[14] # platform
                             download(url, prefix, None)
 
 def main():
