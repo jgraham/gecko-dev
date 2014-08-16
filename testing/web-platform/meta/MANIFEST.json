@@ -562,10 +562,6 @@
         "url": "/2dcontext/shadows/2d.shadow.pattern.alpha.png"
       },
       {
-        "path": "2dcontext/shadows/2d.shadow.stroke.join.1.html",
-        "url": "/2dcontext/shadows/2d.shadow.stroke.join.1.html"
-      },
-      {
         "path": "2dcontext/shadows/canvas_shadows_002-ref.htm",
         "url": "2dcontext/shadows/canvas_shadows_002-ref.htm"
       },
@@ -1666,6 +1662,10 @@
         "url": "/dom/nodes/Node-contains.xml"
       },
       {
+        "path": "dom/nodes/ParentNode-querySelector-All.js",
+        "url": "/dom/nodes/ParentNode-querySelector-All.js"
+      },
+      {
         "path": "dom/nodes/attributes.js",
         "url": "/dom/nodes/attributes.js"
       },
@@ -1692,6 +1692,10 @@
       {
         "path": "dom/nodes/productions.js",
         "url": "/dom/nodes/productions.js"
+      },
+      {
+        "path": "dom/nodes/selectors.js",
+        "url": "/dom/nodes/selectors.js"
       },
       {
         "path": "dom/traversal/unfinished/001.xml",
@@ -3522,20 +3526,8 @@
         "url": "/resource-timing/resources/webperftestharness.js"
       },
       {
-        "path": "selectors-api/level1-lib.js",
-        "url": "/selectors-api/level1-lib.js"
-      },
-      {
-        "path": "selectors-api/selectors.js",
-        "url": "/selectors-api/selectors.js"
-      },
-      {
         "path": "selectors-api/tests/submissions/Opera/level2-lib.js",
         "url": "/selectors-api/tests/submissions/Opera/level2-lib.js"
-      },
-      {
-        "path": "selectors-api/tests/submissions/Opera/selectors.js",
-        "url": "/selectors-api/tests/submissions/Opera/selectors.js"
       },
       {
         "path": "service-workers/specgen.json",
@@ -5874,6 +5866,18 @@
       {
         "path": "html/semantics/embedded-content/media-elements/audio_volume_silent-manual.html",
         "url": "/html/semantics/embedded-content/media-elements/audio_volume_silent-manual.html"
+      },
+      {
+        "path": "html/semantics/embedded-content/media-elements/loading-the-media-resource/stable-state-beforeunload-manual.html",
+        "url": "/html/semantics/embedded-content/media-elements/loading-the-media-resource/stable-state-beforeunload-manual.html"
+      },
+      {
+        "path": "html/semantics/embedded-content/media-elements/loading-the-media-resource/stable-state-dialogs-manual.html",
+        "url": "/html/semantics/embedded-content/media-elements/loading-the-media-resource/stable-state-dialogs-manual.html"
+      },
+      {
+        "path": "html/semantics/embedded-content/media-elements/loading-the-media-resource/stable-state-print-manual.html",
+        "url": "/html/semantics/embedded-content/media-elements/loading-the-media-resource/stable-state-print-manual.html"
       },
       {
         "path": "html/semantics/embedded-content/media-elements/video_controls_present-manual.html",
@@ -11196,6 +11200,10 @@
         "url": "/2dcontext/shadows/2d.shadow.stroke.cap.2.html"
       },
       {
+        "path": "2dcontext/shadows/2d.shadow.stroke.join.1.html",
+        "url": "/2dcontext/shadows/2d.shadow.stroke.join.1.html"
+      },
+      {
         "path": "2dcontext/shadows/2d.shadow.stroke.join.2.html",
         "url": "/2dcontext/shadows/2d.shadow.stroke.join.2.html"
       },
@@ -14104,6 +14112,14 @@
       {
         "path": "dom/nodes/Node-textContent.html",
         "url": "/dom/nodes/Node-textContent.html"
+      },
+      {
+        "path": "dom/nodes/ParentNode-querySelector-All.html",
+        "url": "/dom/nodes/ParentNode-querySelector-All.html"
+      },
+      {
+        "path": "dom/nodes/ParentNode-querySelector-All.xht",
+        "url": "/dom/nodes/ParentNode-querySelector-All.xht"
       },
       {
         "path": "dom/nodes/attributes.html",
@@ -17839,38 +17855,47 @@
       },
       {
         "path": "html/syntax/parsing/html5lib_adoption01.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_adoption01.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_adoption02.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_adoption02.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_comments01.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_comments01.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_doctype01.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_doctype01.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_domjs-unsafe.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_domjs-unsafe.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_entities01.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_entities01.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_entities02.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_entities02.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_html5test-com.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_html5test-com.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_inbody01.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_inbody01.html"
       },
       {
@@ -17891,154 +17916,192 @@
       },
       {
         "path": "html/syntax/parsing/html5lib_isindex.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_isindex.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_main-element.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_main-element.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_pending-spec-changes-plain-text-unsafe.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_pending-spec-changes-plain-text-unsafe.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_pending-spec-changes.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_pending-spec-changes.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_plain-text-unsafe.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_plain-text-unsafe.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_scriptdata01.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_scriptdata01.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_scripted_adoption01.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_scripted_adoption01.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_scripted_ark.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_scripted_ark.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_scripted_webkit01.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_scripted_webkit01.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tables01.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tables01.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_template.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_template.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests1.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests1.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests10.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests10.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests11.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests11.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests12.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests12.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests14.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests14.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests15.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests15.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests16.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests16.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests17.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests17.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests18.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests18.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests19.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests19.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests2.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests2.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests20.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests20.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests21.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests21.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests22.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests22.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests23.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests23.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests24.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests24.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests25.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests25.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests26.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests26.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests3.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests3.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests5.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests5.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests6.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests6.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests7.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests7.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests8.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests8.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tests9.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tests9.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_tricky01.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_tricky01.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_webkit01.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_webkit01.html"
       },
       {
         "path": "html/syntax/parsing/html5lib_webkit02.html",
+        "timeout": "long",
         "url": "/html/syntax/parsing/html5lib_webkit02.html"
       },
       {
@@ -19396,18 +19459,6 @@
       {
         "path": "resource-timing/test_resource_timing.html",
         "url": "/resource-timing/test_resource_timing.html"
-      },
-      {
-        "path": "selectors-api/level1-additional.html",
-        "url": "/selectors-api/level1-additional.html"
-      },
-      {
-        "path": "selectors-api/level1-all.xht",
-        "url": "/selectors-api/level1-all.xht"
-      },
-      {
-        "path": "selectors-api/level1-baseline.html",
-        "url": "/selectors-api/level1-baseline.html"
       },
       {
         "path": "selectors-api/tests/submissions/Opera/level2-baseline.html",
@@ -22229,5 +22280,5 @@
     ]
   },
   "local_changes": [],
-  "rev": "059285df03ed574a4afa34743febe3e92d3286a7"
+  "rev": "e898c25709fa15b254904caab1ef82f0f193c6a9"
 }

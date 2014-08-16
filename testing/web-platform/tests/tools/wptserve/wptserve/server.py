@@ -107,6 +107,9 @@ class WebTestServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
     allow_reuse_address = True
     acceptable_errors = (errno.EPIPE, errno.ECONNABORTED)
 
+    # Ensure that we don't hang on shutdown waiting for requests
+    daemon_threads = True
+
     def __init__(self, server_address, RequestHandlerClass, router, rewriter, bind_hostname, config=None,
                  use_ssl=False, certificate=None, **kwargs):
         """Server for HTTP(s) Requests
@@ -329,17 +332,21 @@ class WebTestHttpd(object):
         if use_ssl:
             assert certificate is not None and os.path.exists(certificate)
 
-        self.httpd = server_cls((host, port),
-                                handler_cls,
-                                self.router,
-                                self.rewriter,
-                                config=config,
-                                bind_hostname=bind_hostname,
-                                use_ssl=use_ssl,
-                                certificate=certificate)
-        self.started = False
+        try:
+            self.httpd = server_cls((host, port),
+                                    handler_cls,
+                                    self.router,
+                                    self.rewriter,
+                                    config=config,
+                                    bind_hostname=bind_hostname,
+                                    use_ssl=use_ssl,
+                                    certificate=certificate)
+            self.started = False
 
-        _host, self.port = self.httpd.socket.getsockname()
+            _host, self.port = self.httpd.socket.getsockname()
+        except Exception:
+            logger.error('Init failed! You may need to modify your hosts file. Refer to README.md.');
+            raise
 
     def start(self, block=False):
         """Start the server.
