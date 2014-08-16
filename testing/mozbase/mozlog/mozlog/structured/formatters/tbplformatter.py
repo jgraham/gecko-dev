@@ -34,21 +34,27 @@ class TbplFormatter(BaseFormatter):
         id = self.id_str(data["test"]) if "test" in data else "pid: " % data["process"]
 
         rv = ["PROCESS-CRASH | %s | application crashed [%s]" % (id,
-                                                                 data["top_frame"])]
-        rv.append("Crash dump filename: %s" % data["minidump_path"])
+                                                                 data["signature"])]
+        if data.get("minidump_path"):
+            rv.append("Crash dump filename: %s" % data["minidump_path"])
+
         if data.get("stackwalk_stderr"):
             rv.append("stderr from minidump_stackwalk:")
             rv.append(data["stackwalk_stderr"])
-        else:
+        elif data.get("stackwalk_stdout"):
             rv.append(data["stackwalk_stdout"])
+
         if data.get("stackwalk_returncode", 0) != 0:
             rv.append("minidump_stackwalk exited with return code %d" %
                       data["stackwalk_returncode"])
+
         if data.get("stackwalk_errors"):
-            rv.extend("stackwalk_errors")
+            rv.extend(data.get("stackwalk_errors"))
+
         rv = "\n".join(rv)
         if not rv[-1] == "\n":
             rv += "\n"
+
         return rv
 
     def suite_start(self, data):
@@ -62,6 +68,8 @@ class TbplFormatter(BaseFormatter):
 
     def test_status(self, data):
         message = "- " + data["message"] if "message" in data else ""
+        if "stack" in data:
+            message += "\n%s" % data["stack"]
         if "expected" in data:
             failure_line = "TEST-UNEXPECTED-%s | %s | %s %s" % (
                 data["status"], self.id_str(data["test"]), data["subtest"],

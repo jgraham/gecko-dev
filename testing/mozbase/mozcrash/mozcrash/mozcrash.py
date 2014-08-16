@@ -14,10 +14,22 @@ import sys
 import tempfile
 import urllib2
 import zipfile
+from collections import namedtuple
 
 import mozfile
 import mozlog
 from mozlog.structured import structuredlog
+
+
+StackInfo = namedtuple("StackInfo",
+                       ["minidump_path",
+                        "signature",
+                        "stackwalk_stdout",
+                        "stackwalk_stderr",
+                        "stackwalk_retcode",
+                        "stackwalk_errors",
+                        "extra"])
+
 
 def get_logger():
     structured_logger = structuredlog.get_default_logger("mozcrash")
@@ -25,7 +37,9 @@ def get_logger():
         return mozlog.getLogger('mozcrash')
     return structured_logger
 
-def check_for_crashes(dump_directory, symbols_path,
+
+def check_for_crashes(dump_directory,
+                      symbols_path,
                       stackwalk_binary=None,
                       dump_save_path=None,
                       test_name=None,
@@ -65,90 +79,80 @@ def check_for_crashes(dump_directory, symbols_path,
         except:
             test_name = "unknown"
 
-    if dump_save_path is None:
-        dump_save_path = os.environ.get('MINIDUMP_SAVE_PATH', None)
+    crash_info = CrashInfo(dump_directory, symbols_path, dump_save_path=dump_save_path,
+                           stackwalk_binary=stackwalk_binary)
 
-    with CrashInfo(dump_directory, symbols_path, stackwalk_binary) as crash_info:
-        if not crash_info.has_dumps:
-            return False
+    if not crash_info.has_dumps:
+        return False
 
-        for dump in crash_info:
-            if not quiet:
-                stackwalk_output = ["Crash dump filename: %s" % dump["minidump_path"]]
-                if dump["stackwalk_stderr"]:
-                    stackwalk_output.append("stderr from minidump_stackwalk:")
-                    stackwalk_output.append(dump["stackwalk_stderr"])
-                elif dump["stackwalk_stdout"] is not None:
-                    stackwalk_output.append(dump["stackwalk_stdout"])
-                if dump["stackwalk_retcode"] is not None and dump["stackwalk_retcode"] != 0:
-                    stackwalk_output.append("minidump_stackwalk exited with return code %d" %
-                                            dump["stackwalk_retcode"])
-                top_frame = dump.get("top_frame", "unknown top frame")
-                print "PROCESS-CRASH | %s | application crashed [%s]" % (test_name,
-                                                                         top_frame)
-                print '\n'.join(stackwalk_output)
-                print '\n'.join(dump["errors"])
-
-            if dump_save_path:
-                save_dump_file(dump_save_path, dump["minidump_path"], dump["minidump_extra"])
+    for info in crash_info:
+        if not quiet:
+            stackwalk_output = ["Crash dump filename: %s" % info.minidump_path]
+            if info.stackwalk_stderr:
+                stackwalk_output.append("stderr from minidump_stackwalk:")
+                stackwalk_output.append(info.stackwalk_stderr)
+            elif info.stackwalk_stdout is not None:
+                stackwalk_output.append(info.stackwalk_stdout)
+            if info.stackwalk_retcode is not None and info.stackwalk_retcode != 0:
+                stackwalk_output.append("minidump_stackwalk exited with return code %d" %
+                                        info.stackwalk_retcode)
+            signature = info.signature if info.signature else "unknown top frame"
+            print "PROCESS-CRASH | %s | application crashed [%s]" % (test_name,
+                                                                     signature)
+            print '\n'.join(stackwalk_output)
+            print '\n'.join(info.stackwalk_errors)
 
     return True
 
 
-def save_dump_file(dump_save_path, dump_path, extra):
-    log = get_logger()
-    if os.path.isfile(dump_save_path):
-        os.unlink(dump_save_path)
-    if not os.path.isdir(dump_save_path):
-        try:
-            os.makedirs(dump_save_path)
-        except OSError:
-            pass
-
-    shutil.move(dump_path, dump_save_path)
-    log.info("Saved minidump as %s" %
-             os.path.join(dump_save_path, os.path.basename(dump_path)))
-
-    if os.path.isfile(extra):
-        shutil.move(extra, dump_save_path)
-        log.info("Saved app info as %s" %
-                 os.path.join(dump_save_path, os.path.basename(extra)))
+def log_crashes(logger,
+                dump_directory,
+                symbols_path,
+                process=None,
+                test=None,
+                stackwalk_binary=None,
+                dump_save_path=None):
+    """Log crashes using a structured logger"""
+    for info in CrashInfo(dump_directory, symbols_path, dump_save_path=dump_save_path,
+                          stackwalk_binary=stackwalk_binary):
+        kwargs = info._asdict()
+        kwargs.pop("extra")
+        logger.crash(process=process, test=test, **kwargs)
 
 
 class CrashInfo(object):
-    """Get infromation about a crash based on dump files.
+    """Get information about a crash based on dump files.
 
-    This class is intended to be used as a context manager, because it may create
-    temporary files during processing that have to be cleaned up. For example:
-
-    with CrashInfo("/path/to/dumps", "http://example.org/symbols.zip") as crash_info:
-        if not crash_info.has_dumps:
-            print "No crash dump files found"
-        for dump_info in crash_info:
-            print "Found crash with top frame %s" % dump_info["top_frame"]
+    Typical usage is to iterate over the CrashInfo object. This returns StackInfo
+    objects, one for each crash dump file that is found in the dump_directory.
 
     :param dump_directory: Path to search for minidump files
     :param symbols_path: Path to a path to a directory containing symbols to use for
                          dump processing. This can either be a path to a directory
                          containing Breakpad-format symbols, or a URL to a zip file
                          containing a set of symbols.
+    :param dump_save_path: Path to which to save the dump files. If this is None,
+                           the MINIDUMP_SAVE_PATH environment variable will be used.
     :param stackwalk_binary: Path to the minidump_stackwalk binary. If this is None,
                              the MINIDUMP_STACKWALK environment variable will be used
                              as the path to the minidump binary."""
 
-    def __init__(self, dump_directory, symbols_path, stackwalk_binary=None):
+    def __init__(self, dump_directory, symbols_path, dump_save_path=None,
+                 stackwalk_binary=None):
         self.dump_directory = dump_directory
         self.symbols_path = symbols_path
         self.remove_symbols = False
 
+        if dump_save_path is None:
+            dump_save_path = os.environ.get('MINIDUMP_SAVE_PATH', None)
+        self.dump_save_path = dump_save_path
+
         if stackwalk_binary is None:
             stackwalk_binary = os.environ.get('MINIDUMP_STACKWALK', None)
         self.stackwalk_binary = stackwalk_binary
+
         self.logger = get_logger()
         self._dump_files = None
-
-    def __enter__(self):
-        return self
 
     def _get_symbols(self):
         # This updates self.symbols_path so we only download once
@@ -170,8 +174,8 @@ class CrashInfo(object):
         """List of tuple (path_to_dump_file, path_to_extra_file) for each dump
            file in self.dump_directory. The extra files may not exist."""
         if self._dump_files is None:
-            self._dump_files  = [(path, os.path.splitext(path)[0] + '.extra') for path in
-                                 glob.glob(os.path.join(self.dump_directory, '*.dmp'))]
+            self._dump_files = [(path, os.path.splitext(path)[0] + '.extra') for path in
+                                glob.glob(os.path.join(self.dump_directory, '*.dmp'))]
         return self._dump_files
 
     @property
@@ -182,35 +186,38 @@ class CrashInfo(object):
 
     def __iter__(self):
         for path, extra in self.dump_files:
-            rv = self.process_dump_file(path)
-            rv["minidump_extra"] = extra
+            rv = self._process_dump_file(path, extra)
             yield rv
 
-    def process_dump_file(self, path):
+        if self.remove_symbols:
+            mozfile.remove(self.symbols_path)
+
+    def _process_dump_file(self, path, extra):
         """Process a single dump file using self.stackwalk_binary, and return a
-        dictionary containing properties of the crash dump.
+        tuple containing properties of the crash dump.
 
         :param path: Path to the minidump file to analyse
-        :return: A dictionary of the form::
+        :return: A StackInfo tuple with the fields::
                    minidump_path: Path of the dump file
-                   top_frame: The top frame of the stack trace, or None if it
+                   signature: The top frame of the stack trace, or None if it
                               could not be determined.
                    stackwalk_stdout: String of stdout data from stackwalk
                    stackwalk_stderr: String of stderr data from stackwalk or
                                      None if it succeeded
-                   stackwalk_retcode: Retun code from stackwalk
-                   errors: List of errors in human-readable form that prevented
-                           stackwalk being launched.
+                   stackwalk_retcode: Return code from stackwalk
+                   stackwalk_errors: List of errors in human-readable form that prevented
+                                     stackwalk being launched.
         """
         self._get_symbols()
 
         errors = []
-        top_frame = None
+        signature = None
         include_stderr = False
         out = None
         err = None
         retcode = None
-        if self.symbols_path and self.stackwalk_binary and os.path.exists(self.stackwalk_binary):
+        if (self.symbols_path and self.stackwalk_binary and
+            os.path.exists(self.stackwalk_binary)):
             # run minidump_stackwalk
             p = subprocess.Popen([self.stackwalk_binary, path, self.symbols_path],
                                  stdout=subprocess.PIPE,
@@ -231,7 +238,7 @@ class CrashInfo(object):
                     if "(crashed)" in line:
                         match = re.search(r"^ 0  (?:.*!)?(?:void )?([^\[]+)", lines[i+1])
                         if match:
-                            top_frame = "@ %s" % match.group(1).strip()
+                            signature = "@ %s" % match.group(1).strip()
                         break
             else:
                 include_stderr = True
@@ -243,24 +250,39 @@ class CrashInfo(object):
             elif self.stackwalk_binary and not os.path.exists(self.stackwalk_binary):
                 errors.append("MINIDUMP_STACKWALK binary not found: %s" % self.stackwalk_binary)
 
-        rv = {"minidump_path":path,
-              "top_frame":top_frame,
-              "stackwalk_stdout":out,
-              "stackwalk_stderr":err if include_stderr else None,
-              "stackwalk_retcode":retcode,
-              "errors":errors}
+        if self.dump_save_path:
+            self._save_dump_file(path, extra)
 
-        return rv
+        if os.path.exists(path):
+            mozfile.remove(path)
+        if os.path.exists(extra):
+            mozfile.remove(extra)
 
-    def __exit__(self, *args, **kwargs):
-        for path, extra in self.dump_files:
-            if os.path.exists(path):
-                mozfile.remove(path)
-            if os.path.exists(extra):
-                mozfile.remove(extra)
+        return StackInfo(path,
+                         signature,
+                         out,
+                         err if include_stderr else None,
+                         retcode,
+                         errors,
+                         extra)
 
-        if self.remove_symbols:
-            mozfile.remove(self.symbols_path)
+    def _save_dump_file(self, path, extra):
+        if os.path.isfile(self.dump_save_path):
+            os.unlink(self.dump_save_path)
+        if not os.path.isdir(self.dump_save_path):
+            try:
+                os.makedirs(self.dump_save_path)
+            except OSError:
+                pass
+
+        shutil.move(path, self.dump_save_path)
+        self.logger.info("Saved minidump as %s" %
+                         os.path.join(self.dump_save_path, os.path.basename(path)))
+
+        if os.path.isfile(extra):
+            shutil.move(extra, self.dump_save_path)
+            self.logger.info("Saved app info as %s" %
+                             os.path.join(self.dump_save_path, os.path.basename(extra)))
 
 
 def check_for_java_exception(logcat, quiet=False):
