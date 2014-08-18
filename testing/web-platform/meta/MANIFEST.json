@@ -13063,6 +13063,10 @@
         "url": "/XMLHttpRequest/send-send.htm"
       },
       {
+        "path": "XMLHttpRequest/send-sync-blocks-async.htm",
+        "url": "/XMLHttpRequest/send-sync-blocks-async.htm"
+      },
+      {
         "path": "XMLHttpRequest/send-sync-no-response-event-load.htm",
         "url": "/XMLHttpRequest/send-sync-no-response-event-load.htm"
       },
@@ -19421,8 +19425,12 @@
         "url": "/progress-events/tests/submissions/Samsung/security-consideration.sub.html"
       },
       {
-        "path": "proximity/ProximityEvent_tests.html",
-        "url": "/proximity/ProximityEvent_tests.html"
+        "path": "proximity/DeviceProximityEvent_tests.html",
+        "url": "/proximity/DeviceProximityEvent_tests.html"
+      },
+      {
+        "path": "proximity/UserProximityEvent_tests.html",
+        "url": "/proximity/UserProximityEvent_tests.html"
       },
       {
         "path": "proximity/idlharness.html",
@@ -22280,5 +22288,5 @@
     ]
   },
   "local_changes": [],
-  "rev": "e898c25709fa15b254904caab1ef82f0f193c6a9"
+  "rev": "6dc0391257a1666a90f66c8da193b43cd9c60dcb"
 }
