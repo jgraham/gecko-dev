@@ -17691,8 +17691,18 @@
     ]
   },
   "local_changes": {
-    "deleted": [],
-    "items": {}
+    "deleted": [
+      "dom/historical.html"
+    ],
+    "items": {
+      "testharness": {
+        "example/testtest.html": [
+          {
+            "url": "/example/testtest.html"
+          }
+        ]
+      }
+    }
   },
   "rev": "fdbdabd4c8adb385e19f541cd03f1832b1aea468",
   "url_base": "/"

@@ -9,7 +9,15 @@
   },
   "local_changes": {
     "deleted": [],
-    "items": {}
+    "items": {
+      "helper": {
+        "_mozilla/placeholder": [
+          {
+            "url": "/_mozilla/placeholder"
+          }
+        ]
+      }
+    }
   },
   "rev": null,
   "url_base": "/_mozilla/"
