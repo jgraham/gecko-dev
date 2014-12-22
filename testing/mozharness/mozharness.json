@@ -1,4 +1,4 @@
 {
-    "repo": "https://hg.mozilla.org/build/mozharness",
-    "revision": "production"
+    "repo": "https://hg.mozilla.org/users/james_hoppipolla.co.uk/mozharness",
+    "revision": "tip"
 }
